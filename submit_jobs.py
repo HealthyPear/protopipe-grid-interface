@@ -12,29 +12,6 @@ from DIRAC.Interfaces.API.Dirac import Dirac
 from utils import load_config, make_argparser
 
 
-# bad sites
-banned_sites = [
-    'LCG.CPPM.fr',   # LFN connection problems
-    #'LCG.IN2P3-CC.fr',  # jobs fail immediately after start
-    'LCG.CIEMAT.es',  # GLIBC_2.14 not found
-    'LCG.FRASCATI.it',  # GLIBC_2.14 not found
-    'LCG.CYFRONET.pl',  # GLIBC_2.14 not found
-    'ARC.SE-SNIC-T2.se',
-    'LCG.CAMK.pl',      # no miniconda (bad vo configuration?)
-    'LCG.Prague.cz',    # no miniconda (bad vo configuration?)
-    'LCG.PRAGUE-CESNET.cz',    # no miniconda (bad vo configuration?)
-    'LCG.OBSPM.fr',
-    'LCG.LAPP.fr',      # no miniconda (bad vo configuration?)
-    'LCG.PIC.es',       #
-    'LCG.M3PEC.fr',     #
-    'LCG.CETA.es',
-    'LCG.DESY-ZEUTHEN.de',
-    'LCG.GRIF.fr',
-    'ARC.Prague.cz',
-    'LCG.INFN-TORINO.it',
-]
-
-
 def sliding_window(my_list, window_size, step_size=None, start=0):
 
     step_size = step_size or window_size
@@ -76,9 +53,12 @@ def main():
     force_tailcut_for_extended_cleaning = cfg['General']['force_tailcut_for_extended_cleaning']
 
     # Take parameters from the analysis configuration file
-    config_name = load_config(os.path.join(config_path, config_file))['General']['config_name']
-    print(config_name)
-    cam_id_list = load_config(os.path.join(config_path, config_file))['General']['cam_id_list']
+    ana_cfg = load_config(os.path.join(config_path, config_file))
+    config_name = ana_cfg['General']['config_name']
+    cam_id_list = ana_cfg['General']['cam_id_list']
+    # Regressor and classifier methods
+    regressor_method = ana_cfg['EnergyRegressor']['method_name']
+    classifier_method = ana_cfg['GammaHadronClassifier']['method_name']
 
     # GRID
     outdir = os.path.join(cfg['GRID']['outdir'], config_name)
@@ -86,6 +66,11 @@ def main():
     n_jobs_max = cfg['GRID']['n_jobs_max']
     model_dir = cfg['GRID']['model_dir']
     home_grid = cfg['GRID']['home_grid']
+    banned_sites = cfg['GRID']['banned_sites']
+
+    # HACK
+    if force_tailcut_for_extended_cleaning is True:
+        print('Force tail cuts for extended cleaning!!!')
 
     # Prepare command to launch script
     source_ctapipe = 'source /cvmfs/cta.in2p3.fr/software/miniconda/bin/activate ctapipe_v0.6.1'
@@ -109,6 +94,9 @@ def main():
                        '--indir ./ --infile_list *.simtel.gz',
                        '--max_events={}'.format(args.max_events),
                        '--{mode}',
+                       '--force_tailcut_for_extended_cleaning={}'.format(
+                           force_tailcut_for_extended_cleaning
+                       ),
                        '--cam_ids']
         output_filename_template = 'dl2'
         args.estimate_energy = True
@@ -157,7 +145,10 @@ def main():
     if estimate_energy is True and args.output_type in 'DL1':
         output_path += '/discrimination/'
     if args.output_type in 'DL2':
-        output_path += '/dl2/'
+        if force_tailcut_for_extended_cleaning is False:
+            output_path += '/dl2/'
+        else:
+            output_path += '/dl2_force_tc_extended_cleaning/'
     output_filename += '_{}.h5'
 
     # sets all the local files that are going to be uploaded with the job plus the pickled
@@ -172,7 +163,6 @@ def main():
         # python wrapper for the mr_filter wavelet cleaning
         os.path.expandvars('$PYWI/pywi/'),
         os.path.expandvars('$PYWICTA/pywicta/'),
-        './mr_filter',  # the executable for the wavelet cleaning
 
         # script that is being run
         os.path.expandvars('$PROTOPIPE/protopipe/scripts/' + execute),
@@ -180,22 +170,31 @@ def main():
         # Configuration file
         os.path.expandvars(os.path.join(config_path, config_file)),
     ]
+
+    # Add executables for wavelet
+    input_sandbox.append('LFN:' + os.path.join(home_grid, 'cta/sparse2d/bin/mr_filter'))
+    input_sandbox.append('LFN:' + os.path.join(home_grid, 'cta/sparse2d/bin/mr_transform'))
+
     if estimate_energy is True and args.output_type in 'DL1':
-        model_path_template = 'LFN:' + os.path.join(home_grid, outdir, model_dir, 'regressor_{}_{}_AdaBoostRegressor.pkl.gz')
+        model_path_template = 'LFN:' + os.path.join(home_grid, outdir, model_dir, 'regressor_{}_{}_{}.pkl.gz')
         for cam_id in cam_id_list:
             for mode in modes:
-                model_to_upload = model_path_template.format(mode, cam_id)
+                model_to_upload = model_path_template.format(mode, cam_id, regressor_method)  # TBC
                 print(model_to_upload)
                 input_sandbox.append(model_to_upload)
     elif estimate_energy is False and args.output_type in 'DL1':
         pass
     else:  # Charge also classifer for DL2
         model_type_list = ['regressor', 'classifier']
-        model_method_list = ['AdaBoostRegressor', 'AdaBoostClassifier']
+        model_method_list = [regressor_method, classifier_method]
         model_path_template = 'LFN:' + os.path.join(home_grid, outdir, model_dir, '{}_{}_{}_{}.pkl.gz')
+        if force_tailcut_for_extended_cleaning is True:
+            force_modes = [mode.replace('wave', 'tail') for mode in modes]
+        else:
+            force_modes = modes
         for idx, model_type in enumerate(model_type_list):
             for cam_id in cam_id_list:
-                for mode in modes:
+                for mode in force_modes:
                     model_to_upload = model_path_template.format(
                         model_type_list[idx],
                         mode,
@@ -292,7 +291,7 @@ def main():
             print("-" * 50)
 
             # setting output name
-            job_name = '_'.join([channel, run_token])
+            job_name = 'job_{}_{}_{}'.format(config_name, channel, run_token)
             output_filenames = dict()
             for mode in modes:
                 output_filenames[mode] = output_filename.format(
@@ -342,8 +341,9 @@ def main():
 
             # mr_filter loses its executable property by uploading it to the GRID SE; reset
             j.setExecutable('chmod', '+x mr_filter')
-            j.setExecutable('ls -lah ./pywi/')
-            j.setExecutable('ls -lah ./pywicta/')
+            j.setExecutable('chmod', '+x mr_transform')
+            #j.setExecutable('export', 'PATH=.:$PATH')
+            #j.setExecutable('echo', '$PATH')
 
             for run_file in run_filelist:
                 file_token = re.split('_', run_file)[3]
