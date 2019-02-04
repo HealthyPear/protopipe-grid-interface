@@ -47,7 +47,7 @@ def main():
     # Analysis
     config_path = cfg['General']['config_path']
     config_file = cfg['General']['config_file']
-    modes = cfg['General']['modes']
+    modes = cfg['General']['modes']  # One mode naw
     particles = cfg['General']['particles']
     estimate_energy = cfg['General']['estimate_energy']
     force_tailcut_for_extended_cleaning = cfg['General']['force_tailcut_for_extended_cleaning']
@@ -59,6 +59,18 @@ def main():
     # Regressor and classifier methods
     regressor_method = ana_cfg['EnergyRegressor']['method_name']
     classifier_method = ana_cfg['GammaHadronClassifier']['method_name']
+    # Someone might want to create DL2 without score or energy estimation
+    print('JLK: {} {}'.format(regressor_method, classifier_method))
+    if regressor_method in ['None', 'none', None]:
+        use_regressor = False
+    else:
+        use_regressor = True
+
+    if classifier_method in ['None', 'none', None]:
+        use_classifier = False
+    else:
+        use_classifier = True
+
 
     # GRID
     outdir = os.path.join(cfg['GRID']['outdir'], config_name)
@@ -172,8 +184,8 @@ def main():
     ]
 
     # Add executables for wavelet
-    input_sandbox.append('LFN:' + os.path.join(home_grid, 'cta/sparse2d/bin/mr_filter'))
-    input_sandbox.append('LFN:' + os.path.join(home_grid, 'cta/sparse2d/bin/mr_transform'))
+    #input_sandbox.append('LFN:' + os.path.join(home_grid, 'cta/sparse2d/bin/mr_filter'))  # REMOVED
+    #input_sandbox.append('LFN:' + os.path.join(home_grid, 'cta/sparse2d/bin/mr_transform'))  # REMOVED
 
     if estimate_energy is True and args.output_type in 'DL1':
         model_path_template = 'LFN:' + os.path.join(home_grid, outdir, model_dir, 'regressor_{}_{}_{}.pkl.gz')
@@ -195,6 +207,15 @@ def main():
         for idx, model_type in enumerate(model_type_list):
             for cam_id in cam_id_list:
                 for mode in force_modes:
+
+                    if model_type in 'regressor' and use_regressor is False:
+                        print('Do not upload regressor model on GRID!!!')
+                        continue
+
+                    if model_type in 'classifier' and use_classifier is False:
+                        print('Do not upload classifier model on GRID!!!')
+                        continue
+
                     model_to_upload = model_path_template.format(
                         model_type_list[idx],
                         mode,
@@ -291,7 +312,8 @@ def main():
             print("-" * 50)
 
             # setting output name
-            job_name = 'job_{}_{}_{}'.format(config_name, channel, run_token)
+            mode = modes[0]
+            job_name = 'job_{}_{}_{}_{}'.format(config_name, channel, run_token, mode)
             output_filenames = dict()
             for mode in modes:
                 output_filenames[mode] = output_filename.format(
@@ -340,8 +362,8 @@ def main():
                 j.setBannedSites(banned_sites)
 
             # mr_filter loses its executable property by uploading it to the GRID SE; reset
-            j.setExecutable('chmod', '+x mr_filter')
-            j.setExecutable('chmod', '+x mr_transform')
+            #j.setExecutable('chmod', '+x mr_filter') # REMOVED
+            #j.setExecutable('chmod', '+x mr_transform') # REMOVED
             #j.setExecutable('export', 'PATH=.:$PATH')
             #j.setExecutable('echo', '$PATH')
 
