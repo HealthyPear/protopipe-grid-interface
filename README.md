@@ -7,8 +7,7 @@ In order to use those utilities you need:
  - A working installation of Dirac (see the [CTA-DIRAC Users Guide](https://forge.in2p3.fr/projects/cta_dirac/wiki/CTA-DIRAC_Users_Guide))
  - The [PyYAML](https://pyyaml.org/) module (to handle configuration files)
  - The [HDF5](https://www.h5py.org/) module (to merge tables)
- - the protopipe module
- - the pywi and pywi-cta modules
+ - the [protopipe](https://drf-gitlab.cea.fr/CTA-Irfu/protopipe) module
 
 Here is an example of environment variables bash file to activate the dirac settings:
 ```
@@ -69,6 +68,7 @@ GRID:
 
  # Output directories on the GRID home_grid/outdir
  outdir: 'cta/ana/'
+ 
  # home_grid/outdir/models
  model_dir: 'models'
  dl2_dir: 'dl2'
