@@ -69,8 +69,10 @@ GRID:
  # Output directories on the GRID home_grid/outdir
  outdir: 'cta/ana/'
  
- # home_grid/outdir/models
+ # Directory for models, home_grid/outdir/models
  model_dir: 'models'
+ 
+ # Directory for DL2, saved in home_grid/outdir/dl2
  dl2_dir: 'dl2'
 
  # Number of file per job
@@ -91,6 +93,36 @@ Performance:
  proton_list: './list/Prod3b_NSB1x/LaPalma/proton_perf.list'
  electron_list: './list/Prod3b_NSB1x/LaPalma/electron_perf.list'
 ```
+
+### How to get a list of Monte-Carlo files
+A bunch of tools related to CTA is provided with the dirac installation
+to get information about the existing Monte-Carlo productions and to retrieve the
+simulated data. Two importants tools are needed.
+
+The first tool is `cta-prod3-show-dataset` which allow a user to get all the information
+about the corresponding dataset:
+```
+$> cta-prod3-show-dataset --help
+
+Get PROD3 statistics for a given dataset
+if no dataset is specified it gives the list of available datasets
+Usage:
+   cta-prod3-show-dataset <dataset>
+```
+If a production name is given it will show the characteristics of the production. 
+If no production name is given all of them will be shown.
+
+The second tool is used to retrieve the list of files, on the GRID, corresponding to 
+one Monte-Carlo production:
+```
+$> cta-prod3-dump-dataset --help
+
+Dump in a file the list of PROD3 files for a given dataset
+
+Usage:
+   cta-prod3-dump-dataset <dataset> 
+```
+The file list will be saved on disk.
 
 ### How to produce tables for training
 To launch the processing of events use the script `submit_jobs.py`:
@@ -200,4 +232,26 @@ Delete collection files from Dirac
 optional arguments:
   -h, --help     show this help message and exit
   --indir INDIR  Dirac repository
+```
+
+## Useful tips 
+
+### Make replicates of permanent files
+For permanent files you you should make replicates in order to avoid to saturate the
+storage elements. This is particularly important for regression or classification
+model. In order to make a replicate you should do:
+```
+$> dirac-dms-replicate-lfn the_file_on_grid the_storage_element
+```
+Here is a list of some storage elements:
+* CC-IN2P3-USER
+* DESY-ZN-USER
+* CNAF-USER
+* CEA-USER
+* LAPP-USER
+
+### SSLError by using pip
+Try to add the following options:
+```
+--trusted-host pypi.python.org --trusted-host files.pythonhosted.org --trusted-host pypi.org
 ```
