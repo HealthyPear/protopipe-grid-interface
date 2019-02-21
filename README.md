@@ -54,7 +54,7 @@ General:
  modes: ['tail']
 
  # Type for processing (gamma, proton, electron)
- particles: ['proton']
+ particle: 'proton'
 
  # If true estimate energy (need regressor file)
  estimate_energy: True
@@ -63,6 +63,9 @@ General:
  force_tailcut_for_extended_cleaning: False  # for reco and classify writer (evt level)
 
 GRID:
+ # User name
+ user_name: 'jlefaucheur'
+
  # Home on GRID
  home_grid: '/vo.cta.in2p3.fr/user/j/jlefaucheur/'
 
