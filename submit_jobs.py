@@ -5,12 +5,12 @@ import random
 import datetime
 import subprocess
 import sys
+import yaml
 
 from DIRAC.Interfaces.API.Job import Job
 from DIRAC.Interfaces.API.Dirac import Dirac
 
-from utils import load_config, make_argparser
-
+from utils import make_argparser
 
 def sliding_window(my_list, window_size, step_size=None, start=0):
 
@@ -21,6 +21,14 @@ def sliding_window(my_list, window_size, step_size=None, start=0):
     else:
         yield my_list[start:]
 
+def load_config(name):
+    try:
+        with open(name, 'r') as stream:
+            cfg = yaml.load(stream)
+    except FileNotFoundError as e:
+        print(e)
+        raise
+    return cfg
 
 def main():
     """
@@ -48,7 +56,7 @@ def main():
     config_path = cfg['General']['config_path']
     config_file = cfg['General']['config_file']
     modes = cfg['General']['modes']  # One mode naw
-    particles = cfg['General']['particles']
+    particle = cfg['General']['particle']
     estimate_energy = cfg['General']['estimate_energy']
     force_tailcut_for_extended_cleaning = cfg['General']['force_tailcut_for_extended_cleaning']
 
@@ -139,8 +147,7 @@ def main():
         prod3b_filelist['electron'] = open(cfg['Performance']['electron_list'])
 
     file_list_to_run_on = list()
-    for part_id in particles:
-        file_list_to_run_on.append(prod3b_filelist[part_id])
+    file_list_to_run_on.append(prod3b_filelist[particle])
 
     # Number of files per job
     window_sizes = [n_file_per_job] * 3
@@ -234,8 +241,8 @@ def main():
     print(input_sandbox)
     print("\nDEBUG> with output file:")
     print(output_filename.format('{job_name}'))
-    print("\nDEBUG> Particles:")
-    print(particles)
+    print("\nDEBUG> Particle:")
+    print(particle)
     print("\nDEBUG> Energy estimation:")
     print(estimate_energy)
 
