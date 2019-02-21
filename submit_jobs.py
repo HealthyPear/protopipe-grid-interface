@@ -77,6 +77,8 @@ def main():
     n_file_per_job = cfg['GRID']['n_file_per_job']
     n_jobs_max = cfg['GRID']['n_jobs_max']
     model_dir = cfg['GRID']['model_dir']
+    dl2_dir = cfg['GRID']['dl2_dir']
+    user_name = cfg['GRID']['user_name']
     home_grid = cfg['GRID']['home_grid']
     banned_sites = cfg['GRID']['banned_sites']
 
@@ -158,9 +160,9 @@ def main():
         output_path += '/discrimination/'
     if args.output_type in 'DL2':
         if force_tailcut_for_extended_cleaning is False:
-            output_path += '/dl2/'
+            output_path += '/{}/'.format(dl2_dir)
         else:
-            output_path += '/dl2_force_tc_extended_cleaning/'
+            output_path += '/{}_force_tc_extended_cleaning/'.format(dl2_dir)
     output_filename += '_{}.h5'
 
     # sets all the local files that are going to be uploaded with the job plus the pickled
@@ -350,7 +352,7 @@ def main():
                 n_jobs_max -= 1
 
 
-            j = Job()  # WArning here :
+            j = Job()  # Warning here :
             # 2018-10-22 15:00:21 UTC Framework ERROR: Problem retrieving sections in /Resources/Sites
 
             # runtime in seconds times 8 (CPU normalisation factor)
@@ -361,11 +363,8 @@ def main():
             if banned_sites:
                 j.setBannedSites(banned_sites)
 
-            # mr_filter loses its executable property by uploading it to the GRID SE; reset
-            #j.setExecutable('chmod', '+x mr_filter') # REMOVED
-            #j.setExecutable('chmod', '+x mr_transform') # REMOVED
-            #j.setExecutable('export', 'PATH=.:$PATH')
-            #j.setExecutable('echo', '$PATH')
+            # JLK, add simtel files as input data
+            # j.setInputData(run_filelist)
 
             for run_file in run_filelist:
                 file_token = re.split('_', run_file)[3]
@@ -376,6 +375,7 @@ def main():
                 sleep = random.randint(0, 5 * 60)
                 j.setExecutable('sleep', str(sleep))
 
+                # JLK: Try to stop doing that
                 # consecutively downloads the data files, processes them, deletes the input
                 # and goes on to the next input file; afterwards, the output files are merged
                 j.setExecutable('dirac-dms-get-file', "LFN:" + run_file)
