@@ -272,7 +272,7 @@ def main():
             try:
                 [running_ids.add(id) for id in dirac.selectJobs(
                     status=status, date=day,
-                    owner="jlefaucheur")['Value']]
+                    owner=user_name)['Value']]
             except KeyError:
                 pass
 
