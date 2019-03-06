@@ -30,11 +30,11 @@ Note that only Python 2.7 is supported for the scripts using Dirac utilities.
 ## How to launch jobs on the GRID
 The two test cases covered here are:
  - producing tables containing image parameters (and more) per type of camera to be
- further used for training of regressors (energy estimation) or classifiers
+ further used for the training of regressors (energy estimation) or classifiers
  (gamma/hadron separation)
  - production of DL2 event list, containing event parameter (direction, energy, score, etc.)
 
-A single script called `submit_jobs.py` is used to submit jobs on the GRID and it uses
+A single script called `submit_jobs_new_scheme.py` is used to submit jobs on the GRID and it uses
 a configuration file based on YAML.
 
 ### Configuration file
@@ -71,12 +71,18 @@ GRID:
 
  # Output directories on the GRID home_grid/outdir
  outdir: 'cta/ana/'
- 
- # Directory for models, home_grid/outdir/models
- model_dir: 'models'
- 
- # Directory for DL2, saved in home_grid/outdir/dl2
- dl2_dir: 'dl2'
+
+ # Directory for DL2
+ dl1_dir_energy: 'new_dl1_energy'
+
+ # Directory for DL2
+ dl1_dir_discrimination: 'new_dl1_discrimination'
+
+ # home_grid/outdir/models
+ model_dir: 'new_models'
+
+ # Directory for DL2
+ dl2_dir: 'new_dl2'
 
  # Number of file per job
  n_file_per_job: 1
@@ -127,53 +133,70 @@ Usage:
 ```
 The file list will be saved on disk.
 
+Up to now, we have focused on the MC production labelled as `NSB1x` since they contain 
+the 'final' subarrays and are thus easier to process than the official productions (which
+contain a lot of telescopes, e.g. 400).
+
+
 ### How to produce tables for training
-To launch the processing of events use the script `submit_jobs.py`:
+To launch the processing of events use the script `submit_jobs_new_scheme.py`:
 ```
-$> python ./submit_jobs.py --help
-usage: submit_jobs.py [-h] --config_file CONFIG_FILE [--max_events MAX_EVENTS]
-                      [--test TEST] [--dry DRY] [--DL1 | --DL2]
+$> python ./submit_jobs_new_scheme.py --help
 
-Arguments for GRID submission
+Usage:
+python submit_jobs_new_scheme [options]
+e.g.:
+python submit_jobs_new_scheme --config_file=config.cfg --output_type=DL1
 
-optional arguments:
-  -h, --help            show this help message and exit
-  --config_file CONFIG_FILE
-  --max_events MAX_EVENTS
-                        maximum number of events considered per file
-  --test TEST           Submit only one job
-  --dry DRY             Do not submit any job
-  --DL1                 if set, produce image tables
-  --DL2                 if set, produce event tables
+Options:
+  -   --config_file=           : Configuration file
+  -   --output_type=           : Data level output, e.g. DL1 or DL2, str
+  -   --max_events=            : Maximal number of events to be processed, int, optional
+  -   --dry=                   : If in [True, true] do not submit job, str, optional
+  -   --test=                  : If in [True, true] submit only one job, str, optional
 ```
-Here you should use the `DL1` options, images informations, along with event information,
-will be saved in order to further train models.
-INternally, the script `protopipe/scripts/write_dl1.py` is called.
-Ine the configuration file, make sure to upload a regressor model on the GRID if you 
-set the `estimate_energy` option to `True`.
+Here you should use the `--output_type=DL1` options, images information, 
+along with event information, will be saved in order to further train models.
+Internally, the script `protopipe/scripts/write_dl1.py` is called.
+Depending whether you want to build tables to train an energy estimator or a classifier, 
+you will need to specify the lists containing the MC files in `EnergyRegressor` and 
+`GammaHadronClassifier` sections, respectively, of the configuration file.
+
+**Make sure to upload a regressor model on the GRID if you 
+set the `estimate_energy` option to `True` in the configuration file 
+in order to build tables to train a classifier.**
+This is something that could be improve.
 
 ### How to produce tables for performance estimation
-To launch the processing of events use the script `submit_jobs.py`:
+To launch the processing of events use the script `submit_jobs_new_scheme.py`:
 ```
-$> python ./submit_jobs.py --help
-usage: submit_jobs.py [-h] --config_file CONFIG_FILE [--max_events MAX_EVENTS]
-                      [--test TEST] [--dry DRY] [--DL1 | --DL2]
+$> python ./submit_jobs_new_scheme.py --help
 
-Arguments for GRID submission
+Usage:
+python submit_jobs_new_scheme [options]
+e.g.:
+python submit_jobs_new_scheme --config_file=config.cfg --output_type=DL2
 
-optional arguments:
-  -h, --help            show this help message and exit
-  --config_file CONFIG_FILE
-  --max_events MAX_EVENTS
-                        maximum number of events considered per file
-  --test TEST           Submit only one job
-  --dry DRY             Do not submit any job
-  --DL1                 if set, produce image tables
-  --DL2                 if set, produce event tables
+Options:
+  -   --config_file=           : Configuration file
+  -   --output_type=           : Data level output, e.g. DL1 or DL2, str
+  -   --max_events=            : Maximal number of events to be processed, int, optional
+  -   --dry=                   : If in [True, true] do not submit job, str, optional
+  -   --test=                  : If in [True, true] submit only one job, str, optional
 ```
-Here you should use the `DL2` options to call the `protopipe/scripts/write_dl2.py` script.
-Make sure to upload a regressor and a classifier model on the GRID in order to be able
-to process entirely the events (energy and score estimation).
+Here you should use the `--output_type=DL2` options to call the 
+`protopipe/scripts/write_dl2.py` script.
+You will need to specify the list of MC files for the gamma, proton and electron in the 
+section `Performance`.
+
+**Make sure to upload a regressor and a classifier model on the GRID in order to be able
+to fully process the events (energy and gammaness/score estimation).**
+
+**If you want to generate DL2 tables without the estimation of the energy or the score, you
+will need to specify `None` as attributs for the machine learning methods
+in the analysis configuration (`EnergyRegressor` and `GammaHadronClassifier` sections)
+used by `protopipe/scripts/write_dl2.py`.** 
+
 
 ## Useful scripts
 Here is a bunch of scripts wrapping DIRAC utilities.
@@ -240,7 +263,7 @@ optional arguments:
 ## Useful tips 
 
 ### Make replicates of permanent files
-For permanent files you you should make replicates in order to avoid to saturate the
+For permanent files you should make replicates in order to avoid to saturate the
 storage elements. This is particularly important for regression or classification
 model. In order to make a replicate you should do:
 ```
@@ -250,11 +273,39 @@ Here is a list of some storage elements:
 * CC-IN2P3-USER
 * DESY-ZN-USER
 * CNAF-USER
-* CEA-USER
+* CEA-USER (badly configured, apparently)
 * LAPP-USER
 
 ### SSLError by using pip
 Try to add the following options:
 ```
 --trusted-host pypi.python.org --trusted-host files.pythonhosted.org --trusted-host pypi.org
+```
+
+### Zeuthen storage
+At this time the DESY-ZN-Disk storage element is badly configured
+and you should add the following lines in the etc/dirac.cfg
+configuration file (in your DIRAC install):
+```
+Resources
+{
+  StorageElements
+  {
+    DESY-ZN-Disk
+    {
+      AccessProtocol.1
+      {
+      Access = remote
+      PluginName = GFAL2_SRM2
+      Host = globe-door.ifh.de
+      Port = 8443
+      Protocol = srm
+      Path = /pnfs/ifh.de/acs/grid/cta
+      SpaceToken =
+      WSUrl = /srm/managerv2?SFN=
+      ProtocolsList = file
+      }
+    }
+  }
+}
 ```

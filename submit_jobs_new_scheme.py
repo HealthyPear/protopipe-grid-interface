@@ -116,6 +116,8 @@ def main():
     n_file_per_job = cfg['GRID']['n_file_per_job']
     n_jobs_max = cfg['GRID']['n_jobs_max']
     model_dir = cfg['GRID']['model_dir']
+    dl1_dir_energy = cfg['GRID']['dl1_dir_energy']
+    dl1_dir_discrimination = cfg['GRID']['dl1_dir_discrimination']
     dl2_dir = cfg['GRID']['dl2_dir']
     home_grid = cfg['GRID']['home_grid']
     user_name = cfg['GRID']['user_name']
@@ -126,14 +128,15 @@ def main():
         print('Force tail cuts for extended cleaning!!!')
 
     # Prepare command to launch script
-    source_ctapipe = 'source /cvmfs/cta.in2p3.fr/software/miniconda/bin/activate ctapipe_v0.6.1'
+    source_ctapipe = 'source /cvmfs/cta.in2p3.fr/software/miniconda/bin/activate ctapipe_v0.6.2'
     if switches['output_type'] in 'DL1':
         execute = 'write_dl1.py'
         script_args = ['--config_file={}'.format(config_file),
                        '--estimate_energy={}'.format(str(estimate_energy)),
                        '--regressor_dir=./',
                        '--outfile {outfile}',
-                       '--indir ./ --infile_list *.simtel.gz',
+                       #'--indir ./ --infile_list *.simtel.gz',
+                       '--indir ./ --infile_list={infile_name}',
                        '--max_events={}'.format(switches['max_events']),
                        '--{mode}',
                        '--cam_ids']
@@ -144,7 +147,8 @@ def main():
                        '--regressor_dir=./',
                        '--classifier_dir=./',
                        '--outfile {outfile}',
-                       '--indir ./ --infile_list *.simtel.gz',
+                       #'--indir ./ --infile_list *.simtel.gz',
+                       '--indir ./ --infile_list={infile_name}',
                        '--max_events={}'.format(switches['max_events']),
                        '--{mode}',
                        '--force_tailcut_for_extended_cleaning={}'.format(
@@ -188,9 +192,9 @@ def main():
     output_filename = output_filename_template
     output_path = outdir
     if estimate_energy is False and switches['output_type'] in 'DL1':
-        output_path += '/energy/'
+        output_path += '/{}/'.format(dl1_dir_energy)  # JLK
     if estimate_energy is True and switches['output_type'] in 'DL1':
-        output_path += '/discrimination/'
+        output_path += '/{}/'.format(dl1_dir_discrimination)  # JLK
     if switches['output_type'] in 'DL2':
         if force_tailcut_for_extended_cleaning is False:
             output_path += '/{}/'.format(dl2_dir)
@@ -391,8 +395,8 @@ def main():
             # wait for a random number of seconds (up to five minutes) before starting
             # to add a bit more entropy in the starting times of the dirac queries.
             # if too many jobs try in parallel to access the SEs, the interface crashes
-            sleep = random.randint(0, 5 * 60)
-            j.setExecutable('sleep', str(sleep))
+            # #sleep = random.randint(0, 20)  # seconds
+            # #j.setExecutable('sleep', str(sleep))
 
             # JLK: Try to stop doing that
             # consecutively downloads the data files, processes them, deletes the input
@@ -401,6 +405,9 @@ def main():
 
             # consecutively process file with wavelet and tailcut cleaning
             for mode in modes:
+                # from IPython import embed
+                # embed()
+
                 # source the miniconda ctapipe environment and run the python script with
                 # all its arguments
                 output_filename_temp = output_filename.format(
@@ -408,6 +415,7 @@ def main():
                 j.setExecutable('./pilot.sh',
                                 pilot_args_write.format(
                                     outfile=output_filename_temp,
+                                    infile_name=os.path.basename(run_file),
                                     mode=mode)
                                 )
 
