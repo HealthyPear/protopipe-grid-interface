@@ -89,6 +89,9 @@ GRID:
 
  # Maximum number of jobs
  n_jobs_max: -1
+ 
+ # Banned sites
+ banned_sites: ['LCG.CPPM.fr']  # Badly configure
 
 EnergyRegressor:
  gamma_list: './list/Prod3b_NSB1x/LaPalma/gamma_energy.list'

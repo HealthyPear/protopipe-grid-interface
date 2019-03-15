@@ -129,6 +129,8 @@ def main():
 
     # Prepare command to launch script
     source_ctapipe = 'source /cvmfs/cta.in2p3.fr/software/miniconda/bin/activate ctapipe_v0.6.2'
+    #source_ctapipe = 'source /cvmfs/cta.in2p3.fr/software/miniconda/bin/activate ctapipe_v0.6.1'
+
     if switches['output_type'] in 'DL1':
         execute = 'write_dl1.py'
         script_args = ['--config_file={}'.format(config_file),
@@ -180,9 +182,13 @@ def main():
         prod3b_filelist['proton'] = cfg['Performance']['proton_list']
         prod3b_filelist['electron'] = cfg['Performance']['electron_list']
 
+    #from IPython import embed
+    #embed()
+
     # Split list of files according to stoprage elements
     with open(prod3b_filelist[particle]) as f:
         filelist = f.readlines()
+
     filelist = ['{}'.format(_.replace('\n', '')) for _ in filelist]
     res = dirac.splitInputData(filelist, n_file_per_job)
     list_run_to_loop_on = res['Value']
