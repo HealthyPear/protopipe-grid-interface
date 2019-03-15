@@ -72,10 +72,10 @@ GRID:
  # Output directories on the GRID home_grid/outdir
  outdir: 'cta/ana/'
 
- # Directory for DL2
+ # Directory for DL1
  dl1_dir_energy: 'new_dl1_energy'
 
- # Directory for DL2
+ # Directory for DL1
  dl1_dir_discrimination: 'new_dl1_discrimination'
 
  # home_grid/outdir/models
