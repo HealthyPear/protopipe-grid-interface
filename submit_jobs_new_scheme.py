@@ -212,7 +212,7 @@ def main():
     # classifier (if the file name starts with `LFN:`, it will be copied from the GRID itself)
     input_sandbox = [
         # Utility to assign one job to one command...
-        '$GRID/pilot.sh',
+        os.path.expandvars('$GRID/pilot.sh'),
 
         os.path.expandvars('$PROTOPIPE/protopipe/'),
         os.path.expandvars('$GRID/merge_tables.py'),
