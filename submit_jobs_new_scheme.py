@@ -215,7 +215,7 @@ def main():
         'pilot.sh',
 
         os.path.expandvars('$PROTOPIPE/protopipe/'),
-        os.path.expandvars('./merge_tables.py'),
+        os.path.expandvars('$GRID/merge_tables.py'),
 
         # python wrapper for the mr_filter wavelet cleaning
         os.path.expandvars('$PYWI/pywi/'),
