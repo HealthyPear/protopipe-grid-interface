@@ -85,7 +85,7 @@ def main():
     # Analysis
     config_path = cfg['General']['config_path']
     config_file = cfg['General']['config_file']
-    modes = cfg['General']['modes']  # One mode naw
+    mode = cfg['General']['mode']  # One mode naw
     particle = cfg['General']['particle']
     estimate_energy = cfg['General']['estimate_energy']
     force_tailcut_for_extended_cleaning = cfg['General']['force_tailcut_for_extended_cleaning']
@@ -231,10 +231,9 @@ def main():
     if estimate_energy is True and switches['output_type'] in 'DL1':
         model_path_template = 'LFN:' + os.path.join(home_grid, outdir, model_dir, 'regressor_{}_{}_{}.pkl.gz')
         for cam_id in cam_id_list:
-            for mode in modes:
-                model_to_upload = model_path_template.format(mode, cam_id, regressor_method)  # TBC
-                print(model_to_upload)
-                input_sandbox.append(model_to_upload)
+            model_to_upload = model_path_template.format(mode, cam_id, regressor_method)  # TBC
+            print(model_to_upload)
+            input_sandbox.append(model_to_upload)
     elif estimate_energy is False and switches['output_type'] in 'DL1':
         pass
     else:  # Charge also classifer for DL2
@@ -242,29 +241,28 @@ def main():
         model_method_list = [regressor_method, classifier_method]
         model_path_template = 'LFN:' + os.path.join(home_grid, outdir, model_dir, '{}_{}_{}_{}.pkl.gz')
         if force_tailcut_for_extended_cleaning is True:
-            force_modes = [mode.replace('wave', 'tail') for mode in modes]
+            force_mode = mode.replace('wave', 'tail')
         else:
-            force_modes = modes
+            force_mode = mode
         for idx, model_type in enumerate(model_type_list):
             for cam_id in cam_id_list:
-                for mode in force_modes:
 
-                    if model_type in 'regressor' and use_regressor is False:
-                        print('Do not upload regressor model on GRID!!!')
-                        continue
+                if model_type in 'regressor' and use_regressor is False:
+                    print('Do not upload regressor model on GRID!!!')
+                    continue
 
-                    if model_type in 'classifier' and use_classifier is False:
-                        print('Do not upload classifier model on GRID!!!')
-                        continue
+                if model_type in 'classifier' and use_classifier is False:
+                    print('Do not upload classifier model on GRID!!!')
+                    continue
 
-                    model_to_upload = model_path_template.format(
-                        model_type_list[idx],
-                        mode,
-                        cam_id,
-                        model_method_list[idx]
-                    )
-                    print(model_to_upload)
-                    input_sandbox.append(model_to_upload)
+                model_to_upload = model_path_template.format(
+                    model_type_list[idx],
+                    mode,
+                    cam_id,
+                    model_method_list[idx]
+                )
+                print(model_to_upload)
+                input_sandbox.append(model_to_upload)
 
     # summary before submitting
     print("\nDEBUG> running as:")
@@ -343,12 +341,9 @@ def main():
         print("-" * 50)
 
         # setting output name
-        mode = modes[0]
         job_name = 'job_{}_{}_{}_{}'.format(config_name, particle, run_token, mode)
         output_filenames = dict()
-        for mode in modes:
-            output_filenames[mode] = output_filename.format(
-                '_'.join([mode, particle, run_token]))
+        output_filenames[mode] = output_filename.format('_'.join([mode, particle, run_token]))
 
         # if job already running / waiting, skip
         if job_name in running_names:
@@ -361,15 +356,12 @@ def main():
         # (you cannot overwrite it there, delete it and resubmit)
         # (assumes tail and wave will always be written out together)
         already_exist = False
-        for mode in modes:
-            file_on_grid = os.path.join(output_path, output_filenames[mode])
-            print('DEBUG> check for existing file on GRID...')
-            #print('file on grid: {}'.format(file_on_grid))
-            #print('All files: {}'.format(grid_filelist))
-            if file_on_grid in grid_filelist:
-                print("\n{} already on GRID SE\n".format(job_name))
-                already_exist = True
-                break
+        file_on_grid = os.path.join(output_path, output_filenames[mode])
+        print('DEBUG> check for existing file on GRID...')
+        if file_on_grid in grid_filelist:
+            print("\n{} already on GRID SE\n".format(job_name))
+            already_exist = True
+            break
         if already_exist is True:
             continue
 
@@ -409,21 +401,16 @@ def main():
             # and goes on to the next input file; afterwards, the output files are merged
             # j.setExecutable('dirac-dms-get-file', "LFN:" + run_file)
 
-            # consecutively process file with wavelet and tailcut cleaning
-            for mode in modes:
-                # from IPython import embed
-                # embed()
-
-                # source the miniconda ctapipe environment and run the python script with
-                # all its arguments
-                output_filename_temp = output_filename.format(
-                    "_".join([mode, particle, file_token]))
-                j.setExecutable('./pilot.sh',
-                                pilot_args_write.format(
-                                    outfile=output_filename_temp,
-                                    infile_name=os.path.basename(run_file),
-                                    mode=mode)
-                                )
+            # source the miniconda ctapipe environment and run the python script with
+            # all its arguments
+            output_filename_temp = output_filename.format(
+                "_".join([mode, particle, file_token]))
+            j.setExecutable('./pilot.sh',
+                            pilot_args_write.format(
+                                outfile=output_filename_temp,
+                                infile_name=os.path.basename(run_file),
+                                mode=mode)
+            )
 
             # remove the current file to clear space
             j.setExecutable('rm', os.path.basename(run_file))
@@ -434,8 +421,7 @@ def main():
         # if there is more than one file per job, merge the output tables
         if len(bunch) > 1:
             names = []
-            for mode in modes:
-                names.append((output_filename_template + '_' + mode, output_filenames[mode]))
+            names.append((output_filename_template + '_' + mode, output_filenames[mode]))
             for in_name, out_name in names:
                 print('in_name: {}, out_name: {}'.format(in_name, out_name))
                 j.setExecutable('./pilot.sh',
@@ -451,9 +437,8 @@ def main():
                 ))
 
         outputs = []
-        for mode in modes:
-            outputs.append(output_filenames[mode])
-            print("OutputData: {}{}".format(output_path, output_filenames[mode]))
+        outputs.append(output_filenames[mode])
+        print("OutputData: {}{}".format(output_path, output_filenames[mode]))
 
         j.setOutputData(outputs,
                         outputSE=None, outputPath=output_path)

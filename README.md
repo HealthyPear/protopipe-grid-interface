@@ -50,8 +50,8 @@ General:
  config_path: '/Users/julien/Documents/WorkingDir/Tools/python/protopipe/ana/prod_full_array_north_zen20_az0/configs/'
  config_file: 'ana.cfg'
 
- # Type of cleaning
- modes: ['tail']
+ # Type of cleaning (tail or wave)
+ mode: 'tail'
 
  # Type for processing (gamma, proton, electron)
  particle: 'proton'
@@ -94,13 +94,19 @@ GRID:
  banned_sites: ['LCG.CPPM.fr']  # Badly configure
 
 EnergyRegressor:
+ # This list is used to build an energy regressor, if output_type=DL1 and
+ # if estimate_energy is False
  gamma_list: './list/Prod3b_NSB1x/LaPalma/gamma_energy.list'
 
 GammaHadronClassifier:
+ # Those lists are used to build a g/h classifier, if output_type=DL1 and
+ # if estimate_energy is True
  gamma_list: './list/Prod3b_NSB1x/LaPalma/gamma_classification.list'
  proton_list: './list/Prod3b_NSB1x/LaPalma/proton_classification.list'
 
 Performance:
+ # Those lists are used to build event lists for performance estimation,
+ # if output_type=DL2
  gamma_list: './list/Prod3b_NSB1x/LaPalma/gamma_perf.list'
  proton_list: './list/Prod3b_NSB1x/LaPalma/proton_perf.list'
  electron_list: './list/Prod3b_NSB1x/LaPalma/electron_perf.list'
