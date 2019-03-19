@@ -4,12 +4,16 @@ It contains utilities adapted from [here](https://github.com/tino-michael/tino_c
 
 ## Setup
 In order to use those utilities you need: 
- - A working installation of Dirac (see the [CTA-DIRAC Users Guide](https://forge.in2p3.fr/projects/cta_dirac/wiki/CTA-DIRAC_Users_Guide))
- - The [PyYAML](https://pyyaml.org/) module (to handle configuration files)
- - The [HDF5](https://www.h5py.org/) module (to merge tables)
+ - a working installation of Dirac (see the [CTA-DIRAC Users Guide](https://forge.in2p3.fr/projects/cta_dirac/wiki/CTA-DIRAC_Users_Guide))
+ - to install [PyYAML](https://pyyaml.org/) module (to handle configuration files)
+ - to install [HDF5](https://www.h5py.org/) module (to merge tables)
  - the [protopipe](https://drf-gitlab.cea.fr/CTA-Irfu/protopipe) module
+ - the [pywi](http://www.pywi.org/) and the [pywi-cta](http://cta.pywi.org/) modules 
 
-Here is an example of environment variables bash file to activate the dirac settings:
+The protopipe, the pywi and the pywi-cta modules are needed because they will be
+downloaded on the GRID machines before the data processing.
+Here is an example of environment variables in a bash file to activate
+the dirac settings:
 ```
 #!/bin/bash
 source $DIRAC_INSTALL_PATH/bashrc
@@ -318,3 +322,63 @@ Resources
   }
 }
 ```
+
+### Uploading models
+Here is an example of bash script to upload models on the GRID and then make replicas:
+```
+CONFIG="lapalma_fullarray"  # Name of the configuration
+CAM_IDS='LSTCam NectarCam'  # This is a list
+MODEL_TYPE="classifier"  # Here regressor or classifier
+MODEL_NAME="RandomForestClassifier"  # Here AdaBoostRegressor or RandomForestClassifier
+MODE="tail"  # Here tail or wave
+
+INPUT_DIR="path_to_my_config/$CONFIG/models/"
+OUTPUT_DIR="/vo.cta.in2p3.fr/user/x/xxx/path_to_my_config/$CONFIG/models/"
+
+SE_LIST='DESY-ZN-USER CNAF-USER ' # List of SE, by default copy on CC-kIN2P3
+
+for cam_id in $CAM_IDS; do
+    file="${MODEL_TYPE}_${MODE}_${cam_id}_${MODEL_NAME}.pkl.gz"
+    echo "Uploading $INPUT_DIR/$file..."
+    python upload_file.py --indir=$INPUT_DIR --infile=$file --outdir=$OUTPUT_DIR
+
+    # Make replicas
+    for SE in $SE_LIST; do
+    echo "Making replica on $SE"
+        dirac-dms-replicate-lfn $OUTPUT_DIR/$file $SE
+    done
+
+done
+```  
+
+### Get and merge files
+Here is an example of bash script to retrieve files from the GRID and then merge them:
+```
+# User variables
+CONFIG="lapalma_fullarray"  # Name of the configuration
+TYPE="dl2"  # Here dl1 or dl2
+FILE_TYPE="dl2"  # Here dl1_energy, dl1_discrimination, dl2, dl2_force_tc_extended_cleaning
+MODE="tail"  # Here, tail, wave
+PARTICLE='gamma '  # This a list, gamma, proton, electron
+
+# For Python's script
+INPUT_DIR="/vo.cta.in2p3.fr/user/x/xxx/path_to_my_config/$CONFIG/$FILE_TYPE"
+OUTPUT_DIR="path_to_my_config/$CONFIG/$FILE_TYPE/"
+
+# Get files
+python download_files.py --indir=$INPUT_DIR --outdir=$OUTPUT_DIR
+
+# Merge files
+for part in $PARTICLE; do
+    echo "Merging $part..."
+    OUTPUT_FILE="$OUTPUT_DIR/${TYPE}_${MODE}_${part}_merged.h5"
+    TEMPLATE_FILE_NAME="${TYPE}_${MODE}_${part}"
+
+    echo $OUTPUT_DIR
+    echo $TEMPLATE_FILE_NAME
+    echo $OUTPUT_FILE
+
+    python merge_tables.py --indir=$OUTPUT_DIR --template_file_name=$TEMPLATE_FILE_NAME --outfile=$OUTPUT_FILE
+done
+```
+
