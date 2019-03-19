@@ -4,11 +4,11 @@ It contains utilities adapted from [here](https://github.com/tino-michael/tino_c
 
 ## Setup
 In order to use those utilities you need: 
- - a working installation of Dirac (see the [CTA-DIRAC Users Guide](https://forge.in2p3.fr/projects/cta_dirac/wiki/CTA-DIRAC_Users_Guide))
- - to install [PyYAML](https://pyyaml.org/) module (to handle configuration files)
- - to install [HDF5](https://www.h5py.org/) module (to merge tables)
- - the [protopipe](https://drf-gitlab.cea.fr/CTA-Irfu/protopipe) module
- - the [pywi](http://www.pywi.org/) and the [pywi-cta](http://cta.pywi.org/) modules 
+ - a working installation of Dirac, see the [CTA-DIRAC Users Guide](https://forge.in2p3.fr/projects/cta_dirac/wiki/CTA-DIRAC_Users_Guide)
+ - to install [PyYAML](https://pyyaml.org/) module to handle configuration files
+ - to install [HDF5](https://www.h5py.org/) and [tables](https://www.pytables.org/usersguide/installation.html#installation-with-pip) modules in order to be able to merge HDF5 tables
+ - the [protopipe](https://drf-gitlab.cea.fr/CTA-Irfu/protopipe) module to process data on the GRID
+ - the [pywi](http://www.pywi.org/) and the [pywi-cta](http://cta.pywi.org/) modules to use wavelets stuff on the GRID
 
 The protopipe, the pywi and the pywi-cta modules are needed because they will be
 downloaded on the GRID machines before the data processing.
