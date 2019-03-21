@@ -240,6 +240,8 @@ def main():
         model_path_template = 'LFN:' + os.path.join(home_grid, outdir, model_dir, '{}_{}_{}_{}.pkl.gz')
         if force_tailcut_for_extended_cleaning is True:
             force_mode = mode.replace('wave', 'tail')
+            print('################')
+            print(force_mode)
         else:
             force_mode = mode
         for idx, model_type in enumerate(model_type_list):
@@ -255,7 +257,7 @@ def main():
 
                 model_to_upload = model_path_template.format(
                     model_type_list[idx],
-                    mode,
+                    force_mode,
                     cam_id,
                     model_method_list[idx]
                 )
