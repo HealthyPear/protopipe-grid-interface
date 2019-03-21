@@ -3,14 +3,23 @@ This repository contains scripts to deal with the GRID via the Dirac interface.
 It contains utilities adapted from [here](https://github.com/tino-michael/tino_cta/tree/master/grid).
 
 ## Setup
+**Note that only Python 2.7 is supported for the scripts using Dirac utilities. After you 
+installed the Dirac software you will have to to stick with the Dirac Python version.
+To install additional packages (e.g. ipython, PyYAML, etc.) you can use the built-in `pip` 
+package manager provided in the Dirac suite. If you have SSL errors using `pip`, look 
+[here](###ssl-error-by-using-pip).**
+
 In order to use those utilities you need: 
  - a working installation of Dirac, see the [CTA-DIRAC Users Guide](https://forge.in2p3.fr/projects/cta_dirac/wiki/CTA-DIRAC_Users_Guide)
  - to install [PyYAML](https://pyyaml.org/) module to handle configuration files
- - to install [HDF5](https://www.h5py.org/) and [tables](https://www.pytables.org/usersguide/installation.html#installation-with-pip) modules in order to be able to merge HDF5 tables
+ - to install [HDF5](https://www.h5py.org/) and [tables](https://www.pytables.org/usersguide/installation.html#installation-with-pip) 
+ modules in order to be able to merge HDF5 tables. You will need to install the following dependencies, 
+ [cython](https://cython.org/), [numpy](http://www.numpy.org/) and [six](https://pypi.org/project/six/) as
+ well as the [HDF5](https://www.hdfgroup.org/solutions/hdf5/) library.
  - the [protopipe](https://drf-gitlab.cea.fr/CTA-Irfu/protopipe) module to process data on the GRID
  - the [pywi](http://www.pywi.org/) and the [pywi-cta](http://cta.pywi.org/) modules to use wavelets stuff on the GRID
 
-The protopipe, the pywi and the pywi-cta modules are needed because they will be
+The protopipe, pywi and pywi-cta modules are needed because they will be
 downloaded on the GRID machines before the data processing.
 Here is an example of environment variables in a bash file to activate
 the dirac settings:
@@ -26,10 +35,8 @@ export PYWICTA=$PYTOOLS/pywi-cta
 ```
 where the DIRAC_INSTALL and PYTOOLS paths correspond respectively to the places
 where you installed the dirac utilities and the protopipe and pywi-cta modules.
-
-<aside class="warning">
-Note that only Python 2.7 is supported for the scripts using Dirac utilities.
-</aside>
+The environment variables are necessary in order to put the mandatory packages
+in the `InputSandBox`.
 
 ## How to launch jobs on the GRID
 The two test cases covered here are:
