@@ -110,7 +110,6 @@ def main():
     else:
         use_classifier = True
 
-
     # GRID
     outdir = os.path.join(cfg['GRID']['outdir'], config_name)
     n_file_per_job = cfg['GRID']['n_file_per_job']
@@ -129,7 +128,6 @@ def main():
 
     # Prepare command to launch script
     source_ctapipe = 'source /cvmfs/cta.in2p3.fr/software/miniconda/bin/activate ctapipe_v0.6.2'
-    #source_ctapipe = 'source /cvmfs/cta.in2p3.fr/software/miniconda/bin/activate ctapipe_v0.6.1'
 
     if switches['output_type'] in 'DL1':
         execute = 'write_dl1.py'
