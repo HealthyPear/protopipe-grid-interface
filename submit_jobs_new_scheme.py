@@ -140,9 +140,8 @@ def main():
         print("Force tail cuts for extended cleaning!!!")
 
     # Prepare command to launch script
-    source_ctapipe = (
-        "source /cvmfs/cta.in2p3.fr/software/miniconda/bin/activate ctapipe_v0.7.0"
-    )
+    source_ctapipe = "source /cvmfs/cta.in2p3.fr/software/conda/dev/setupConda.sh"
+    source_ctapipe += " && conda activate ctapipe_v0.7.0"
 
     if switches["output_type"] in "DL1":
         execute = "write_dl1.py"
