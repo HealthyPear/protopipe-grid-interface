@@ -348,7 +348,7 @@ def main():
         for i, id in enumerate(running_ids):
             if ((100 * i) / n_jobs) % 5 == 0:
                 print("\r{} %".format(((20 * i) / n_jobs) * 5)),
-            jobname = dirac.attributes(id)["Value"]["JobName"]
+            jobname = dirac.getJobAttributes(id)["Value"]["JobName"]
             running_names.append(jobname)
         else:
             print("\n... done")
