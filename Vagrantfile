@@ -46,7 +46,7 @@ Vagrant.configure("2") do |config|
   # config.vm.synced_folder "../data", "/vagrant_data"
   config.vm.synced_folder "/Users/michele/Applications/ctasoft/protopipe", "/home/vagrant/protopipe", create: true
   config.vm.synced_folder "/Users/michele/Applications/ctasoft/protopipe-grid-interface", "/home/vagrant/protopipe-grid-interface", create: true
-  config.vm.synced_folder "/Users/michele/Applications/ctasoft/dirac/data", "/home/vagrant/data", create: true
+  config.vm.synced_folder "/Users/michele/Applications/ctasoft/dirac/data/analyses", "/home/vagrant/data/analyses", create: true
   config.vm.synced_folder "/Users/michele/.globus", "/home/vagrant/.globus", create: true
   # Provider-specific configuration so you can fine-tune various
   # backing providers for Vagrant. These expose provider-specific options.

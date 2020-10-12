@@ -1,16 +1,25 @@
 #!/usr/bin/env bash
 
 # User variables
-ANALYSIS_NAME=""  # Name of the analysis
-TYPE="dl2"  # Here dl1 or dl2
-FILE_TYPE="dl2"  # Here dl1_energy, dl1_discrimination, dl2, dl2_force_tc_extended_cleaning
+ANALYSIS_NAME=""
+HOME_PATH_GRID="/vo.cta.in2p3.fr/user/x/xxx/"
+ANALYSIS_PATH_GRID="" # path from HOME_PATH_GRID
+ANALYSIS_PATH_LOCAL="home/vagrant/data/analyses/$ANALYSIS_NAME"
+
+# ANALYSIS STEP DATA PATH
+# - DL1/for_energy_estimation
+# - DL1/for_classification
+# - DL2
+# - DL3
+DATA_PATH="DL1/for_energy_estimation"
+
 MODE="tail"  # Here, tail, wave
 PARTICLE='gamma '  # This can be list, gamma, proton, electron
 
 # DIRAC file catalog full path
-INPUT_DIR="/vo.cta.in2p3.fr/user/x/xxx/path_to_analysis/$ANALYSIS_NAME/$FILE_TYPE"
+INPUT_DIR="$ANALYSIS_PATH_GRID/$ANALYSIS_NAME/$DATA_PATH"
 # Full path in local virtual environment for the grid interface
-OUTPUT_DIR="path_to_my_config/$ANALYSIS_NAME/data/$FILE_TYPE/"
+OUTPUT_DIR="home/vagrant/data/analyses/$ANALYSIS_NAME/data/$DATA_PATH/"
 
 # Get files
 python $GRID/download_files.py --indir=$INPUT_DIR --outdir=$OUTPUT_DIR
