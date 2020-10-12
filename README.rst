@@ -3,8 +3,8 @@ Protopipe GRID interface
 ========================
 
 This software provides an interface between the
-`Protopipe CTA prototype pipeline <https://github.com/cta-observatory/protopipe>`_
- and the `DIRAC GRID tools <http://diracgrid.org/>`_.
+`Protopipe CTA prototype pipeline <https://github.com/cta-observatory/protopipe>`_ 
+and the `DIRAC GRID tools <http://diracgrid.org/>`_.
  
 It is required for using *protopipe* to analyze large scale simulation
 productions.
@@ -35,23 +35,24 @@ You can fin all necessary information
 Vagrant
 +++++++
 
-All users, regardless of their operative systems can use this interface via
+All users, regardless of their operative systems, can use this interface via
 `Vagrant <https://www.vagrantup.com/>`_.
 
-The interface code comes with a *VagrantFile* which allows to adapt a virtual 
+The interface code comes with a *VagrantFile* which allows to adapt the virtual 
 environment to the local setup.
 
-Linux users are not required to use Vagrant, but they can.
+For Linux users is in not required to use Vagrant, but it is suggested.
 
 Singularity
 +++++++++++
 
-`Singularity <https://sylabs.io/docs/>`_ allows to use the DIRAC tools within the virtual environment.
-The vagrant box that you get comes with this software already.
+`Singularity <https://sylabs.io/docs/>`_ allows to use the DIRAC tools within 
+the virtual environment. The vagrant box obtained by using the *VagrantFile* 
+comes with this software already installed.
 
-Linux users that do not want to use *Vagrant* will have to install Singularity
-and edit their own setup environment.
-The simplest solution is to use ``$HOME`` as a shared folder. 
+Linux users that do not want to use *Vagrant* will need Singularity installed
+on their systems and they will need to edit their own environment accordingly.
+In this case, the simplest solution is to use ``$HOME`` as a shared folder.
 
 Documentation
 -------------
