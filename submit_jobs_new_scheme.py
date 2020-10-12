@@ -246,6 +246,7 @@ def main():
         os.path.expandvars(os.path.join(config_path, config_file)),
     ]
 
+    models_to_upload = []
     if estimate_energy is True and switches["output_type"] in "DL1":
         model_path_template = "LFN:" + os.path.join(
             home_grid, outdir, model_dir, "regressor_{}_{}_{}.pkl.gz"
@@ -255,7 +256,8 @@ def main():
                 mode, cam_id, regressor_method
             )  # TBC
             print(model_to_upload)
-            input_sandbox.append(model_to_upload)
+            models_to_upload.append(model_to_upload)
+            #input_sandbox.append(model_to_upload)
     elif estimate_energy is False and switches["output_type"] in "DL1":
         pass
     else:  # Charge also classifer for DL2
@@ -285,7 +287,8 @@ def main():
                     model_type_list[idx], force_mode, cam_id, model_method_list[idx]
                 )
                 print(model_to_upload)
-                input_sandbox.append(model_to_upload)
+		models_to_upload.append(model_to_upload)
+                #input_sandbox.append(model_to_upload)
 
     # summary before submitting
     print("\nDEBUG> running as:")
@@ -471,6 +474,11 @@ def main():
                         pilot_args_merge.format(in_name=in_name, out_name=out_name)
                     )
                 )
+
+	bunch.extend(models_to_upload)
+	j.setInputData(bunch)
+
+	print("Input data set to job = {}".format(bunch))
 
         outputs = []
         outputs.append(output_filenames[mode])
