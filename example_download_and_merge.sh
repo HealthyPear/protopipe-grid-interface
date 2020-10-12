@@ -25,5 +25,5 @@ for part in $PARTICLE; do
     echo $TEMPLATE_FILE_NAME
     echo $OUTPUT_FILE
 
-    python merge_tables.py --indir=$OUTPUT_DIR --template_file_name=$TEMPLATE_FILE_NAME --outfile=$OUTPUT_FILE
+    python $GRID/merge_tables.py --indir=$OUTPUT_DIR --template_file_name=$TEMPLATE_FILE_NAME --outfile=$OUTPUT_FILE
 done
