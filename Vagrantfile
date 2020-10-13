@@ -48,9 +48,12 @@ Vagrant.configure("2") do |config|
   config.vm.synced_folder "XXX/protopipe", "/home/vagrant/protopipe", create: true
   # Link to protopipe-grid-interface source code
   config.vm.synced_folder "XXX/protopipe-grid-interface", "/home/vagrant/protopipe-grid-interface", create: true
-  # Full path to the shared folder
+  # Full path to the analyses storage in the shared folder 
   # Edit only the 1st argument before "shared_folder"
   config.vm.synced_folder "XXX/shared_folder/analyses", "/home/vagrant/shared_folder/analyses", create: true
+  # Full path to the production lists storage in the shared folder
+  # Edit only the 1st argument before "shared_folder"
+  config.vm.synced_folder "XXX/shared_folder/productions", "/home/vagrant/shared_folder/productions", create: true
   # Full path to the GRID VO certificate
   # Edit only the 1st argument before ".globus"
   config.vm.synced_folder "XXX/.globus", "/home/vagrant/.globus", create: true

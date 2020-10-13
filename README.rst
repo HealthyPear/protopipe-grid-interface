@@ -6,19 +6,23 @@ This software provides an interface between the
 `Protopipe CTA prototype pipeline <https://github.com/cta-observatory/protopipe>`_ 
 and the `DIRAC GRID tools <http://diracgrid.org/>`_.
  
-It is required for using *protopipe* to analyze large scale simulation
+It is required for using this pipeline to analyse large scale simulation
 productions.
 
-The interface can be used from a virtual environment container stored
-`here <https://github.com/HealthyPear/CTADIRAC>`_
-as a spin-off of `CTADIRAC <https://github.com/cta-observatory/CTADIRAC>`_.
+The interface is run from a copy of the virtual environment container stored
+`here <https://github.com/HealthyPear/CTADIRAC>`_, which is a spin-off of `CTADIRAC <https://github.com/cta-observatory/CTADIRAC>`_.
 
 Contents
 --------
 
-- interface code for jobs handling
-- configuration file for setup of the analysis jobs on the grid
-- auxiliary bash/python scripts to download/merge data tables and models upload
+- VagrantFile
+- interface code to the DIRAC GRID
+- configuration file to setup the analysis on the GRID
+- auxiliary scripts to 
+  
+  - download/merge data tables,
+  - upload estimation models,
+  - setup an analysis working environment.
 
 Requirements
 ------------
@@ -36,29 +40,34 @@ Vagrant
 +++++++
 
 All users, regardless of their operative systems, can use this interface via
-`Vagrant <https://www.vagrantup.com/>`_.
+`Vagrant <https://www.vagrantup.com/>`_ (recommended). 
 
-The interface code comes with a *VagrantFile* which allows to adapt the virtual 
-environment to the local setup.
+The *VagrantFile* allows to download a virtual 
+environment in form of a *Vagrant box* which will host the container.
 
-The *VagrantFile* comes with a suggested directory tree structure shared 
-between the virtual and local environments, i.e. a shared
-``data`` folder containing an ``analyses`` folder where to store all the various analyses.
-Use the ``create_analysis_tree.py`` auxiliary script from *protopipe* to create 
-each new analysis folder ready to use by this interface.
+The user needs only to edit a couple lines to link the source codes of the
+pipeline and this interface.
 
-For Linux users is in not required to use Vagrant, but it is suggested.
+The *VagrantFile* defines also a ``shared_folder`` containing
+
+- an ``analyses`` folder where to store the analyses,
+- a ``productions`` folder where to store the lists of simulation files
+
+The ``create_analysis_tree.py`` auxiliary script allows to create a directory 
+structure for each new analysis, mirrored with the one stored on the user's 
+home in the GRID file catalog.
 
 Singularity
 +++++++++++
 
 `Singularity <https://sylabs.io/docs/>`_ allows to use the DIRAC tools within 
-the virtual environment. The vagrant box obtained by using the *VagrantFile* 
-comes with this software already installed.
+a container. 
 
-Linux users that do not want to use *Vagrant* will need Singularity installed
+This software is already installed and ready to use from the *Vagrant box* 
+obtained by using the *VagrantFile*.
+
+Linux users that do not want to use *Vagrant* will need to install *Singularity*
 on their systems and they will need to edit their own environment accordingly.
-In this case, the simplest solution is to use ``$HOME`` as a shared folder.
 
 Documentation
 -------------
