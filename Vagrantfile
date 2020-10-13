@@ -43,11 +43,17 @@ Vagrant.configure("2") do |config|
   # the path on the host to the actual folder. The second argument is
   # the path on the guest to mount the folder. And the optional third
   # argument is a set of non-required options.
-  # config.vm.synced_folder "../data", "/vagrant_data"
-  config.vm.synced_folder "/Users/michele/Applications/ctasoft/protopipe", "/home/vagrant/protopipe", create: true
-  config.vm.synced_folder "/Users/michele/Applications/ctasoft/protopipe-grid-interface", "/home/vagrant/protopipe-grid-interface", create: true
-  config.vm.synced_folder "/Users/michele/Applications/ctasoft/dirac/data/analyses", "/home/vagrant/data/analyses", create: true
-  config.vm.synced_folder "/Users/michele/.globus", "/home/vagrant/.globus", create: true
+  
+  # Link to protopipe source code
+  config.vm.synced_folder "XXX/protopipe", "/home/vagrant/protopipe", create: true
+  # Link to protopipe-grid-interface source code
+  config.vm.synced_folder "XXX/protopipe-grid-interface", "/home/vagrant/protopipe-grid-interface", create: true
+  # Full path to the shared folder
+  # Edit only the 1st argument before "shared_folder"
+  config.vm.synced_folder "XXX/shared_folder/analyses", "/home/vagrant/shared_folder/analyses", create: true
+  # Full path to the GRID VO certificate
+  # Edit only the 1st argument before ".globus"
+  config.vm.synced_folder "XXX/.globus", "/home/vagrant/.globus", create: true
   # Provider-specific configuration so you can fine-tune various
   # backing providers for Vagrant. These expose provider-specific options.
   # Example for VirtualBox:

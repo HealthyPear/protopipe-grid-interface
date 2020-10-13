@@ -13,13 +13,13 @@ ANALYSIS_PATH_LOCAL="home/vagrant/data/analyses/$ANALYSIS_NAME"
 # - DL3
 DATA_PATH="DL1/for_energy_estimation"
 
-MODE="tail"  # Here, tail, wave
-PARTICLE='gamma '  # This can be list, gamma, proton, electron
+MODE="tail"  # Here tail (tailcut) or wave (wavelet) cleaning
+PARTICLE='gamma '  # This can be list up to "gamma, proton, electron"
 
 # DIRAC file catalog full path
-INPUT_DIR="$ANALYSIS_PATH_GRID/$ANALYSIS_NAME/$DATA_PATH"
+INPUT_DIR="$ANALYSIS_PATH_GRID/$ANALYSIS_NAME/data/$DATA_PATH"
 # Full path in local virtual environment for the grid interface
-OUTPUT_DIR="home/vagrant/data/analyses/$ANALYSIS_NAME/data/$DATA_PATH/"
+OUTPUT_DIR="home/vagrant/shared_folder/analyses/$ANALYSIS_NAME/data/$DATA_PATH/"
 
 # Get files
 python $GRID/download_files.py --indir=$INPUT_DIR --outdir=$OUTPUT_DIR

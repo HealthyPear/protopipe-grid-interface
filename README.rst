@@ -44,7 +44,7 @@ environment to the local setup.
 The *VagrantFile* comes with a suggested directory tree structure shared 
 between the virtual and local environments, i.e. a shared
 ``data`` folder containing an ``analyses`` folder where to store all the various analyses.
-Use the ``create_dir_structure.py`` auxiliary script from *protopipe* to create 
+Use the ``create_analysis_tree.py`` auxiliary script from *protopipe* to create 
 each new analysis folder ready to use by this interface.
 
 For Linux users is in not required to use Vagrant, but it is suggested.
