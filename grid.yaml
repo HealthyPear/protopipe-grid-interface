@@ -1,23 +1,25 @@
 General:
- # Path to the analysis configuration file (will be uploaded on the GRID)
- # Please, use an absolute paths with respect to the grid virtual environment
+ # Path to the analysis configuration file
+ # You only need to edit the name of the analysis
  config_path: '/home/vagrant/data/analyses/$ANALYSIS_NAME/configs/'
  # Name of the configuration file for the protopipe analysis
  config_file: 'analysis.yaml'
 
- # Type of cleaning (wave - for "wavelets" - or tail - for 'tailcut' - )
+ # Type of cleaning
+ # wave = "wavelets" (not available at the moment)
+ # tail = "tailcut"
  mode: 'tail'
 
  # Type of the particle to process (gamma, proton or electron) - NOT a list!
  particle: 'gamma'
 
  # If 'True' estimate energy
- # In this case you will need a regressor file
+ # In this case a regressor file is needed!
  estimate_energy: False
 
  # Force reconstruction cleaning also for energy/score estimation
  # possible only if using 'wave' mode - if 'tail', leave 'False'
- force_tailcut_for_extended_cleaning: False  #  only evt level
+ force_tailcut_for_extended_cleaning: False
 
 GRID:
  # Username on GRID
@@ -56,7 +58,9 @@ GRID:
  banned_sites: ['LCG.CPPM.fr']
 
 # The following directory paths refer to directory structure of your analysis
-# Please, use absolute paths with respect to to the grid virtual environment.
+# Here you need to edit
+# - the name of the analysis
+# - the names of the lists of simtel files (those shown here are descriptive)
 
 EnergyRegressor:
  # This list is used to build an energy regressor, if output_type=DL1 and
