@@ -11,15 +11,15 @@ except ImportError:
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Merge collection of HDF5 files')
-    parser.add_argument('--indir', type=str, default="./")
-    parser.add_argument('--template_file_name', type=str, default="features_event")
-    parser.add_argument('--outfile', type=str)
+    parser = argparse.ArgumentParser(description="Merge collection of HDF5 files")
+    parser.add_argument("--indir", type=str, default="./")
+    parser.add_argument("--template_file_name", type=str, default="features_event")
+    parser.add_argument("--outfile", type=str)
     args = parser.parse_args()
 
-    print('DEBUG> template_file_name={}'.format(args.template_file_name))
-    print('DEBUG> indir={}'.format(args.indir))
-    print('DEBUG> outfile={}'.format(args.outfile))
+    print("DEBUG> template_file_name={}".format(args.template_file_name))
+    print("DEBUG> indir={}".format(args.indir))
+    print("DEBUG> outfile={}".format(args.outfile))
 
     input_template = "{}/{}*.h5".format(args.indir, args.template_file_name)
     print("input_template:", input_template)
@@ -36,20 +36,18 @@ def merge_list_of_pytables(filename_list, destination):
 
     for idx, filename in enumerate(sorted(filename_list)):
 
-        infile = tb.open_file(filename, mode='r')
+        infile = tb.open_file(filename, mode="r")
         table_name_list = [table.name for table in infile.root]  # Name of tables
 
         # Initialise output file
         if idx == 0:
             for name in table_name_list:
                 merged_tables[name] = infile.copy_node(
-                    where='/',
-                    name=name,
-                    newparent=outfile.root
+                    where="/", name=name, newparent=outfile.root
                 )
         else:
             for name in table_name_list:
-                table_tmp = infile.get_node('/' + name)
+                table_tmp = infile.get_node("/" + name)
                 table_tmp.append_where(dstTable=merged_tables[name])
 
         infile.close()
@@ -60,5 +58,3 @@ def merge_list_of_pytables(filename_list, destination):
 if __name__ == "__main__":
 
     main()
-
-

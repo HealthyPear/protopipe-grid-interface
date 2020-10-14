@@ -8,9 +8,9 @@ from DIRAC.Interfaces.API.Dirac import Dirac
 
 def main():
     # Read command line options
-    parser = argparse.ArgumentParser(description='Download collection files from Dirac')
-    parser.add_argument('--indir', default=None, help='Dirac repository')
-    parser.add_argument('--outdir', default='', help='Output file directory')
+    parser = argparse.ArgumentParser(description="Download collection files from Dirac")
+    parser.add_argument("--indir", default=None, help="Dirac repository")
+    parser.add_argument("--outdir", default="", help="Output file directory")
     args = parser.parse_args()
 
     print("Download file from: {}".format(args.indir))
@@ -21,7 +21,7 @@ def main():
         os.makedirs(args.outdir)
 
     # Get list of files
-    batcmd = 'dirac-dms-user-lfns --BaseDir {}'.format(args.indir)
+    batcmd = "dirac-dms-user-lfns --BaseDir {}".format(args.indir)
     result = subprocess.check_output(batcmd, shell=True)
     file_list = result.split()[-1]
 
