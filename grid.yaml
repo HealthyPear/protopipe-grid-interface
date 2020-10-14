@@ -1,7 +1,7 @@
 General:
  # Path to the analysis configuration file
  # You only need to edit the name of the analysis
- config_path: '/home/vagrant/data/analyses/$ANALYSIS_NAME/configs/'
+ config_path: '/home/vagrant/shared_folder/analyses/$ANALYSIS_NAME/configs/'
  # Name of the configuration file for the protopipe analysis
  config_file: 'analysis.yaml'
 
@@ -68,17 +68,17 @@ GRID:
 EnergyRegressor:
  # This list is used to build an energy regressor, if output_type=DL1 and
  # if estimate_energy is False
- gamma_list: '/home/vagrant/data/analyses/$ANALYSIS_NAME/data/simtel/gamma_energy.list'
+ gamma_list: '/home/vagrant/shared_folder/analyses/$ANALYSIS_NAME/data/simtel/gamma_energy.list'
 
 GammaHadronClassifier:
  # Those lists are used to build a g/h classifier, if output_type=DL1 and
  # if estimate_energy is True
- gamma_list: '/home/vagrant/data/analyses/$ANALYSIS_NAME/data/simtel/gamma_classification.list'
- proton_list: '/home/vagrant/data/analyses/$ANALYSIS_NAME/data/simtel/proton_classification.list'
+ gamma_list: '/home/vagrant/shared_folder/analyses/$ANALYSIS_NAME/data/simtel/gamma_classification.list'
+ proton_list: '/home/vagrant/shared_folder/analyses/$ANALYSIS_NAME/data/simtel/proton_classification.list'
 
 Performance:
  # Those lists are used to build event lists for performance estimation,
  # if output_type=DL2
- gamma_list: '/home/vagrant/data/analyses/$ANALYSIS_NAME/data/simtel/gamma_perf.list'
- proton_list: '/home/vagrant/data/analyses/$ANALYSIS_NAME/data/simtel/proton_perf.list'
- electron_list: '/home/vagrant/data/analyses/$ANALYSIS_NAME/data/simtel/electron_perf.list'
+ gamma_list: '/home/vagrant/shared_folder/analyses/$ANALYSIS_NAME/data/simtel/gamma_perf.list'
+ proton_list: '/home/vagrant/shared_folder/analyses/$ANALYSIS_NAME/data/simtel/proton_perf.list'
+ electron_list: '/home/vagrant/shared_folder/analyses/$ANALYSIS_NAME/data/simtel/electron_perf.list'
