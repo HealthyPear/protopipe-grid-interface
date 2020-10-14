@@ -54,8 +54,11 @@ GRID:
  # Maximum number of jobs (-1 is no limit)
  n_jobs_max: -1
 
- # List of banned sites if something doesn't work there
- banned_sites: ['LCG.CPPM.fr']
+ # List of banned sites
+ # you can edit this if
+ # - something doesn't work at a certain site (or storage)
+ # - if you want to filter jobs due to technical problems
+ banned_sites: ['LCG.CPPM.fr'] # LCG.GRIF.fr, LCG.DESY-ZEUTHEN.de, LCG.IN2P3-CC.fr
 
 # The following directory paths refer to directory structure of your analysis
 # Here you need to edit
