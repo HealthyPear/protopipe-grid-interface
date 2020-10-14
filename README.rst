@@ -1,6 +1,9 @@
-========================
-Protopipe GRID interface
-========================
+=================================
+Protopipe GRID interface |codacy|
+=================================
+
+.. |codacy| image:: https://app.codacy.com/project/badge/Grade/fecd056c3826433e91d4a7e0b0557434
+   :target: https://www.codacy.com/gh/HealthyPear/protopipe-grid-interface/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=HealthyPear/protopipe-grid-interface&amp;utm_campaign=Badge_Grade
 
 This software provides an interface between the
 `Protopipe CTA prototype pipeline <https://github.com/cta-observatory/protopipe>`_ 
