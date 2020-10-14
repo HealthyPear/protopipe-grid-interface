@@ -475,10 +475,10 @@ def main():
                     )
                 )
 
-	bunch.extend(models_to_upload)
-	j.setInputData(bunch)
+        bunch.extend(models_to_upload)
+        j.setInputData(bunch)
 
-	print("Input data set to job = {}".format(bunch))
+        print("Input data set to job = {}".format(bunch))
 
         outputs = []
         outputs.append(output_filenames[mode])
