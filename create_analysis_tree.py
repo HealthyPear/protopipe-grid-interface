@@ -54,7 +54,7 @@ def main():
     # Define analysis subdirectories
     subdirectories = {
         "configs": [],
-        "data": ["simtel", "DL1", "DL2", "DL3"],
+        "data": ["simtel", "TRAINING", "DL2", "DL3"],
         "estimators": ["energy_regressor", "gamma_hadron_classifier"],
         "performance": [],  # performance script will create the subdirectories
     }
@@ -66,8 +66,8 @@ def main():
         for dd in subdirectories[d]:
             subsubdir = os.path.join(subdir, dd)
             makedir(subsubdir)
-            if dd == "DL1":
-                makedir(os.path.join(subsubdir, "for_classification"))
+            if dd == "TRAINING":
+                makedir(os.path.join(subsubdir, "for_particle_classification"))
                 makedir(os.path.join(subsubdir, "for_energy_estimation"))
 
     print("Directory structure ready for protopipe analysis on DIRAC.")

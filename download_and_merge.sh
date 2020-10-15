@@ -7,11 +7,11 @@ ANALYSIS_PATH_GRID="" # path from HOME_PATH_GRID
 ANALYSIS_PATH_LOCAL="home/vagrant/data/analyses/$ANALYSIS_NAME"
 
 # ANALYSIS STEP DATA PATH
-# - DL1/for_energy_estimation
-# - DL1/for_classification
+# - TRAINING/for_energy_estimation
+# - TRAINING/for_particle_classification
 # - DL2
 # - DL3
-DATA_PATH="DL1/for_energy_estimation"
+DATA_PATH="TRAINING/for_energy_estimation"
 
 MODE="tail"  # Here tail (tailcut) or wave (wavelet) cleaning
 PARTICLE="gamma "  # This can be list up to "gamma, proton, electron"
