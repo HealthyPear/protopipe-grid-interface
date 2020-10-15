@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 ANALYSIS_NAME=""  # Name of the analysis
-ANALYSES_PATH="home/vagrant/shared_folder/analyses"
+ANALYSES_PATH="/home/vagrant/shared_folder/analyses"
 HOME_PATH_GRID="/vo.cta.in2p3.fr/user/x/xxx"
 ANALYSIS_PATH_GRID="" # path from HOME_PATH_GRID to the analysis folder
 MODE="tail"  # Here tail (tailcut) or wave (wavelet) cleaning
