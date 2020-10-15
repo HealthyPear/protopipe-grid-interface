@@ -10,7 +10,6 @@ ANALYSIS_PATH_LOCAL="/home/vagrant/shared_folder/analyses/$ANALYSIS_NAME"
 # - TRAINING/for_energy_estimation
 # - TRAINING/for_particle_classification
 # - DL2
-# - DL3
 DATA_PATH="TRAINING/for_energy_estimation"
 
 MODE="tail"  # Here tail (tailcut) or wave (wavelet) cleaning
