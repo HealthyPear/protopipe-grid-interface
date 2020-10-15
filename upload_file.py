@@ -24,8 +24,8 @@ def main():
     result = subprocess.check_output(batcmd, shell=True)
     file_list = result.split()[-1]
 
-    print(f"Result of the operation = {result}")
-    print(f"Files concerned by this operation = {file_list}")
+    print("Result of the operation = {}".format(result))
+    print("Files concerned by this operation = {}".format(file_list))
 
 
 if __name__ == "__main__":
