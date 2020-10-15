@@ -21,7 +21,7 @@ fi
 # Full path in local virtual environment for the grid interface
 INPUT_DIR="$ANALYSES_PATH/$ANALYSIS_NAME/estimators/$MODEL_TYPE_FOLDER"
 # DIRAC file catalog path
-OUTPUT_DIR="$HOME_PATH_GRID/$ANALYSIS_PATH_GRID/$ANALYSIS_NAME/estimators/"
+OUTPUT_DIR="$HOME_PATH_GRID/$ANALYSIS_PATH_GRID/$ANALYSIS_NAME/estimators"
 
 # List of SE, by default copy on CC-IN2P3
 SE_LIST='DESY-ZN-USER CNAF-USER CEA-USER '
