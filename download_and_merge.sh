@@ -4,7 +4,7 @@
 ANALYSIS_NAME=""
 HOME_PATH_GRID="/vo.cta.in2p3.fr/user/x/xxx/"
 ANALYSIS_PATH_GRID="" # path from HOME_PATH_GRID
-ANALYSIS_PATH_LOCAL="home/vagrant/data/analyses/$ANALYSIS_NAME"
+ANALYSIS_PATH_LOCAL="/home/vagrant/shared_folder/analyses/$ANALYSIS_NAME"
 
 # ANALYSIS STEP DATA PATH
 # - TRAINING/for_energy_estimation
