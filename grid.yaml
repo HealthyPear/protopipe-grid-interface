@@ -58,7 +58,9 @@ GRID:
  # you can edit this if
  # - something doesn't work at a certain site (or storage)
  # - if you want to filter jobs due to technical problems
- banned_sites: ['LCG.CPPM.fr'] # LCG.GRIF.fr, LCG.DESY-ZEUTHEN.de, LCG.IN2P3-CC.fr
+ # Some sites that host data are e.g.
+ # LCG.GRIF.fr, LCG.DESY-ZEUTHEN.de, LCG.IN2P3-CC.fr
+ banned_sites: ['LCG.CPPM.fr']
 
 # The following directory paths refer to directory structure of your analysis
 # Here you need to edit
@@ -66,12 +68,12 @@ GRID:
 # - the names of the lists of simtel files (those shown here are descriptive)
 
 EnergyRegressor:
- # This list is used to build an energy regressor, if output_type=DL1 and
+ # This list is used to build an energy regressor, if output_type=TRAINING and
  # if estimate_energy is False
  gamma_list: '/home/vagrant/shared_folder/analyses/$ANALYSIS_NAME/data/simtel/gamma_energy.list'
 
 GammaHadronClassifier:
- # Those lists are used to build a g/h classifier, if output_type=DL1 and
+ # Those lists are used to build a g/h classifier, if output_type=TRAINING and
  # if estimate_energy is True
  gamma_list: '/home/vagrant/shared_folder/analyses/$ANALYSIS_NAME/data/simtel/gamma_classification.list'
  proton_list: '/home/vagrant/shared_folder/analyses/$ANALYSIS_NAME/data/simtel/proton_classification.list'
