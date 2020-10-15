@@ -10,26 +10,6 @@ except ImportError:
     print("no pytables installed?")
 
 
-def main():
-    parser = argparse.ArgumentParser(description="Merge collection of HDF5 files")
-    parser.add_argument("--indir", type=str, default="./")
-    parser.add_argument("--template_file_name", type=str, default="features_event")
-    parser.add_argument("--outfile", type=str)
-    args = parser.parse_args()
-
-    print("DEBUG> template_file_name={}".format(args.template_file_name))
-    print("DEBUG> indir={}".format(args.indir))
-    print("DEBUG> outfile={}".format(args.outfile))
-
-    input_template = "{}/{}*.h5".format(args.indir, args.template_file_name)
-    print("input_template:", input_template)
-
-    filename_list = glob.glob(input_template)
-    print("filename_list (truncated):", filename_list[0:10])
-
-    merge_list_of_pytables(filename_list, args.outfile)
-
-
 def merge_list_of_pytables(filename_list, destination):
     merged_tables = {}
     outfile = tb.open_file(destination, mode="w")
@@ -53,6 +33,26 @@ def merge_list_of_pytables(filename_list, destination):
         infile.close()
 
     return merged_tables
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Merge collection of HDF5 files")
+    parser.add_argument("--indir", type=str, default="./")
+    parser.add_argument("--template_file_name", type=str, default="features_event")
+    parser.add_argument("--outfile", type=str)
+    args = parser.parse_args()
+
+    print("DEBUG> template_file_name={}".format(args.template_file_name))
+    print("DEBUG> indir={}".format(args.indir))
+    print("DEBUG> outfile={}".format(args.outfile))
+
+    input_template = "{}/{}*.h5".format(args.indir, args.template_file_name)
+    print("input_template:", input_template)
+
+    filename_list = glob.glob(input_template)
+    print("filename_list (truncated):", filename_list[0:10])
+
+    merge_list_of_pytables(filename_list, args.outfile)
 
 
 if __name__ == "__main__":
