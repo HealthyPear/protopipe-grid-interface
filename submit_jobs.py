@@ -21,8 +21,8 @@ Script.setUsageMessage(
         ]
     )
 )
-Script.registerSwitch("", "config_file=", "Configuration file")
-Script.registerSwitch("", "output_type=", "Data level output, e.g. DL1 or DL2, str")
+Script.registerSwitch("", "config_file=", "Full path of configuration file, str")
+Script.registerSwitch("", "output_type=", "Output data type (TRAINING or DL2), str")
 Script.registerSwitch(
     "", "max_events=", "Maximal number of events to be processed, int, optional"
 )
@@ -82,12 +82,12 @@ def main():
     # this thing pilots everything related to the GRID
     dirac = Dirac()
 
-    if switches["output_type"] in "DL1":
-        print("Preparing submission for DL1 production")
+    if switches["output_type"] in "TRAINING":
+        print("Preparing submission for TRAINING data")
     elif switches["output_type"] in "DL2":
-        print("Preparing submission for DL2 production")
+        print("Preparing submission for DL2 data")
     else:
-        print("You have to choose DL1 or DL2 processing")
+        print("You have to choose either TRAINING or DL2 as output type!")
         sys.exit()
 
     # Read configuration file
@@ -112,7 +112,7 @@ def main():
     regressor_method = ana_cfg["EnergyRegressor"]["method_name"]
     classifier_method = ana_cfg["GammaHadronClassifier"]["method_name"]
     # Someone might want to create DL2 without score or energy estimation
-    print("JLK: {} {}".format(regressor_method, classifier_method))
+    print("Available estimators: {} {}".format(regressor_method, classifier_method))
     if regressor_method in ["None", "none", None]:
         use_regressor = False
     else:
@@ -143,20 +143,19 @@ def main():
     source_ctapipe = "source /cvmfs/cta.in2p3.fr/software/conda/dev/setupConda.sh"
     source_ctapipe += " && conda activate ctapipe_v0.9.1"
 
-    if switches["output_type"] in "DL1":
+    if switches["output_type"] in "TRAINING":
         execute = "data_training.py"
         script_args = [
             "--config_file={}".format(config_file),
             "--estimate_energy={}".format(str(estimate_energy)),
             "--regressor_dir=./",
             "--outfile {outfile}",
-            #'--indir ./ --infile_list *.simtel.gz',
             "--indir ./ --infile_list={infile_name}",
             "--max_events={}".format(switches["max_events"]),
             "--{mode}",
             "--cam_ids",
         ]
-        output_filename_template = "dl1"
+        output_filename_template = "TRAINING"
     elif switches["output_type"] in "DL2":
         execute = "write_dl2.py"
         script_args = [
@@ -164,7 +163,6 @@ def main():
             "--regressor_dir=./",
             "--classifier_dir=./",
             "--outfile {outfile}",
-            #'--indir ./ --infile_list *.simtel.gz',
             "--indir ./ --infile_list={infile_name}",
             "--max_events={}".format(switches["max_events"]),
             "--{mode}",
@@ -173,7 +171,7 @@ def main():
             ),
             "--cam_ids",
         ]
-        output_filename_template = "dl2"
+        output_filename_template = "DL2"
 
     cmd = [source_ctapipe, "&&", "./" + execute]
     cmd += script_args
@@ -194,9 +192,9 @@ def main():
     )
 
     prod3b_filelist = dict()
-    if estimate_energy is False and switches["output_type"] in "DL1":
+    if estimate_energy is False and switches["output_type"] in "TRAINING":
         prod3b_filelist["gamma"] = cfg["EnergyRegressor"]["gamma_list"]
-    elif estimate_energy is True and switches["output_type"] in "DL1":
+    elif estimate_energy is True and switches["output_type"] in "TRAINING":
         prod3b_filelist["gamma"] = cfg["GammaHadronClassifier"]["gamma_list"]
         prod3b_filelist["proton"] = cfg["GammaHadronClassifier"]["proton_list"]
     elif switches["output_type"] in "DL2":
@@ -219,19 +217,23 @@ def main():
     # the placeholder braces are going to get set during the file-loop
     output_filename = output_filename_template
     output_path = outdir
-    if estimate_energy is False and switches["output_type"] in "DL1":
-        output_path += "/{}/".format(dl1_dir_energy)  # JLK
-    if estimate_energy is True and switches["output_type"] in "DL1":
+    if estimate_energy is False and switches["output_type"] in "TRAINING":
+        output_path += "/{}/".format(dl1_dir_energy)
+        step = "energy"
+    if estimate_energy is True and switches["output_type"] in "TRAINING":
         output_path += "/{}/".format(dl1_dir_discrimination)  # JLK
+        step = "classification"
     if switches["output_type"] in "DL2":
         if force_tailcut_for_extended_cleaning is False:
             output_path += "/{}/".format(dl2_dir)
         else:
             output_path += "/{}_force_tc_extended_cleaning/".format(dl2_dir)
+        step = ""
     output_filename += "_{}.h5"
 
-    # sets all the local files that are going to be uploaded with the job plus the pickled
-    # classifier (if the file name starts with `LFN:`, it will be copied from the GRID itself)
+    # sets all the local files that are going to be uploaded with the job
+    # plus the pickled classifier
+    # if file name starts with `LFN:`, it will be copied from the GRID
     input_sandbox = [
         # Utility to assign one job to one command...
         os.path.expandvars("$GRID/pilot.sh"),
@@ -247,7 +249,7 @@ def main():
     ]
 
     models_to_upload = []
-    if estimate_energy is True and switches["output_type"] in "DL1":
+    if estimate_energy is True and switches["output_type"] in "TRAINING":
         model_path_template = "LFN:" + os.path.join(
             home_grid, outdir, model_dir, "regressor_{}_{}_{}.pkl.gz"
         )
@@ -257,8 +259,8 @@ def main():
             )  # TBC
             print(model_to_upload)
             models_to_upload.append(model_to_upload)
-            #input_sandbox.append(model_to_upload)
-    elif estimate_energy is False and switches["output_type"] in "DL1":
+            # input_sandbox.append(model_to_upload)
+    elif estimate_energy is False and switches["output_type"] in "TRAINING":
         pass
     else:  # Charge also classifer for DL2
         model_type_list = ["regressor", "classifier"]
@@ -287,8 +289,8 @@ def main():
                     model_type_list[idx], force_mode, cam_id, model_method_list[idx]
                 )
                 print(model_to_upload)
-		models_to_upload.append(model_to_upload)
-                #input_sandbox.append(model_to_upload)
+                models_to_upload.append(model_to_upload)
+                # input_sandbox.append(model_to_upload)
 
     # summary before submitting
     print("\nDEBUG> running as:")
@@ -375,10 +377,10 @@ def main():
         print("-" * 50)
 
         # setting output name
-        job_name = "job_{}_{}_{}_{}".format(config_name, particle, run_token, mode)
+        job_name = "{}_{}_{}_{}_{}".format(config_name, step, particle, run_token, mode)
         output_filenames = dict()
         output_filenames[mode] = output_filename.format(
-            "_".join([mode, particle, run_token])
+            "_".join([step, particle, mode, run_token])
         )
 
         # if job already running / waiting, skip
@@ -482,15 +484,16 @@ def main():
 
         outputs = []
         outputs.append(output_filenames[mode])
-        print("OutputData: {}{}".format(output_path, output_filenames[mode]))
+        print("Output file path: {}{}".format(output_path, output_filenames[mode]))
 
         j.setOutputData(outputs, outputSE=None, outputPath=output_path)
 
         # check if we should somehow stop doing what we are doing
         if switches["dry"] is True:
-            print("\nrunning dry -- not submitting")
-            print("outputs: {}".format(outputs))
-            print("output_path: {}".format(output_path))
+            print("\nThis is a dry run! -- No job has been submitted!")
+            print("Name of the job: {}".format(job_name))
+            print("Name of the output file: {}".format(outputs))
+            print("Output pah from GRID home: {}".format(output_path))
             break
 
         # this sends the job to the GRID and uploads all the
@@ -501,7 +504,10 @@ def main():
 
         # break if this is only a test submission
         if switches["test"] is True:
-            print("test run -- only submitting one job")
+            print("This is a test run! -- Only one job will be submitted!")
+            print("Name of the job: {}".format(job_name))
+            print("Name of the output file: {}".format(outputs))
+            print("Output pah from GRID home: {}".format(output_path))
             break
 
         # since there are two nested loops, need to break again
