@@ -6,7 +6,7 @@
 
 # User variables
 ANALYSIS_NAME=""
-HOME_PATH_GRID="/vo.cta.in2p3.fr/user/x/xxx/" # fill this
+HOME_PATH_GRID="/vo.cta.in2p3.fr/user/x/xxx" # fill this
 ANALYSIS_PATH_GRID="" # path from HOME_PATH_GRID, if none leave empty
 
 # ANALYSIS STEP DATA PATH
