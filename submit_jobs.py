@@ -138,10 +138,10 @@ def main():
 
     # Prepare command to launch script
     source_ctapipe = "source /cvmfs/cta.in2p3.fr/software/conda/dev/setupConda.sh"
-    source_ctapipe += " && conda activate ctapipe_v0.7.0"
+    source_ctapipe += " && conda activate ctapipe_v0.9.1"
 
     if switches["output_type"] in "TRAINING":
-        execute = "write_dl1.py"
+        execute = "data_training.py"
         script_args = [
             "--config_file={}".format(config_file),
             "--estimate_energy={}".format(str(estimate_energy)),
