@@ -257,6 +257,7 @@ def main():
             model_to_upload = model_path_template.format(
                 mode, cam_id, regressor_method
             )  # TBC
+            print("The following model(s) will be uploaded to the GRID:")
             print(model_to_upload)
             models_to_upload.append(model_to_upload)
             # input_sandbox.append(model_to_upload)
@@ -288,6 +289,7 @@ def main():
                 model_to_upload = model_path_template.format(
                     model_type_list[idx], force_mode, cam_id, model_method_list[idx]
                 )
+                print("The following model(s) will be uploaded to the GRID:")
                 print(model_to_upload)
                 models_to_upload.append(model_to_upload)
                 # input_sandbox.append(model_to_upload)
@@ -377,11 +379,17 @@ def main():
         print("-" * 50)
 
         # setting output name
-        job_name = "{}_{}_{}_{}_{}".format(config_name, step, particle, run_token, mode)
         output_filenames = dict()
-        output_filenames[mode] = output_filename.format(
-            "_".join([step, particle, mode, run_token])
-        )
+        if switches["output_type"] in "DL2":
+            job_name = "{}_{}_{}_{}_{}".format(config_name, step, particle, run_token, mode)
+            output_filenames[mode] = output_filename.format(
+                "_".join([particle, mode, run_token])
+            )
+        else:
+            job_name = "{}_{}_{}_{}_{}".format(config_name, step, particle, run_token, mode)
+            output_filenames[mode] = output_filename.format(
+                "_".join([step, particle, mode, run_token])
+            )
 
         # if job already running / waiting, skip
         if job_name in running_names:
