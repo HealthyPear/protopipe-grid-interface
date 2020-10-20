@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 import os
 import re
-import random
 import datetime
 import subprocess
 import sys
 import yaml
 
-# Handle user arguments
+from DIRAC.Interfaces.API.Job import Job
+from DIRAC.Interfaces.API.Dirac import Dirac
 from DIRAC.Core.Base import Script
 
 # Set switches
@@ -21,14 +21,14 @@ Script.setUsageMessage(
         ]
     )
 )
-Script.registerSwitch("", "config_file=", "Full path of configuration file, str")
-Script.registerSwitch("", "output_type=", "Output data type (TRAINING or DL2), str")
+Script.registerSwitch("", "config_file=", "Full path of configuration file")
+Script.registerSwitch("", "output_type=", "Output data type (TRAINING or DL2)")
 Script.registerSwitch(
-    "", "max_events=", "Maximal number of events to be processed, int, optional"
+    "", "max_events=", "Max number of events to be processed (optional, int)"
 )
-Script.registerSwitch("", "dry=", "If in [True, true] do not submit job, str, optional")
+Script.registerSwitch("", "dry=", "If True do not submit job (default: False)")
 Script.registerSwitch(
-    "", "test=", "If in [True, true] submit only one job, str, optional"
+    "", "test=", "If True submit only one job (default: False)"
 )
 Script.parseCommandLine()
 switches = dict(Script.getUnprocessedSwitches())
@@ -60,9 +60,6 @@ elif switches["test"] in ["True", "true"]:
     switches["test"] = True
 else:
     switches["test"] = False
-
-from DIRAC.Interfaces.API.Job import Job
-from DIRAC.Interfaces.API.Dirac import Dirac
 
 
 def load_config(name):
@@ -111,8 +108,8 @@ def main():
     # Regressor and classifier methods
     regressor_method = ana_cfg["EnergyRegressor"]["method_name"]
     classifier_method = ana_cfg["GammaHadronClassifier"]["method_name"]
+
     # Someone might want to create DL2 without score or energy estimation
-    print("Available estimators: {} {}".format(regressor_method, classifier_method))
     if regressor_method in ["None", "none", None]:
         use_regressor = False
     else:
@@ -128,8 +125,8 @@ def main():
     n_file_per_job = cfg["GRID"]["n_file_per_job"]
     n_jobs_max = cfg["GRID"]["n_jobs_max"]
     model_dir = cfg["GRID"]["model_dir"]
-    dl1_dir_energy = cfg["GRID"]["dl1_dir_energy"]
-    dl1_dir_discrimination = cfg["GRID"]["dl1_dir_discrimination"]
+    training_dir_energy = cfg["GRID"]["training_dir_energy"]
+    training_dir_discrimination = cfg["GRID"]["training_dir_discrimination"]
     dl2_dir = cfg["GRID"]["dl2_dir"]
     home_grid = cfg["GRID"]["home_grid"]
     user_name = cfg["GRID"]["user_name"]
@@ -141,10 +138,10 @@ def main():
 
     # Prepare command to launch script
     source_ctapipe = "source /cvmfs/cta.in2p3.fr/software/conda/dev/setupConda.sh"
-    source_ctapipe += " && conda activate ctapipe_v0.9.1"
+    source_ctapipe += " && conda activate ctapipe_v0.7.0"
 
     if switches["output_type"] in "TRAINING":
-        execute = "data_training.py"
+        execute = "write_dl1.py"
         script_args = [
             "--config_file={}".format(config_file),
             "--estimate_energy={}".format(str(estimate_energy)),
@@ -218,10 +215,10 @@ def main():
     output_filename = output_filename_template
     output_path = outdir
     if estimate_energy is False and switches["output_type"] in "TRAINING":
-        output_path += "/{}/".format(dl1_dir_energy)
+        output_path += "/{}/".format(training_dir_energy)
         step = "energy"
     if estimate_energy is True and switches["output_type"] in "TRAINING":
-        output_path += "/{}/".format(dl1_dir_discrimination)  # JLK
+        output_path += "/{}/".format(training_dir_discrimination)
         step = "classification"
     if switches["output_type"] in "DL2":
         if force_tailcut_for_extended_cleaning is False:
@@ -287,7 +284,10 @@ def main():
                     continue
 
                 model_to_upload = model_path_template.format(
-                    model_type_list[idx], force_mode, cam_id, model_method_list[idx]
+                    model_type_list[idx],
+                    force_mode,
+                    cam_id,
+                    model_method_list[idx]
                 )
                 print("The following model(s) will be uploaded to the GRID:")
                 print(model_to_upload)
@@ -348,7 +348,7 @@ def main():
     n_jobs = len(running_ids)
     if n_jobs > 0:
         print(
-            "getting names from {} running/waiting jobs... please wait...".format(
+            "Scanning {} running/waiting jobs... please wait...".format(
                 n_jobs
             )
         )
@@ -369,7 +369,8 @@ def main():
 
         # this selects the `runxxx` part of the first and last file in the run
         # list and joins them with a dash so that we get a nice identifier in
-        # the output file name. if there is only one file in the list, use only that one
+        # the output file name.
+        # if there is only one file in the list, use only that one
         # run_token = re.split('_', bunch[+0])[3]  # JLK JLK
         run_token = re.split("_", bunch[0])[3]
         if len(bunch) > 1:
@@ -381,12 +382,20 @@ def main():
         # setting output name
         output_filenames = dict()
         if switches["output_type"] in "DL2":
-            job_name = "{}_{}_{}_{}_{}".format(config_name, step, particle, run_token, mode)
+            job_name = "{}_{}_{}_{}_{}".format(config_name,
+                                               step,
+                                               particle,
+                                               run_token,
+                                               mode)
             output_filenames[mode] = output_filename.format(
                 "_".join([particle, mode, run_token])
             )
         else:
-            job_name = "{}_{}_{}_{}_{}".format(config_name, step, particle, run_token, mode)
+            job_name = "{}_{}_{}_{}_{}".format(config_name,
+                                               step,
+                                               particle,
+                                               run_token,
+                                               mode)
             output_filenames[mode] = output_filename.format(
                 "_".join([step, particle, mode, run_token])
             )
@@ -418,8 +427,7 @@ def main():
         else:
             n_jobs_max -= 1
 
-        j = Job()  # Warning here :
-        # 2018-10-22 15:00:21 UTC Framework ERROR: Problem retrieving sections in /Resources/Sites
+        j = Job()
 
         # runtime in seconds times 8 (CPU normalisation factor)
         j.setCPUTime(6 * 3600 * 8)
@@ -429,25 +437,29 @@ def main():
         if banned_sites:
             j.setBannedSites(banned_sites)
 
-        # JLK, add simtel files as input data
+        # Add simtel files as input data
         j.setInputData(bunch)
 
         for run_file in bunch:
             file_token = re.split("_", run_file)[3]
 
-            # wait for a random number of seconds (up to five minutes) before starting
-            # to add a bit more entropy in the starting times of the dirac queries.
-            # if too many jobs try in parallel to access the SEs, the interface crashes
+            # wait for a random number of seconds (up to five minutes) before
+            # starting to add a bit more entropy in the starting times of the
+            # dirac queries.
+            # if too many jobs try in parallel to access the SEs,
+            # the interface crashes
             # #sleep = random.randint(0, 20)  # seconds
             # #j.setExecutable('sleep', str(sleep))
 
             # JLK: Try to stop doing that
-            # consecutively downloads the data files, processes them, deletes the input
-            # and goes on to the next input file; afterwards, the output files are merged
+            # consecutively downloads the data files, processes them,
+            # deletes the input
+            # and goes on to the next input file;
+            # afterwards, the output files are merged
             # j.setExecutable('dirac-dms-get-file', "LFN:" + run_file)
 
-            # source the miniconda ctapipe environment and run the python script with
-            # all its arguments
+            # source the miniconda ctapipe environment and
+            # run the python script with all its arguments
             output_filename_temp = output_filename.format(
                 "_".join([mode, particle, file_token])
             )

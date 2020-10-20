@@ -36,11 +36,11 @@ GRID:
 
  # The following four directories will live inside 'outdir'
 
- # Directory for DL1 training data for energy estimation
- dl1_dir_energy: 'data/TRAINING/for_energy_estimation'
+ # Directory for training data used for energy estimation
+ training_dir_energy: 'data/TRAINING/for_energy_estimation'
 
- # Directory for DL1 training data for particle classification
- dl1_dir_discrimination: 'data/TRAINING/for_particle_classification'
+ # Directory for training data used for particle classification
+ training_dir_discrimination: 'data/TRAINING/for_particle_classification'
 
  # Directory for storage of the two estimators
  model_dir: 'estimators'
@@ -63,24 +63,24 @@ GRID:
  banned_sites: ['LCG.CPPM.fr']
 
 # The following directory paths refer to directory structure of your analysis
-# Here you need to edit
+# Here you need to edit only
 # - the name of the analysis
 # - the names of the lists of simtel files (those shown here are descriptive)
 
 EnergyRegressor:
- # This list is used to build an energy regressor, if output_type=TRAINING and
- # if estimate_energy is False
+ # Events used to train an energy regressor
+ # Used when output_type = TRAINING and estimate_energy is False
  gamma_list: '/home/vagrant/shared_folder/analyses/$ANALYSIS_NAME/data/simtel/gamma_energy.list'
 
 GammaHadronClassifier:
- # Those lists are used to build a g/h classifier, if output_type=TRAINING and
- # if estimate_energy is True
+ # Events used to train a gamma-hadron classifier
+ # Used when output_type = TRAINING and estimate_energy is True
  gamma_list: '/home/vagrant/shared_folder/analyses/$ANALYSIS_NAME/data/simtel/gamma_classification.list'
  proton_list: '/home/vagrant/shared_folder/analyses/$ANALYSIS_NAME/data/simtel/proton_classification.list'
 
 Performance:
- # Those lists are used to build event lists for performance estimation,
- # if output_type=DL2
+ # Events processed directly up to DL2 for DL3 production
+ # Used when output_type = DL2
  gamma_list: '/home/vagrant/shared_folder/analyses/$ANALYSIS_NAME/data/simtel/gamma_perf.list'
  proton_list: '/home/vagrant/shared_folder/analyses/$ANALYSIS_NAME/data/simtel/proton_perf.list'
  electron_list: '/home/vagrant/shared_folder/analyses/$ANALYSIS_NAME/data/simtel/electron_perf.list'
