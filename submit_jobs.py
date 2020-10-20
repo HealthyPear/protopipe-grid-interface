@@ -29,6 +29,9 @@ Script.registerSwitch("", "dry=", "If True do not submit job (default: False)")
 Script.registerSwitch(
     "", "test=", "If True submit only one job (default: False)"
 )
+Script.registerSwitch(
+    "", "save_images=", "If True save images together with parameters (default: False)"
+)
 Script.parseCommandLine()
 switches = dict(Script.getUnprocessedSwitches())
 
@@ -63,6 +66,13 @@ elif switches["test"] in ["True", "true"]:
     switches["test"] = True
 else:
     switches["test"] = False
+
+if switches.has_key("save_images") is False:
+    switches["save_images"] = False
+elif switches["save_images"] in ["True", "true"]:
+    switches["save_images"] = True
+else:
+    switches["save_images"] = False
 
 
 def load_config(name):
@@ -172,6 +182,10 @@ def main():
             "--cam_ids",
         ]
         output_filename_template = "DL2"
+
+    # Make the script save also the full calibrated images if required
+    if switches["save_images"] is True:
+        script_args.append("--save_images")
 
     cmd = [source_ctapipe, "&&", "./" + execute]
     cmd += script_args
