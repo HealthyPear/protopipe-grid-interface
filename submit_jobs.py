@@ -6,8 +6,7 @@ import subprocess
 import sys
 import yaml
 
-from DIRAC.Interfaces.API.Job import Job
-from DIRAC.Interfaces.API.Dirac import Dirac
+# This allows to handle user arguments
 from DIRAC.Core.Base import Script
 
 # Set switches
@@ -32,6 +31,10 @@ Script.registerSwitch(
 )
 Script.parseCommandLine()
 switches = dict(Script.getUnprocessedSwitches())
+
+# These two imports need to stay here
+from DIRAC.Interfaces.API.Job import Job
+from DIRAC.Interfaces.API.Dirac import Dirac
 
 # Control switches
 if switches.has_key("config_file") is False:
@@ -383,7 +386,7 @@ def main():
         output_filenames = dict()
         if switches["output_type"] in "DL2":
             job_name = "{}_{}_{}_{}_{}".format(config_name,
-                                               step,
+                                               switches["output_type"],
                                                particle,
                                                run_token,
                                                mode)
@@ -391,11 +394,12 @@ def main():
                 "_".join([particle, mode, run_token])
             )
         else:
-            job_name = "{}_{}_{}_{}_{}".format(config_name,
-                                               step,
-                                               particle,
-                                               run_token,
-                                               mode)
+            job_name = "{}_{}_{}_{}_{}_{}".format(config_name,
+                                                  switches["output_type"],
+                                                  step,
+                                                  particle,
+                                                  run_token,
+                                                  mode)
             output_filenames[mode] = output_filename.format(
                 "_".join([step, particle, mode, run_token])
             )
