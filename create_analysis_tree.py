@@ -61,7 +61,6 @@ using the protopipe prototype pipeline.
         "configs": [],
         "data": ["simtel", "TRAINING", "DL2", "DL3"],
         "estimators": ["energy_regressor", "gamma_hadron_classifier"],
-        "performance": [],  # performance script will create the subdirectories
     }
 
     # Create them
