@@ -139,7 +139,7 @@ def main():
     n_jobs_max = cfg["GRID"]["n_jobs_max"]
     model_dir = cfg["GRID"]["model_dir"]
     training_dir_energy = cfg["GRID"]["training_dir_energy"]
-    training_dir_discrimination = cfg["GRID"]["training_dir_discrimination"]
+    training_dir_classification = cfg["GRID"]["training_dir_classification"]
     dl2_dir = cfg["GRID"]["dl2_dir"]
     home_grid = cfg["GRID"]["home_grid"]
     user_name = cfg["GRID"]["user_name"]
@@ -235,7 +235,7 @@ def main():
         output_path += "/{}/".format(training_dir_energy)
         step = "energy"
     if estimate_energy is True and switches["output_type"] in "TRAINING":
-        output_path += "/{}/".format(training_dir_discrimination)
+        output_path += "/{}/".format(training_dir_classification)
         step = "classification"
     if switches["output_type"] in "DL2":
         if force_tailcut_for_extended_cleaning is False:
