@@ -20,14 +20,14 @@ MODE="tail"  # Here tail (tailcut) or wave (wavelet) cleaning
 
 PARTICLE="gamma "  # This can be list up to "gamma proton electron"
 
+# ============================================
+
+ANALYSIS_PATH_LOCAL="/home/vagrant/shared_folder/analyses/$ANALYSIS_NAME"
+
 # DIRAC file catalog full path
 INPUT_DIR="$HOME_PATH_GRID/$ANALYSIS_PATH_GRID/$ANALYSIS_NAME/data/$DATA_PATH"
 # Full path in local virtual environment for the grid interface
 OUTPUT_DIR="$ANALYSIS_PATH_LOCAL/data/$DATA_PATH/"
-
-# ============================================
-
-ANALYSIS_PATH_LOCAL="/home/vagrant/shared_folder/analyses/$ANALYSIS_NAME"
 
 # FILE TYPE
 case $DATA_PATH in
