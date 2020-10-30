@@ -29,6 +29,9 @@ Script.registerSwitch("", "dry=", "If True do not submit job (default: False)")
 Script.registerSwitch(
     "", "test=", "If True submit only one job (default: False)"
 )
+Script.registerSwitch(
+    "", "save_images=", "If True save images together with parameters (default: False)"
+)
 Script.parseCommandLine()
 switches = dict(Script.getUnprocessedSwitches())
 
@@ -63,6 +66,13 @@ elif switches["test"] in ["True", "true"]:
     switches["test"] = True
 else:
     switches["test"] = False
+
+if switches.has_key("save_images") is False:
+    switches["save_images"] = False
+elif switches["save_images"] in ["True", "true"]:
+    switches["save_images"] = True
+else:
+    switches["save_images"] = False
 
 
 def load_config(name):
@@ -129,7 +139,7 @@ def main():
     n_jobs_max = cfg["GRID"]["n_jobs_max"]
     model_dir = cfg["GRID"]["model_dir"]
     training_dir_energy = cfg["GRID"]["training_dir_energy"]
-    training_dir_discrimination = cfg["GRID"]["training_dir_discrimination"]
+    training_dir_classification = cfg["GRID"]["training_dir_classification"]
     dl2_dir = cfg["GRID"]["dl2_dir"]
     home_grid = cfg["GRID"]["home_grid"]
     user_name = cfg["GRID"]["user_name"]
@@ -172,6 +182,10 @@ def main():
             "--cam_ids",
         ]
         output_filename_template = "DL2"
+
+    # Make the script save also the full calibrated images if required
+    if switches["save_images"] is True:
+        script_args.append("--save_images")
 
     cmd = [source_ctapipe, "&&", "./" + execute]
     cmd += script_args
@@ -221,7 +235,7 @@ def main():
         output_path += "/{}/".format(training_dir_energy)
         step = "energy"
     if estimate_energy is True and switches["output_type"] in "TRAINING":
-        output_path += "/{}/".format(training_dir_discrimination)
+        output_path += "/{}/".format(training_dir_classification)
         step = "classification"
     if switches["output_type"] in "DL2":
         if force_tailcut_for_extended_cleaning is False:
