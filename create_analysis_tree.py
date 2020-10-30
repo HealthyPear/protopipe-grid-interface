@@ -80,7 +80,7 @@ using the protopipe prototype pipeline.
     interface_path = "/home/vagrant/protopipe-grid-interface"
     protopipe_path = "/home/vagrant/protopipe"
     protopipe_configs = os.path.join(
-        protopipe_path, "protopipe/aux/example_config_files/protopipe"
+        protopipe_path, "protopipe/aux/example_config_files/"
     )
 
     # Copy scripts
