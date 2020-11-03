@@ -121,15 +121,21 @@ Default is [100]",
         prodLines = flist.readlines()
         flist.close()
 
-        numlines = [1]
+        if args.debug:
+            print("Input list for {} from {}".format(particle_types[i], prodlist[0]))
+            print("Contains {} files...".format(len(prodLines)))
 
-        for prop in prodlist[1][: len(prodlist[1]) - 1]:
-            delta = int(prop / 100.0 * len(prodLines) + 0.5)
+        numlines = [0]
+
+        for prop in prodlist[1][: len(prodlist[1])-1]:
+            delta = int(prop / 100.0 * len(prodLines)+0.5)
             numlines.append(numlines[-1] + delta)
 
         if args.debug:
-            print("Input list for {} from {}".format(particle_types[i], prodlist[0]))
-            print("\tSplitted according to line numbers : {}".format(numlines))
+            if len(numlines) != 1:
+                print("Splitted according to file # : {}".format(numlines))
+            else:
+                print("All files in 1 list.")
 
         # Cycle on analysis stages
         for inum, iprop in enumerate(numlines):
