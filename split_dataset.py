@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 
-import re
 import os
 import argparse
 from argparse import RawTextHelpFormatter
 
 
 def makedir(name):
-    """Create folder if non-existent and output OS error if any.
+    """
+    Create folder if non-existent and output OS error if any.
 
     Parameters
     ----------
