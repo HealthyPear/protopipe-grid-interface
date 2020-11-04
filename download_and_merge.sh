@@ -14,13 +14,13 @@ ANALYSIS_PATH_GRID="" # path from HOME_PATH_GRID, if none leave empty
 # - TRAINING/for_energy_estimation
 # - TRAINING/for_particle_classification
 # - DL2
-DATA_PATH="TRAINING/for_energy_estimation"
+DATA_PATH=""
 
-MODE="tail"  # Here tail (tailcut) or wave (wavelet) cleaning
-
-PARTICLE="gamma "  # This can be list up to "gamma proton electron"
+PARTICLE=""  # This can be list up to "gamma proton electron"
 
 # ============================================
+
+MODE="tail"  # also "wave" (wavelet) cleaning, but disabled for the moment
 
 ANALYSIS_PATH_LOCAL="/home/vagrant/shared_folder/analyses/$ANALYSIS_NAME"
 
