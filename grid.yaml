@@ -40,7 +40,7 @@ GRID:
  training_dir_energy: 'data/TRAINING/for_energy_estimation'
 
  # Directory for training data used for particle classification
- training_dir_discrimination: 'data/TRAINING/for_particle_classification'
+ training_dir_classification: 'data/TRAINING/for_particle_classification'
 
  # Directory for storage of the two estimators
  model_dir: 'estimators'

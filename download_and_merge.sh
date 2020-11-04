@@ -14,20 +14,20 @@ ANALYSIS_PATH_GRID="" # path from HOME_PATH_GRID, if none leave empty
 # - TRAINING/for_energy_estimation
 # - TRAINING/for_particle_classification
 # - DL2
-DATA_PATH="TRAINING/for_energy_estimation"
+DATA_PATH=""
 
-MODE="tail"  # Here tail (tailcut) or wave (wavelet) cleaning
+PARTICLE=""  # This can be list up to "gamma proton electron"
 
-PARTICLE="gamma "  # This can be list up to "gamma proton electron"
+# ============================================
+
+MODE="tail"  # also "wave" (wavelet) cleaning, but disabled for the moment
+
+ANALYSIS_PATH_LOCAL="/home/vagrant/shared_folder/analyses/$ANALYSIS_NAME"
 
 # DIRAC file catalog full path
 INPUT_DIR="$HOME_PATH_GRID/$ANALYSIS_PATH_GRID/$ANALYSIS_NAME/data/$DATA_PATH"
 # Full path in local virtual environment for the grid interface
 OUTPUT_DIR="$ANALYSIS_PATH_LOCAL/data/$DATA_PATH/"
-
-# ============================================
-
-ANALYSIS_PATH_LOCAL="/home/vagrant/shared_folder/analyses/$ANALYSIS_NAME"
 
 # FILE TYPE
 case $DATA_PATH in

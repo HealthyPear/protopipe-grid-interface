@@ -1,18 +1,22 @@
-"""Ctapipe/protopipe analysis directory structure.
-
-Author: Dr. Michele Peresano
-Affilitation: CEA-Saclay/Irfu
-
-"""
+"""Create the directory structure for an analysis."""
 
 import os
 import glob
 import argparse
+from argparse import RawTextHelpFormatter
 import shutil
 
 
 def makedir(name):
-    """Create folder if non-existent and output OS error if any."""
+    """
+    Create folder if non-existent and output OS error if any.
+
+    Parameters
+    ----------
+    name : str
+        Name of the analysis.
+
+    """
     if not os.path.exists(name):
         try:
             os.mkdir(name)
@@ -27,27 +31,29 @@ def main():
 
     # define command-line arguments
 
+    description = """Create a directory structure for a CTA data analysis \
+using the protopipe prototype pipeline.
+
+    WARNING: check that the version of protopipe is the one you intend to use!
+
+    """
+
     parser = argparse.ArgumentParser(
-        description="Create a directory structure for a CTA data analysis using the protopipe prototype pipeline."
+        description=description,
+        formatter_class=RawTextHelpFormatter
     )
 
     parser.add_argument(
-        "--analysis_path",
-        type=str,
-        required=True,
-        help="The local path of your analysis in the virtual environment.",
-    )
-    parser.add_argument(
-        "--analysis_name", type=str, required=True, help="The name of your analysis"
+        "--analysis_name", type=str, required=True, help="Name of the analysis"
     )
 
     args = parser.parse_args()
 
     # read command-line arguments
-    analysisPath = args.analysis_path
     analysisName = args.analysis_name
 
     # Create analysis parent folder
+    analysisPath = "/home/vagrant/shared_folder/analyses"
     analysis = os.path.join(analysisPath, analysisName)
     makedir(analysis)
 
@@ -56,7 +62,6 @@ def main():
         "configs": [],
         "data": ["simtel", "TRAINING", "DL2", "DL3"],
         "estimators": ["energy_regressor", "gamma_hadron_classifier"],
-        "performance": [],  # performance script will create the subdirectories
     }
 
     # Create them
