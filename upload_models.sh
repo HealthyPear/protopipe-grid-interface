@@ -8,12 +8,14 @@ ANALYSIS_NAME=""  # Name of the analysis
 ANALYSES_PATH="/home/vagrant/shared_folder/analyses"
 HOME_PATH_GRID="/vo.cta.in2p3.fr/user/x/xxx"
 ANALYSIS_PATH_GRID="" # path from HOME_PATH_GRID to the analysis folder
-MODE="tail"  # Here tail (tailcut) or wave (wavelet) cleaning
+
 CAM_IDS=''  # This is a list
 MODEL_TYPE=""  # regressor or classifier
 MODEL_NAME=""  # AdaBoostRegressor or RandomForestClassifier
 
 # ============================================
+
+MODE="tail"  # also "wave" (wavelet) cleaning, but disabled for the moment
 
 # For the moment estimators are stored all together on the GRID
 # but locally keeping them separated makes the analysis directory more clear.

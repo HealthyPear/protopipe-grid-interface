@@ -399,7 +399,7 @@ def main():
         # setting output name
         output_filenames = dict()
         if switches["output_type"] in "DL2":
-            job_name = "{}_{}_{}_{}_{}".format(config_name,
+            job_name = "protopipe_{}_{}_{}_{}_{}".format(config_name,
                                                switches["output_type"],
                                                particle,
                                                run_token,
@@ -408,7 +408,7 @@ def main():
                 "_".join([particle, mode, run_token])
             )
         else:
-            job_name = "{}_{}_{}_{}_{}_{}".format(config_name,
+            job_name = "protopipe_{}_{}_{}_{}_{}_{}".format(config_name,
                                                   switches["output_type"],
                                                   step,
                                                   particle,

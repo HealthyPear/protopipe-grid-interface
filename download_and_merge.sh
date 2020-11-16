@@ -14,13 +14,13 @@ ANALYSIS_PATH_GRID="" # path from HOME_PATH_GRID, if none leave empty
 # - TRAINING/for_energy_estimation
 # - TRAINING/for_particle_classification
 # - DL2
-DATA_PATH="TRAINING/for_energy_estimation"
+DATA_PATH=""
 
-MODE="tail"  # Here tail (tailcut) or wave (wavelet) cleaning
-
-PARTICLE="gamma "  # This can be list up to "gamma proton electron"
+PARTICLE=""  # This can be list up to "gamma proton electron"
 
 # ============================================
+
+MODE="tail"  # also "wave" (wavelet) cleaning, but disabled for the moment
 
 ANALYSIS_PATH_LOCAL="/home/vagrant/shared_folder/analyses/$ANALYSIS_NAME"
 
@@ -43,7 +43,7 @@ python $GRID/download_files.py --indir="$INPUT_DIR" --outdir="$OUTPUT_DIR"
 for part in $PARTICLE; do
     echo "Merging $part..."
     OUTPUT_FILE="$OUTPUT_DIR/${TYPE}_${MODE}_${part}_merged.h5"
-    TEMPLATE_FILE_NAME="${TYPE}_${MODE}_${part}"
+    TEMPLATE_FILE_NAME="${TYPE}_${part}_${MODE}"
 
     echo "$OUTPUT_DIR"
     echo "$TEMPLATE_FILE_NAME"

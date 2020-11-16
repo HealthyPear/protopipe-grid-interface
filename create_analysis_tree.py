@@ -8,7 +8,8 @@ import shutil
 
 
 def makedir(name):
-    """Create folder if non-existent and output OS error if any.
+    """
+    Create folder if non-existent and output OS error if any.
 
     Parameters
     ----------
