@@ -43,7 +43,7 @@ python $GRID/download_files.py --indir="$INPUT_DIR" --outdir="$OUTPUT_DIR"
 for part in $PARTICLE; do
     echo "Merging $part..."
     OUTPUT_FILE="$OUTPUT_DIR/${TYPE}_${MODE}_${part}_merged.h5"
-    TEMPLATE_FILE_NAME="${TYPE}_${MODE}_${part}"
+    TEMPLATE_FILE_NAME="${TYPE}_${part}_${MODE}"
 
     echo "$OUTPUT_DIR"
     echo "$TEMPLATE_FILE_NAME"
