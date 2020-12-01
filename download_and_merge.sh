@@ -31,23 +31,25 @@ OUTPUT_DIR="$ANALYSIS_PATH_LOCAL/data/$DATA_PATH/"
 
 # FILE TYPE
 case $DATA_PATH in
-   "TRAINING/for_energy_estimation") TYPE="TRAINING_energy";;
-   "TRAINING/for_particle_classification") TYPE="TRAINING_classification";;
-   "DL2") TYPE="DL2";;
+  "TRAINING/for_energy_estimation") TYPE="TRAINING_energy";;
+  "TRAINING/for_particle_classification") TYPE="TRAINING_classification";;
+  "DL2") TYPE="DL2";;
 esac
 
-# Get files
-python $GRID/download_files.py --indir="$INPUT_DIR" --outdir="$OUTPUT_DIR"
-
-# Merge files
+# Cycle over particle type
 for part in $PARTICLE; do
-    echo "Merging $part..."
-    OUTPUT_FILE="$OUTPUT_DIR/${TYPE}_${MODE}_${part}_merged.h5"
-    TEMPLATE_FILE_NAME="${TYPE}_${part}_${MODE}"
 
-    echo "$OUTPUT_DIR"
-    echo "$TEMPLATE_FILE_NAME"
-    echo "$OUTPUT_FILE"
+  # Download files
+  echo "Downloading $part..."
+  python $GRID/download_files.py --indir="$INPUT_DIR" --outdir="$OUTPUT_DIR"
 
-    python $GRID/merge_tables.py --indir="$OUTPUT_DIR" --template_file_name="$TEMPLATE_FILE_NAME" --outfile="$OUTPUT_FILE"
+  # Merge files
+  echo "Merging $part..."
+  OUTPUT_FILE="$OUTPUT_DIR/${TYPE}_${MODE}_${part}_merged.h5"
+  TEMPLATE_FILE_NAME="${TYPE}_${part}_${MODE}"
+  echo "$OUTPUT_DIR"
+  echo "$TEMPLATE_FILE_NAME"
+  echo "$OUTPUT_FILE"
+  python $GRID/merge_tables.py --indir="$OUTPUT_DIR" --template_file_name="$TEMPLATE_FILE_NAME" --outfile="$OUTPUT_FILE"
+
 done
