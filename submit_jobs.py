@@ -163,7 +163,7 @@ def main():
             "--indir ./ --infile_list={infile_name}",
             "--max_events={}".format(switches["max_events"]),
             "--{mode}",
-            "--cam_ids",
+            "--cam_ids {}".format(cam_id_list),
         ]
         output_filename_template = "TRAINING"
     elif switches["output_type"] in "DL2":
@@ -179,7 +179,7 @@ def main():
             "--force_tailcut_for_extended_cleaning={}".format(
                 force_tailcut_for_extended_cleaning
             ),
-            "--cam_ids",
+            "--cam_ids {}".format(cam_id_list),
         ]
         output_filename_template = "DL2"
 
@@ -190,7 +190,7 @@ def main():
     cmd = [source_ctapipe, "&&", "./" + execute]
     cmd += script_args
 
-    pilot_args_write = " ".join(cmd + cam_id_list)
+    pilot_args_write = " ".join(cmd)
 
     # For table merging if multiple runs
     pilot_args_merge = " ".join(
