@@ -340,7 +340,7 @@ def main():
     try:
         grid_filelist = open(result.split()[-1]).read()
     except IOError:
-        raise IOError("cannot read GRID filelist...")
+        raise IOError("ERROR> cannot read GRID filelist...")
 
     # get jobs from today and yesterday...
     days = []
@@ -420,7 +420,7 @@ def main():
 
         # if job already running / waiting, skip
         if job_name in running_names:
-            print("\n{} still running\n".format(job_name))
+            print("\n WARNING> {} still running\n".format(job_name))
             continue
 
         print("Output file name: {}".format(output_filenames[mode]))
