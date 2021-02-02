@@ -478,9 +478,14 @@ def main():
 
             # source the miniconda ctapipe environment and
             # run the python script with all its arguments
-            output_filename_temp = output_filename.format(
-                "_".join([mode, particle, file_token])
-            )
+            if switches["output_type"] in "DL2":
+                output_filename_temp = output_filename.format(
+                    "_".join([particle, mode, file_token])
+                )
+            if switches["output_type"] in "TRAINING":
+                output_filename_temp = output_filename.format(
+                    "_".join([step, particle, mode, file_token])
+                )
             j.setExecutable(
                 "./pilot.sh",
                 pilot_args_write.format(
