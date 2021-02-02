@@ -432,15 +432,12 @@ def main():
         file_on_grid = os.path.join(output_path, output_filenames[mode])
         print("DEBUG> check for existing file on GRID...")
         if file_on_grid in grid_filelist:
-            print("\n{} already on GRID SE\n".format(job_name))
-            already_exist = True
-            break
-        if already_exist is True:
+            print("\n WARNING> {} already on GRID SE\n".format(job_name))
             continue
 
         if n_jobs_max == 0:
-            print("maximum number of jobs to submit reached")
-            print("breaking loop now")
+            print("WARNING> maximum number of jobs to submit reached")
+            print("WARNING> breaking loop now")
             break
         else:
             n_jobs_max -= 1
