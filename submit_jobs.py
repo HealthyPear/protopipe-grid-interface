@@ -532,24 +532,24 @@ def main():
 
         # check if we should somehow stop doing what we are doing
         if switches["dry"] is True:
-            print("\nThis is a dry run! -- No job has been submitted!")
+            print("\nThis is a DRY RUN! -- NO job has been submitted!")
             print("Name of the job: {}".format(job_name))
             print("Name of the output file: {}".format(outputs))
-            print("Output pah from GRID home: {}".format(output_path))
+            print("Output path from GRID home: {}".format(output_path))
             break
 
         # this sends the job to the GRID and uploads all the
         # files into the input sandbox in the process
-        print("\nsubmitting job")
+        print("\nSUBMITTING job with the following INPUT SANDBOX:")
         print(input_sandbox)
-        print("Submission Result: {}\n".format(dirac.submitJob(j)["Value"]))
+        print("Submission RESULT: {}\n".format(dirac.submitJob(j)["Value"]))
 
         # break if this is only a test submission
         if switches["test"] is True:
-            print("This is a test run! -- Only one job will be submitted!")
+            print("This is a TEST RUN! -- Only ONE job will be submitted!")
             print("Name of the job: {}".format(job_name))
             print("Name of the output file: {}".format(outputs))
-            print("Output pah from GRID home: {}".format(output_path))
+            print("Output path from GRID home: {}".format(output_path))
             break
 
         # since there are two nested loops, need to break again
