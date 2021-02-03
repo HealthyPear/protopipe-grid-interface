@@ -501,9 +501,11 @@ def main():
         # if there is more than one file per job, merge the output tables
         if len(bunch) > 1:
             names = []
+
             names.append(
-                (output_filename_template + "_" + mode, output_filenames[mode])
+                ("*_{}_".format(particle), output_filenames[mode])
             )
+
             for in_name, out_name in names:
                 print("in_name: {}, out_name: {}".format(in_name, out_name))
                 j.setExecutable(
