@@ -340,7 +340,7 @@ def main():
     try:
         grid_filelist = open(result.split()[-1]).read()
     except IOError:
-        raise IOError("cannot read GRID filelist...")
+        raise IOError("ERROR> cannot read GRID filelist...")
 
     # get jobs from today and yesterday...
     days = []
@@ -420,7 +420,7 @@ def main():
 
         # if job already running / waiting, skip
         if job_name in running_names:
-            print("\n{} still running\n".format(job_name))
+            print("\n WARNING> {} still running\n".format(job_name))
             continue
 
         print("Output file name: {}".format(output_filenames[mode]))
@@ -432,15 +432,12 @@ def main():
         file_on_grid = os.path.join(output_path, output_filenames[mode])
         print("DEBUG> check for existing file on GRID...")
         if file_on_grid in grid_filelist:
-            print("\n{} already on GRID SE\n".format(job_name))
-            already_exist = True
-            break
-        if already_exist is True:
+            print("\n WARNING> {} already on GRID SE\n".format(job_name))
             continue
 
         if n_jobs_max == 0:
-            print("maximum number of jobs to submit reached")
-            print("breaking loop now")
+            print("WARNING> maximum number of jobs to submit reached")
+            print("WARNING> breaking loop now")
             break
         else:
             n_jobs_max -= 1
@@ -478,9 +475,14 @@ def main():
 
             # source the miniconda ctapipe environment and
             # run the python script with all its arguments
-            output_filename_temp = output_filename.format(
-                "_".join([mode, particle, file_token])
-            )
+            if switches["output_type"] in "DL2":
+                output_filename_temp = output_filename.format(
+                    "_".join([particle, mode, file_token])
+                )
+            if switches["output_type"] in "TRAINING":
+                output_filename_temp = output_filename.format(
+                    "_".join([step, particle, mode, file_token])
+                )
             j.setExecutable(
                 "./pilot.sh",
                 pilot_args_write.format(
@@ -499,9 +501,11 @@ def main():
         # if there is more than one file per job, merge the output tables
         if len(bunch) > 1:
             names = []
+
             names.append(
-                (output_filename_template + "_" + mode, output_filenames[mode])
+                ("*_{}_".format(particle), output_filenames[mode])
             )
+
             for in_name, out_name in names:
                 print("in_name: {}, out_name: {}".format(in_name, out_name))
                 j.setExecutable(
@@ -528,24 +532,24 @@ def main():
 
         # check if we should somehow stop doing what we are doing
         if switches["dry"] is True:
-            print("\nThis is a dry run! -- No job has been submitted!")
+            print("\nThis is a DRY RUN! -- NO job has been submitted!")
             print("Name of the job: {}".format(job_name))
             print("Name of the output file: {}".format(outputs))
-            print("Output pah from GRID home: {}".format(output_path))
+            print("Output path from GRID home: {}".format(output_path))
             break
 
         # this sends the job to the GRID and uploads all the
         # files into the input sandbox in the process
-        print("\nsubmitting job")
+        print("\nSUBMITTING job with the following INPUT SANDBOX:")
         print(input_sandbox)
-        print("Submission Result: {}\n".format(dirac.submitJob(j)["Value"]))
+        print("Submission RESULT: {}\n".format(dirac.submitJob(j)["Value"]))
 
         # break if this is only a test submission
         if switches["test"] is True:
-            print("This is a test run! -- Only one job will be submitted!")
+            print("This is a TEST RUN! -- Only ONE job will be submitted!")
             print("Name of the job: {}".format(job_name))
             print("Name of the output file: {}".format(outputs))
-            print("Output pah from GRID home: {}".format(output_path))
+            print("Output path from GRID home: {}".format(output_path))
             break
 
         # since there are two nested loops, need to break again
