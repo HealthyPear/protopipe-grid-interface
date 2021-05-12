@@ -14,9 +14,9 @@ Script.setUsageMessage(
     "\n".join(
         [
             "Usage:",
-            "python %s [options]" % Script.scriptName,
+            "python $GRID/%s.py [options]" % Script.scriptName,
             "e.g.:",
-            "python %s --config_file=config.cfg --output_type=DL2" % Script.scriptName,
+            "python $GRID/%s.py --config_file=config.cfg --output_type=DL2" % Script.scriptName,
         ]
     )
 )
