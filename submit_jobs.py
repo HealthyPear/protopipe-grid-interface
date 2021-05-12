@@ -32,6 +32,10 @@ Script.registerSwitch(
 Script.registerSwitch(
     "", "save_images=", "If True save images together with parameters (default: False)"
 )
+
+Script.registerSwitch(
+    "", "debug_script=", "If True save debug information during execution of the script (default: False)"
+)
 Script.parseCommandLine()
 switches = dict(Script.getUnprocessedSwitches())
 
@@ -73,6 +77,13 @@ elif switches["save_images"] in ["True", "true"]:
     switches["save_images"] = True
 else:
     switches["save_images"] = False
+
+if switches.has_key("debug_script") is False:
+    switches["debug_script"] = False
+elif switches["debug_script"] in ["True", "true"]:
+    switches["debug_script"] = True
+else:
+    switches["debug_script"] = False
 
 
 def load_config(name):
@@ -186,6 +197,10 @@ def main():
     # Make the script save also the full calibrated images if required
     if switches["save_images"] is True:
         script_args.append("--save_images")
+
+    # Make the script print debug information if required
+    if switches["debug_script"] is True:
+        script_args.append("--debug")
 
     cmd = [source_ctapipe, "&&", "./" + execute]
     cmd += script_args
