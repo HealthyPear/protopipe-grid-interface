@@ -14,9 +14,9 @@ Script.setUsageMessage(
     "\n".join(
         [
             "Usage:",
-            "python %s [options]" % Script.scriptName,
+            "python $GRID/%s.py [options]" % Script.scriptName,
             "e.g.:",
-            "python %s --config_file=config.cfg --output_type=DL2" % Script.scriptName,
+            "python $GRID/%s.py --config_file=config.cfg --output_type=DL2" % Script.scriptName,
         ]
     )
 )
@@ -151,7 +151,7 @@ def main():
 
     # Prepare command to launch script
     source_ctapipe = "source /cvmfs/cta.in2p3.fr/software/conda/dev/setupConda.sh"
-    source_ctapipe += " && conda activate ctapipe_v0.10.5"
+    source_ctapipe += " && conda activate ctapipe_v0.11.0"
 
     if switches["output_type"] in "TRAINING":
         execute = "data_training.py"
