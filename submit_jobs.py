@@ -169,6 +169,7 @@ def main():
         script_args = [
             "--config_file={}".format(config_file),
             "--estimate_energy={}".format(str(estimate_energy)),
+            "--regressor_config={}.yaml".format(regressor_method),
             "--regressor_dir=./",
             "--outfile {outfile}",
             "--indir ./ --infile_list={infile_name}",
@@ -181,7 +182,9 @@ def main():
         execute = "write_dl2.py"
         script_args = [
             "--config_file={}".format(config_file),
+            "--regressor_config={}.yaml".format(regressor_method),
             "--regressor_dir=./",
+            "--classifier_config={}.yaml".format(classifier_method),
             "--classifier_dir=./",
             "--outfile {outfile}",
             "--indir ./ --infile_list={infile_name}",
@@ -278,25 +281,38 @@ def main():
     ]
 
     models_to_upload = []
+    configs_to_upload = []
     if estimate_energy is True and switches["output_type"] in "TRAINING":
+        config_path_template = "LFN:" + os.path.join(
+            home_grid, outdir, model_dir, "{}.yaml"
+        )
+        config_to_upload = config_path_template.format(regressor_method)
         model_path_template = "LFN:" + os.path.join(
-            home_grid, outdir, model_dir, "regressor_{}_{}_{}.pkl.gz"
+            home_grid, outdir, model_dir, "regressor_{}_{}.pkl.gz"
         )
         for cam_id in cam_id_list:
+
             model_to_upload = model_path_template.format(
-                mode, cam_id, regressor_method
+                cam_id, regressor_method
             )  # TBC
             print("The following model(s) will be uploaded to the GRID:")
             print(model_to_upload)
             models_to_upload.append(model_to_upload)
+
+        print("The following configs(s) for such models will be uploaded to the GRID:")
+        print(config_to_upload)
+        configs_to_upload.append(config_to_upload)
             # input_sandbox.append(model_to_upload)
     elif estimate_energy is False and switches["output_type"] in "TRAINING":
         pass
     else:  # Charge also classifer for DL2
         model_type_list = ["regressor", "classifier"]
         model_method_list = [regressor_method, classifier_method]
+        config_path_template = "LFN:" + os.path.join(
+            home_grid, outdir, model_dir, "{}.yaml"
+        )
         model_path_template = "LFN:" + os.path.join(
-            home_grid, outdir, model_dir, "{}_{}_{}_{}.pkl.gz"
+            home_grid, outdir, model_dir, "{}_{}_{}.pkl.gz"
         )
         if force_tailcut_for_extended_cleaning is True:
             force_mode = mode.replace("wave", "tail")
@@ -304,7 +320,17 @@ def main():
             print(force_mode)
         else:
             force_mode = mode
+
         for idx, model_type in enumerate(model_type_list):
+
+            print("The following configuration file will be uploaded to the GRID:")
+
+            config_to_upload = config_path_template.format(model_method_list[idx])
+            print(config_to_upload)
+            configs_to_upload.append(config_to_upload) # upload only 1 copy
+
+            print("The following model(s) related to such configuration file will be uploaded to the GRID:")
+
             for cam_id in cam_id_list:
 
                 if model_type in "regressor" and use_regressor is False:
@@ -317,12 +343,11 @@ def main():
 
                 model_to_upload = model_path_template.format(
                     model_type_list[idx],
-                    force_mode,
                     cam_id,
                     model_method_list[idx]
                 )
-                print("The following model(s) will be uploaded to the GRID:")
                 print(model_to_upload)
+
                 models_to_upload.append(model_to_upload)
                 # input_sandbox.append(model_to_upload)
 
@@ -535,6 +560,7 @@ def main():
                 )
 
         bunch.extend(models_to_upload)
+        bunch.extend(configs_to_upload)
         j.setInputData(bunch)
 
         print("Input data set to job = {}".format(bunch))
