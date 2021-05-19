@@ -32,7 +32,6 @@ def merge_list_of_pytables(filename_list, destination):
         
         if len(table_name_list) == 0:
             logging.warning('file %s appears to be empty' % filename)
-            print 'file %s appears to be empty' % filename
             empty_file = True
             empty_files +=1
         else:
@@ -55,12 +54,10 @@ def merge_list_of_pytables(filename_list, destination):
             all_previous_files_were_empty = False
         elif all_previous_files_were_empty:
             logging.warning("Still no file with data...")
-            print("Still no file with data...")
             infile.close()
             continue
         elif empty_file:
             logging.warning("Empty file! Closing and going to the next one...")
-            print("Empty file! Closing and going to the next one...")
             infile.close()
             continue
         else:
@@ -81,21 +78,21 @@ def main():
     parser.add_argument("--outfile", type=str)
     args = parser.parse_args()
 
-    print("DEBUG> template_file_name={}".format(args.template_file_name))
-    print("DEBUG> indir={}".format(args.indir))
-    print("DEBUG> outfile={}".format(args.outfile))
+    logging.debug("template_file_name={}".format(args.template_file_name))
+    logging.debug("indir={}".format(args.indir))
+    logging.debug("outfile={}".format(args.outfile))
 
     input_template = "{}/{}*.h5".format(args.indir, args.template_file_name)
-    print("input_template:", input_template)
+    logging.info("input_template:", input_template)
 
     filename_list = glob.glob(input_template)
-    print("filename_list (truncated):", filename_list[0:10])
+    logging.info("filename_list (truncated):", filename_list[0:10])
 
     merged_tables, empty_files = merge_list_of_pytables(filename_list, args.outfile)
     
     if empty_files > 0:
         ratio = round(float(empty_files)/float(len(filename_list)), 2) * 100
-        print "WARNING: %d over %f (%f%%) were empty!" % (empty_files, len(filename_list), ratio)
+        logging.warning("%d over %f (%f%%) were empty!" % (empty_files, len(filename_list), ratio)
 
 
 if __name__ == "__main__":
