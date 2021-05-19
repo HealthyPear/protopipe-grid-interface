@@ -92,7 +92,7 @@ def main():
     
     if empty_files > 0:
         ratio = round(float(empty_files)/float(len(filename_list)), 2) * 100
-        logging.warning("%d over %f (%f%%) were empty!" % (empty_files, len(filename_list), ratio)
+        logging.warning("%d over %f (%f%%) were empty!" % (empty_files, len(filename_list), ratio))
 
 
 if __name__ == "__main__":
