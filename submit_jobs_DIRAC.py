@@ -4,7 +4,14 @@ import re
 import datetime
 import subprocess
 import sys
-import yaml
+import logging
+
+# PyYAML
+try:
+    import yaml
+except ImportError:
+    logging.critical("PyYAML is not installed in this environment (pip install pyyaml).")
+
 
 # This allows to handle user arguments
 from DIRAC.Core.Base import Script
