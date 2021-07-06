@@ -1,7 +1,7 @@
 General:
  # Path to the analysis configuration file
  # You only need to edit the name of the analysis
- config_path: '/home/vagrant/shared_folder/analyses/$ANALYSIS_NAME/configs/'
+ config_path: '$HOME/shared_folder/analyses/$ANALYSIS_NAME/configs/'
  # Name of the configuration file for the protopipe analysis
  config_file: 'analysis.yaml'
 
@@ -28,7 +28,7 @@ GRID:
  # Home on GRID
  # 'X' = 'user_name' initial
  # 'Y' = 'user_name'
- home_grid: '/vo.cta.in2p3.fr/user/X/Y/'
+ home_grid: ''
 
  # Output directory from GRID's home
  # i.e. "home_grid/outdir"
@@ -62,25 +62,23 @@ GRID:
  # LCG.GRIF.fr, LCG.DESY-ZEUTHEN.de, LCG.IN2P3-CC.fr
  banned_sites: ['LCG.CPPM.fr']
 
-# The following directory paths refer to directory structure of your analysis
-# Here you need to edit only
-# - the name of the analysis
-# - the names of the lists of simtel files (those shown here are descriptive)
+# Lists of simtel files
+# >>> python protopipe-grid-interface/split_dataset.py -h
 
 EnergyRegressor:
  # Events used to train an energy regressor
  # Used when output_type = TRAINING and estimate_energy is False
- gamma_list: '/home/vagrant/shared_folder/analyses/$ANALYSIS_NAME/data/simtel/gamma_energy.list'
+ gamma_list: '$HOME/shared_folder/analyses/$ANALYSIS_NAME/data/simtel/Prod3_LaPalma_Baseline_NSB1x_gamma_South_20deg_DL0_TRAINING_ENERGY.list'
 
 GammaHadronClassifier:
  # Events used to train a gamma-hadron classifier
  # Used when output_type = TRAINING and estimate_energy is True
- gamma_list: '/home/vagrant/shared_folder/analyses/$ANALYSIS_NAME/data/simtel/gamma_classification.list'
- proton_list: '/home/vagrant/shared_folder/analyses/$ANALYSIS_NAME/data/simtel/proton_classification.list'
+ gamma_list: '$HOME/shared_folder/analyses/$ANALYSIS_NAME/data/simtel/Prod3_LaPalma_Baseline_NSB1x_gamma_South_20deg_DL0_TRAINING_CLASSIFICATION.list'
+ proton_list: '$HOME/shared_folder/analyses/$ANALYSIS_NAME/data/simtel/Prod3_LaPalma_Baseline_NSB1x_proton_South_20deg_DL0_TRAINING_CLASSIFICATION.list'
 
 Performance:
  # Events processed directly up to DL2 for DL3 production
  # Used when output_type = DL2
- gamma_list: '/home/vagrant/shared_folder/analyses/$ANALYSIS_NAME/data/simtel/gamma_perf.list'
- proton_list: '/home/vagrant/shared_folder/analyses/$ANALYSIS_NAME/data/simtel/proton_perf.list'
- electron_list: '/home/vagrant/shared_folder/analyses/$ANALYSIS_NAME/data/simtel/electron_perf.list'
+ gamma_list: '$HOME/shared_folder/analyses/$ANALYSIS_NAME/data/simtel/Prod3_LaPalma_Baseline_NSB1x_gamma_South_20deg_DL0_PERFORMANCE.list'
+ proton_list: '$HOME/shared_folder/analyses/$ANALYSIS_NAME/data/simtel/Prod3_LaPalma_Baseline_NSB1x_proton_South_20deg_DL0_PERFORMANCE.list'
+ electron_list: '$HOME/shared_folder/analyses/$ANALYSIS_NAME/data/simtel/Prod3_LaPalma_Baseline_NSB1x_electron_South_20deg_DL0_PERFORMANCE.list'
