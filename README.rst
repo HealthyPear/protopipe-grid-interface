@@ -18,6 +18,7 @@ The interface is run from the virtual environment provided by the container of `
    could be easily adapted to different infrastructures.
 
 .. contents::
+   :local:
 
 Requirements
 ------------
