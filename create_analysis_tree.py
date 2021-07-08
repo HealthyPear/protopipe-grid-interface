@@ -168,20 +168,7 @@ using the protopipe prototype pipeline.
             protopipe_path, "protopipe/aux/example_config_files/"
         )
 
-        # Copy scripts
-        # shutil.copy(
-        #     os.path.join(interface_path, "download_and_merge.sh"),
-        #     os.path.join(analysis_path, "data"),
-        # )
-
-        # Create a grid configuration file for this analysis starting from the example in protopipe
-        # with open(os.path.join(interface_path, "download_and_merge.sh"), "r") as infile:
-        #     with open(os.path.join(analysis_path, "data/download_and_merge.sh"), "w") as outfile:
-        #         for line in infile:
-        #             line = line.replace('ANALYSIS_NAME=""', 'ANALYSIS_NAME="{}"'.format(analysis_name))
-        #             line = line.replace('HOME_PATH_GRID=""', 'HOME_PATH_GRID="{}"'.format(args.GRID_home))
-        #             line = line.replace('ANALYSIS_PATH_GRID=""', 'ANALYSIS_PATH_GRID="{}"'.format(args.GRID_path_from_home))
-        #             outfile.write(os.path.expandvars(line))
+        # Copy scripts and edit scripts according to this analysis
         
         setup_config(os.path.join(interface_path, "download_and_merge.sh"),
                      os.path.join(analysis_path, "data/download_and_merge.sh"),
@@ -202,24 +189,6 @@ using the protopipe prototype pipeline.
                       'HOME_PATH_GRID="{}"'.format(args.GRID_home),
                       'ANALYSIS_PATH_GRID="{}"'.format(args.GRID_path_from_home)]
                      )
-
-        # shutil.copy(
-        #     os.path.join(interface_path, "upload_models.sh"),
-        #     os.path.join(analysis_path, "estimators"),
-        # )
-
-        # Copy configuration files
-        # shutil.copy(
-        #     os.path.join(interface_path, "grid.yaml"),
-        #     os.path.join(analysis_path, "configs")
-        # )
-
-        
-        # with open(os.path.join(interface_path, "grid.yaml"), "r") as infile:
-        #     with open(os.path.join(analysis_path, "configs/grid.yaml"), "w") as outfile:
-        #         for line in infile:
-        #             line = line.replace("$ANALYSIS_NAME", analysis_name)
-        #             line = line.replace("$HOME", home_path)
 
         # Create a grid configuration file for this analysis starting from the example in protopipe
 
@@ -244,14 +213,9 @@ using the protopipe prototype pipeline.
         # Same with the analysis configuration file
         setup_config(os.path.join(protopipe_configs, "analysis.yaml"),
                      os.path.join(analysis_path, "configs/analysis.yaml"),
-                     "config_name: ''",
-                     "config_name: '{}'".format(analysis_name)
+                     ["config_name: ''"],
+                     ["config_name: '{}'".format(analysis_name)]
                      )
-
-        # with open(os.path.join(protopipe_configs, "analysis.yaml"), "r") as infile:
-        #     with open(os.path.join(analysis_path, "configs/analysis.yaml"), "w") as outfile:
-        #         for line in infile:
-        #             line = line.replace("config_name: ''", "config_name: '{}'".format(analysis_name))
 
         # copy all other configuration files
         # these will require to work outside of the container untile CTADIRAC supports Python3
