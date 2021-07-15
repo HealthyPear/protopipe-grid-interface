@@ -8,14 +8,14 @@ Protopipe GRID interface |codacy|
 This software provides an interface between the
 `Protopipe CTA prototype pipeline <https://github.com/cta-observatory/protopipe>`_ 
 and the `DIRAC GRID tools <http://diracgrid.org/>`_.
- 
+
 It is required for using *protopipe* to analyse large scale simulation productions on the DIRAC grid.
 The interface is run from the virtual environment provided by the container of `CTADIRAC <https://github.com/cta-observatory/CTADIRAC>`_.
 
-.. warning::
-   Usage of the pipeline on an infrastucture different than the DIRAC grid has not been fully tested.
-   This interface code is higly bound to DIRAC, but the scripts which manage download, merge and upload of files
-   could be easily adapted to different infrastructures.
+**WARNING**
+Usage of the pipeline on an infrastucture different than the DIRAC grid has not been fully tested.
+This interface code is higly bound to DIRAC, but the scripts which manage download, merge and upload of files
+could be easily adapted to different infrastructures.
 
 .. contents::
    :local:
@@ -47,8 +47,7 @@ You can find all necessary information
 Options for containerization
 ----------------------------
 
-.. note::
-   Any of the following containerization choices will constitute a separate requirement.
+**NOTE** Any of the following containerization choices will constitute a separate requirement.
 
 - **Single user working from personal machine**
 
@@ -74,20 +73,20 @@ where ``[...]`` is the path of your source code on the host and the ``--rm`` fla
 to save disk space (the data stored in the ``shared_folder`` won't disappear).
 Please, refer to the Docker documentation for other use cases.
 
-.. warning::
-   There is yet no container for a released version of *protopipe*.
-   In that case you can link its folder from your python environment installation on the host (``import protopipe; protopipe.__path__``).
+**WARNING**
+There is yet no container for a released version of *protopipe*.
+In that case you can link its folder from your python environment installation on the host (``import protopipe; protopipe.__path__``).
 
-.. warning::
-   If you are using *macos* you could encounter some disk space issues.
-   Please check `here <https://docs.docker.com/docker-for-mac/space/>`_ and `here <https://djs55.github.io/jekyll/update/2017/11/27/docker-for-mac-disk-space.html>`_ on how to manage disk space.
+**WARNING**
+If you are using *macos* you could encounter some disk space issues.
+Please check `here <https://docs.docker.com/docker-for-mac/space/>`_ and `here <https://djs55.github.io/jekyll/update/2017/11/27/docker-for-mac-disk-space.html>`_ on how to manage disk space.
 
 Vagrant
 +++++++
 
-.. note::
-   Only required for users that want to use a *Singularity*
-   container on a *macos* and *Microsoft Windows* machine.
+**NOTE**
+Only required for users that want to use a *Singularity*
+container on a *macos* and *Microsoft Windows* machine.
 
 All users, regardless of their operative systems, can use this interface via
 `Vagrant <https://www.vagrantup.com/>`_. 
@@ -104,9 +103,9 @@ used by the interface to setup the analysis.
 Singularity
 +++++++++++
 
-.. warning::
-   Support for *Singularity* has been dropped by the mantainers of *CTADIRAC*.
-   The following solutions have not been tested in all possible cases.
+**WARNING**
+Support for *Singularity* has been dropped by the mantainers of *CTADIRAC*.
+The following solutions have not been tested in all possible cases.
 
 - **macos / Microsoft Windows**
 
@@ -122,7 +121,7 @@ Singularity
   bind mounts for *protopipe*, its grid interface and the shared_folder 
   will work in the same way: ``--bind path_on_host:path_on_container``.
 
-Note that the DIRAC grid certificate should be already available, since *Singularity* mounts the user's home by default.
+The DIRAC grid certificate should be already available since *Singularity* mounts the user's home by default.
 For more details, please check e.g. `system-defined bind paths <https://sylabs.io/guides/3.8/user-guide/bind_paths_and_mounts.html#system-defined-bind-paths>`_.
 
 Depending on the privileges granted on the host there are 2 ways to get a working container.
@@ -161,9 +160,9 @@ but the recipe for the container has been saved here.
 In this case you won't need to do ``. /home/dirac/dirac_env.sh``: the 
 commands will be already stored in your ``$PATH``.
 
-.. warning::
-   The recipe ``CTADIRAC_singularity`` is maintained by the author; if any bug arises,
-   reverting to the methods described above (if possible) will provide you with a working environment.
+**WARNING**
+The recipe ``CTADIRAC_singularity`` is maintained by the author; if any bug arises,
+reverting to the methods described above (if possible) will provide you with a working environment.
 
 If you have root privileges you can just build your own image with,
 
