@@ -6,7 +6,7 @@
 
 CAM_IDS=''  # This is a list
 MODEL_TYPE=""  # regressor or classifier
-MODEL_NAME=""  # AdaBoostRegressor or RandomForestClassifier
+MODEL_NAME=""  # RandomForestRegressor, AdaBoostRegressor or RandomForestClassifier
 
 # ============================================
 #             DO NOT EDIT THIS PART
