@@ -610,6 +610,27 @@ def main():
     except:
         pass
 
+    # Upload analysis configuration file for provenance
+    
+    SE_LIST=['CC-IN2P3-USER', 'DESY-ZN-USER', 'CNAF-USER', 'CEA-USER']
+    analysis_config_local = os.path.join(config_path, config_file)
+    # the configuration file is uploaded to the data directory because
+    # the training samples (as well as their cleaning settings) are independent
+    analysis_config_dirac = os.path.join(home_grid, output_path, config_file)
+    print("Uploading {} to {}...".format(analysis_config_local, analysis_config_dirac))
+
+    if switches["dry"] is False:
+        # Upload this file to all Dirac Storage Elements in SE_LIST
+        for se in SE_LIST:
+            # the uploaded config file overwrites any old copy
+            ana_cfg_upload_cmd = "dirac-dms-add-file -f {} {} {}".format(
+                analysis_config_dirac, analysis_config_local, se
+            )
+            ana_cfg_upload_result = subprocess.check_output(ana_cfg_upload_cmd, shell=True)
+            print(ana_cfg_upload_result)
+    else:
+        print("This is a DRY RUN! -- analysis.yaml has NOT been uploaded.")
+
     print("\nall done -- exiting now")
     exit()
 
