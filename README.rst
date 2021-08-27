@@ -9,7 +9,7 @@ Protopipe DIRAC GRID interface |codacy| |coverage|
 
 This software provides an interface between the
 `Protopipe CTA prototype pipeline <https://github.com/cta-observatory/protopipe>`_ 
-and the `DIRAC GRID tools <http://diracgrid.org/>`_.
+and the `DIRAC GRID tools <https://dirac.readthedocs.io/en/latest/index.html>`_.
 
 It is required for using *protopipe* to analyse large scale simulation productions on the DIRAC grid.
 The interface is run from the virtual environment provided by the container of `CTADIRAC <https://github.com/cta-observatory/CTADIRAC>`_.
