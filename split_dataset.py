@@ -95,13 +95,13 @@ Default is [100]",
         type=str,
         required=False,
         default=None,
-        help="Folder or path under /home/vagrant/productions.",
+        help="It is recommended to use the 'productions' folder created by create_analysis_tree.py)",
     )
 
     args = parser.parse_args()
 
     print("Checking for output directory...")
-    outdir = os.path.join("/home/vagrant/shared_folder/productions", args.output_path)
+    outdir = args.output_path
     makedir(outdir)
     print("Splitted lists will be stored under {}".format(outdir))
 
@@ -116,6 +116,10 @@ Default is [100]",
 
     # Cycle on simulation lists
     for i, prodlist in enumerate(prodlists):
+
+        if prodlist[0] is None:
+            print("WARNING: a particle type list seems empty or undefined.")
+            continue
 
         flist = open(prodlist[0], "r")
         prodLines = flist.readlines()
