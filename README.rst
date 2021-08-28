@@ -1,7 +1,9 @@
-==================================================
-Protopipe DIRAC GRID interface |codacy| |coverage|
-==================================================
+=======================================================
+Protopipe DIRAC GRID interface |CI| |codacy| |coverage|
+=======================================================
 
+.. |CI| image:: https://github.com/HealthyPear/protopipe-grid-interface/actions/workflows/ci.yml/badge.svg
+  :target: https://github.com/HealthyPear/protopipe-grid-interface/actions/workflows/ci.yml
 .. |codacy| image:: https://app.codacy.com/project/badge/Grade/fecd056c3826433e91d4a7e0b0557434
   :target: https://www.codacy.com/gh/HealthyPear/protopipe-grid-interface/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=HealthyPear/protopipe-grid-interface&amp;utm_campaign=Badge_Grade
 .. |coverage| image:: https://codecov.io/gh/HealthyPear/protopipe-grid-interface/branch/master/graph/badge.svg?token=N8GWUWSG3W
