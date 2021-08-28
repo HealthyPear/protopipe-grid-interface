@@ -11,14 +11,18 @@ import logging
 
 def setup_config(input_file, output_file, old_text, new_text):
     """Fill a configuration file for an analysis starting from the example one.
-    
+
     Parameters
     ----------
-    
-    Returns
-    -------
+    input_file: str
+        Path of the input configuration file.
+    output_file: str
+        Path of the output configuration file.
+    old_text: str
+        Text to replace.
+    new_text: str
+        Text to be used.
     """
-
     with open(input_file, "r") as infile:
             with open(output_file, "w") as outfile:
                 for line in infile:
@@ -55,7 +59,7 @@ def makedir(name):
 
 def create_paths(dictionary):
     """Create the relative paths of all leaves of a directory tree.
-    
+
     Parameters
     ----------
     dictionary : dict
@@ -64,8 +68,8 @@ def create_paths(dictionary):
     Returns
     -------
     paths : list
-        List of relative paths"""
-
+        List of relative paths
+    """
     paths = []
 
     for key, children in dictionary.iteritems():
@@ -137,7 +141,7 @@ using the protopipe prototype pipeline.
     # (it could be read as a dictionary from a JSON file if multiple analysis workflows are introduced)
     subdirectories = {
         "configs": [],
-        "data": ["simtel", 
+        "data": ["simtel",
                     {"TRAINING": ["for_energy_estimation",
                                   "for_particle_classification"]},
                      "DL2",
