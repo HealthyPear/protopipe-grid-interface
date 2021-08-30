@@ -221,10 +221,17 @@ using the protopipe prototype pipeline.
                      ["config_name: '{}'".format(analysis_name)]
                      )
 
+        # Same with the benchmarks configuration file
+        setup_config(os.path.join(protopipe_configs, "benchmarks.yaml"),
+                     os.path.join(analysis_path, "configs/benchmarks.yaml"),
+                     ["analysis_name: ''"],
+                     ["analysis_name: '{}'".format(analysis_name)]
+                     )
+
         # copy all other configuration files
         # these will require to work outside of the container untile CTADIRAC supports Python3
         for config_file in glob.glob(os.path.join(protopipe_configs, "*.yaml")):
-            if "analysis" in config_file:
+            if ("analysis" in config_file) or ("benchmarks" in config_file):
                 continue
             shutil.copy(
                 config_file, os.path.join(analysis_path, "configs")
