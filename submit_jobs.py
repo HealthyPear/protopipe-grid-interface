@@ -23,11 +23,11 @@ Script.setUsageMessage(
             "Usage:",
             "python $INTERFACE/%s.py [options]" % Script.scriptName,
             "e.g.:",
-            "python $INTERFACE/%s.py --config_file=grid.yaml --output_type=DL2" % Script.scriptName,
+            "python $INTERFACE/%s.py --analysis_name=test --output_type=DL2" % Script.scriptName,
         ]
     )
 )
-Script.registerSwitch("", "config_file=", "Full path of configuration file")
+Script.registerSwitch("", "analysis_name=", "Name of the analysis")
 Script.registerSwitch("", "output_type=", "Output data type (TRAINING or DL2)")
 Script.registerSwitch(
     "", "max_events=", "Max number of events to be processed (optional, int)"
@@ -51,8 +51,8 @@ from DIRAC.Interfaces.API.Job import Job
 from DIRAC.Interfaces.API.Dirac import Dirac
 
 # Control switches
-if switches.has_key("config_file") is False:
-    print("Configuration file argument is missing: --config_file")
+if switches.has_key("analysis_name") is False:
+    print("Analysis name argument is missing: --analysis_name")
     sys.exit()
 
 if switches.has_key("output_type") is False:
@@ -119,7 +119,12 @@ def main():
         sys.exit()
 
     # Read configuration file
-    cfg = load_config(switches["config_file"])
+    analysis_path = os.path.expanduser(os.path.join("~/shared_folder/analyses",
+                                                    switches["analysis_name"])
+                                      )
+    if not os.path.isdir(analysis_path):
+        raise ValueError("This analysis folder doesn't exist yet - use create_analysis_tree.py")
+    cfg = load_config(os.path.join(analysis_path, "configs/grid.yaml"))
 
     # Analysis
     config_path = cfg["General"]["config_path"]
