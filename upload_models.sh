@@ -1,17 +1,15 @@
 #!/usr/bin/env bash
 
 # ============================================
-#           EDIT ONLY THIS PART
+#             EDIT ONLY THIS PART
 # ============================================
 
-ANALYSIS_NAME=""  # Name of the analysis
-ANALYSES_PATH="/home/vagrant/shared_folder/analyses"
-HOME_PATH_GRID="/vo.cta.in2p3.fr/user/x/xxx"
-ANALYSIS_PATH_GRID="" # path from HOME_PATH_GRID to the analysis folder
 CAM_IDS=''  # This is a list
 MODEL_TYPE=""  # regressor or classifier
-MODEL_NAME=""  # AdaBoostRegressor or RandomForestClassifier
+MODEL_NAME=""  # RandomForestRegressor, AdaBoostRegressor or RandomForestClassifier
 
+# ============================================
+#             DO NOT EDIT THIS PART
 # ============================================
 
 MODE="tail"  # also "wave" (wavelet) cleaning, but disabled for the moment
@@ -25,7 +23,14 @@ else
   MODEL_TYPE_FOLDER="gamma_hadron_classifier"
 fi
 
-# Full path in local virtual environment for the grid interface
+# GRID environment variables
+GRID="$HOME/protopipe-grid-interface"
+HOME_PATH_GRID=""
+ANALYSIS_PATH_GRID=""
+
+# ANALYSIS environment variables
+ANALYSIS_NAME=""  # Name of the analysis
+ANALYSES_PATH="$HOME/shared_folder/analyses"
 CONFIG_DIR="$ANALYSES_PATH/$ANALYSIS_NAME/configs"
 INPUT_DIR="$ANALYSES_PATH/$ANALYSIS_NAME/estimators/$MODEL_TYPE_FOLDER"
 # DIRAC file catalog path

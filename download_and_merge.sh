@@ -4,11 +4,6 @@
 #           EDIT ONLY THIS PART
 # ============================================
 
-# User variables
-ANALYSIS_NAME=""
-HOME_PATH_GRID="/vo.cta.in2p3.fr/user/x/xxx" # fill this
-ANALYSIS_PATH_GRID="" # path from HOME_PATH_GRID, if none leave empty
-
 # ANALYSIS STEP DATA PATH
 # Possible choices are,
 # - TRAINING/for_energy_estimation
@@ -19,10 +14,19 @@ DATA_PATH=""
 PARTICLE=""  # This can be list up to "gamma proton electron"
 
 # ============================================
+#           DO NOT EDIT THIS PART
+# ============================================
 
 MODE="tail"  # also "wave" (wavelet) cleaning, but disabled for the moment
 
-ANALYSIS_PATH_LOCAL="/home/vagrant/shared_folder/analyses/$ANALYSIS_NAME"
+# GRID environment variables
+GRID="$HOME/protopipe-grid-interface"
+HOME_PATH_GRID=""
+ANALYSIS_PATH_GRID=""
+
+# ANALYSIS environment variables
+ANALYSIS_NAME=""
+ANALYSIS_PATH_LOCAL="$HOME/shared_folder/analyses/$ANALYSIS_NAME"
 
 # DIRAC file catalog full path
 INPUT_DIR="$HOME_PATH_GRID/$ANALYSIS_PATH_GRID/$ANALYSIS_NAME/data/$DATA_PATH"
