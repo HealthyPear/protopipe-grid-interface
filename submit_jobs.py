@@ -91,7 +91,13 @@ elif switches["debug_script"] in ["True", "true"]:
     switches["debug_script"] = True
 else:
     switches["debug_script"] = False
-
+    
+if switches.has_key("DataReprocessing") is False:
+    switches["DataReprocessing"] = False
+elif switches["DataReprocessing"] in ["True", "true"]:
+    switches["DataReprocessing"] = True
+else:
+    switches["DataReprocessing"] = False
 
 def load_config(name):
     try:
@@ -590,6 +596,15 @@ def main():
             print("Name of the output file: {}".format(outputs))
             print("Output path from GRID home: {}".format(output_path))
             break
+
+        # This allows to run the jobs sites different from where the input
+        # data is located when the source site has been banned
+        if switches["DataReprocessing"] is True:
+            j.setType("DataReprocessing")
+            
+            # WARNING: at the moment this is true for 
+            # LCG.IN2P3-CC.fr and LCG.GRIF.fr alone!
+            j.setTag("HighMem") 
 
         # this sends the job to the GRID and uploads all the
         # files into the input sandbox in the process
