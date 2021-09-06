@@ -4,7 +4,7 @@
 # were 'realpath' is defined, but just in case...
 if [[ ( "$OSTYPE" == "darwin"* ) && ( -z "$(command -v realpath)" ) ]]; then
   echo "ERROR: realpath command not found!"
-  echo "You can install it with Homebrew: 'brew install coreutils'"
+  echo "Please, check that you are using the Docker container."
   return 1
 fi
 
