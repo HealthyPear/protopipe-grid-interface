@@ -105,12 +105,12 @@ using the protopipe prototype pipeline.
     
     parser.add_argument(
         "--source_path", type=str, default=os.environ['HOME'],
-        help="Path to the source codes of protopipe and the GRID interface (default: home directory)"
+        help="Full path to the source codes of protopipe and the GRID interface (default: home directory)"
     )
     
     parser.add_argument(
         "--output_path", type=str, default=os.environ['HOME'],
-        help="Path of the folder which will contain analyses and productions (default: home directory)"
+        help="Full path of the folder which will contain analyses and productions (default: home directory)"
     )
 
     parser.add_argument(
@@ -233,11 +233,16 @@ using the protopipe prototype pipeline.
                      )
 
         # Same with the benchmarks configuration file
-        setup_config(os.path.join(protopipe_configs, "benchmarks.yaml"),
-                     os.path.join(analysis_path, "configs/benchmarks.yaml"),
-                     ["analysis_name: ''"],
-                     ["analysis_name: '{}'".format(analysis_name)]
-                     )
+        try:
+            setup_config(os.path.join(protopipe_configs, "benchmarks.yaml"),
+                         os.path.join(analysis_path, "configs/benchmarks.yaml"),
+                         ["analysis_name: ''"],
+                         ["analysis_name: '{}'".format(analysis_name)]
+                         )
+        except IOError:
+            print("benchmarks.yaml not found in example configs")
+            print("You should find it under docs/contribute/benchmarks")
+            pass
 
         # copy all other configuration files
         # these will require to work outside of the container untile CTADIRAC supports Python3
