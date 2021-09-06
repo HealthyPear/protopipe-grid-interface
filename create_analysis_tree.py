@@ -254,7 +254,7 @@ using the protopipe prototype pipeline.
                 config_file, os.path.join(analysis_path, "configs")
             )
 
-        logging.info("Auxiliary scripts and configuration file are also stored there.")
+        logging.info("Auxiliary scripts and configuration files have been stored and partially filled.")
 
     else:
         logging.info("Required analysis folder already present. For safety no sub-directory will be overwritten.")
