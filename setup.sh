@@ -30,3 +30,5 @@ if [ "$(command -v dirac-info)" != "$DIRAC/scripts/dirac-info" ]; then
     echo "Please, make sure that DIRAC has been properly installed."
     return 1
 fi
+
+echo "The protopipe GRID interface is ready to be used!"
