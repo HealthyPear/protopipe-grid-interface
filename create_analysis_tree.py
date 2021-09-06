@@ -8,6 +8,7 @@ from argparse import RawTextHelpFormatter
 import shutil
 import logging
 
+logging.basicConfig(level=logging.INFO)
 
 def setup_config(input_file, output_file, old_text, new_text):
     """Fill a configuration file for an analysis starting from the example one.
