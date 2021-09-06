@@ -43,8 +43,8 @@ for cam_id in $CAM_IDS; do
     config="${MODEL_NAME}.yaml"
     file="${MODEL_TYPE}_${cam_id}_${MODEL_NAME}.pkl.gz"
 
-    $DIRAC/diracos/usr/bin $GRID_INTERFACE/upload_file.py --indir=$CONFIG_DIR --infile=$config --outdir=$OUTPUT_DIR
-    $DIRAC/diracos/usr/bin $GRID_INTERFACE/upload_file.py --indir=$INPUT_DIR --infile=$file --outdir=$OUTPUT_DIR
+    $DIRAC/diracos/usr/bin/python $GRID_INTERFACE/upload_file.py --indir=$CONFIG_DIR --infile=$config --outdir=$OUTPUT_DIR
+    $DIRAC/diracos/usr/bin/python $GRID_INTERFACE/upload_file.py --indir=$INPUT_DIR --infile=$file --outdir=$OUTPUT_DIR
 
     # Make replicas
     for SE in $SE_LIST; do

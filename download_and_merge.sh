@@ -45,7 +45,7 @@ for part in $PARTICLE; do
 
   # Download files
   echo "Downloading $part..."
-  $DIRAC/diracos/usr/bin $GRID_INTERFACE/download_files.py --indir="$INPUT_DIR" --outdir="$OUTPUT_DIR"
+  $DIRAC/diracos/usr/bin/python $GRID_INTERFACE/download_files.py --indir="$INPUT_DIR" --outdir="$OUTPUT_DIR"
 
   # Merge files
   echo "Merging $part..."
@@ -54,6 +54,6 @@ for part in $PARTICLE; do
   echo "$OUTPUT_DIR"
   echo "$TEMPLATE_FILE_NAME"
   echo "$OUTPUT_FILE"
-  $DIRAC/diracos/usr/bin $GRID_INTERFACE/merge_tables.py --indir="$OUTPUT_DIR" --template_file_name="$TEMPLATE_FILE_NAME" --outfile="$OUTPUT_FILE"
+  $DIRAC/diracos/usr/bin/python $GRID_INTERFACE/merge_tables.py --indir="$OUTPUT_DIR" --template_file_name="$TEMPLATE_FILE_NAME" --outfile="$OUTPUT_FILE"
 
 done
