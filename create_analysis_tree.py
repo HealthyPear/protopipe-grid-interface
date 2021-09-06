@@ -241,8 +241,8 @@ using the protopipe prototype pipeline.
                          ["analysis_name: '{}'".format(analysis_name)]
                          )
         except IOError:
-            print("benchmarks.yaml not found in example configs")
-            print("You should find it under docs/contribute/benchmarks")
+            logging.warning("benchmarks.yaml not found in example configs")
+            logging.warning("You should find it under docs/contribute/benchmarks")
             pass
 
         # copy all other configuration files
