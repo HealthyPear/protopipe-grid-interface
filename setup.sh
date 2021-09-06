@@ -14,6 +14,11 @@ GRID_INTERFACE_full_path=$(realpath $BASH_SOURCE)
 export GRID_INTERFACE=$(dirname $GRID_INTERFACE_full_path)
 echo "\$GRID_INTERFACE points to $GRID_INTERFACE"
 
+# Define where the source code of protopipe is stored
+# Same folder as the interface (as per installation instructions)
+export PROTOPIPE=$(dirname $GRID_INTERFACE)
+echo "\$PROTOPIPE points to $PROTOPIPE"
+
 # Check if DIRAC has been initialized
 if [[ -z "${DIRAC}" ]]; then
   echo "ERROR: \$DIRAC environment variable undefined!"
