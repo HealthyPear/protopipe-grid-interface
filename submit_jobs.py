@@ -21,9 +21,9 @@ Script.setUsageMessage(
     "\n".join(
         [
             "Usage:",
-            "python $INTERFACE/%s.py [options]" % Script.scriptName,
+            "python $GRID_INTERFACE/%s.py [options]" % Script.scriptName,
             "e.g.:",
-            "python $INTERFACE/%s.py --analysis_name=test --output_type=DL2" % Script.scriptName,
+            "python $GRID_INTERFACE/%s.py --analysis_name=test --output_type=DL2" % Script.scriptName,
         ]
     )
 )
@@ -277,9 +277,9 @@ def main():
     # if file name starts with `LFN:`, it will be copied from the GRID
     input_sandbox = [
         # Utility to assign one job to one command...
-        os.path.expandvars("$INTERFACE/pilot.sh"),
+        os.path.expandvars("$GRID_INTERFACE/pilot.sh"),
         os.path.expandvars("$PROTOPIPE/protopipe/"),
-        os.path.expandvars("$INTERFACE/merge_tables.py"),
+        os.path.expandvars("$GRID_INTERFACE/merge_tables.py"),
         # python wrapper for the mr_filter wavelet cleaning
         # os.path.expandvars("$PYWI/pywi/"),
         # os.path.expandvars("$PYWICTA/pywicta/"),
