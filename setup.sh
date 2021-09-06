@@ -16,7 +16,7 @@ echo "\$GRID_INTERFACE points to $GRID_INTERFACE"
 
 # Define where the source code of protopipe is stored
 # Same folder as the interface (as per installation instructions)
-export PROTOPIPE=$(dirname $GRID_INTERFACE)
+export PROTOPIPE="$(dirname $GRID_INTERFACE)/protopipe"
 echo "\$PROTOPIPE points to $PROTOPIPE"
 
 # Check if DIRAC has been initialized
