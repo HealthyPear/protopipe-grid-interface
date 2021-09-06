@@ -229,10 +229,8 @@ using the protopipe prototype pipeline.
         # Same with the analysis configuration file
         setup_config(os.path.join(protopipe_configs, "analysis.yaml"),
                      os.path.join(analysis_path, "configs/analysis.yaml"),
-                     ["analyses_directory: ''",
-                      "config_name: ''"],
-                     ["analyses_directory: '{}'".format(analysis_path),
-                      "config_name: '{}'".format(analysis_name)]
+                     ["config_name: ''"],
+                     ["config_name: '{}'".format(analysis_name)]
                      )
 
         # Same with the benchmarks configuration file
