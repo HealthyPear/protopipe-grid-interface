@@ -110,7 +110,7 @@ using the protopipe prototype pipeline.
     
     parser.add_argument(
         "--output_path", type=str, default=os.environ['HOME'],
-        help="Full path to the folder which contain analyses and productions (default: home directory)"
+        help="Full path of the folder containing analyses and productions (default: home directory)"
     )
 
     parser.add_argument(
