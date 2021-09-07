@@ -23,7 +23,7 @@ Script.setUsageMessage(
             "Usage:",
             "python $GRID_INTERFACE/%s.py [options]" % Script.scriptName,
             "e.g.:",
-            "python $GRID_INTERFACE/%s.py --analysis_name=test --output_type=DL2" % Script.scriptName,
+            "python $GRID_INTERFACE/%s.py --analysis_path=shared_folder/analyses/test --output_type=DL2" % Script.scriptName,
         ]
     )
 )
