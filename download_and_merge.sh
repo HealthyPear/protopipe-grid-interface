@@ -4,12 +4,12 @@
 #           EDIT ONLY THIS PART
 # ============================================
 
-# ANALYSIS STEP DATA PATH
+# ANALYSIS STEP DATA TYPE
 # Possible choices are,
 # - TRAINING/for_energy_estimation
 # - TRAINING/for_particle_classification
 # - DL2
-DATA_PATH=""
+DATA_TYPE=""
 
 PARTICLE=""  # This can be list up to "gamma proton electron"
 
@@ -20,18 +20,18 @@ PARTICLE=""  # This can be list up to "gamma proton electron"
 MODE="tail"  # also "wave" (wavelet) cleaning, but disabled for the moment
 
 # GRID environment variables
-GRID="$HOME/protopipe-grid-interface"
 HOME_PATH_GRID=""
 ANALYSIS_PATH_GRID=""
 
 # ANALYSIS environment variables
+LOCAL=""
 ANALYSIS_NAME=""
-ANALYSIS_PATH_LOCAL="$HOME/shared_folder/analyses/$ANALYSIS_NAME"
+ANALYSIS_PATH_LOCAL="$LOCAL/shared_folder/analyses/$ANALYSIS_NAME"
 
 # DIRAC file catalog full path
-INPUT_DIR="$HOME_PATH_GRID/$ANALYSIS_PATH_GRID/$ANALYSIS_NAME/data/$DATA_PATH"
+INPUT_DIR="$HOME_PATH_GRID/$ANALYSIS_PATH_GRID/$ANALYSIS_NAME/data/$DATA_TYPE"
 # Full path in local virtual environment for the grid interface
-OUTPUT_DIR="$ANALYSIS_PATH_LOCAL/data/$DATA_PATH/"
+OUTPUT_DIR="$ANALYSIS_PATH_LOCAL/data/$DATA_TYPE/"
 
 # FILE TYPE
 case $DATA_PATH in
@@ -45,7 +45,7 @@ for part in $PARTICLE; do
 
   # Download files
   echo "Downloading $part..."
-  python $GRID/download_files.py --indir="$INPUT_DIR" --outdir="$OUTPUT_DIR"
+  $DIRAC/diracos/usr/bin/python $GRID_INTERFACE/download_files.py --indir="$INPUT_DIR" --outdir="$OUTPUT_DIR"
 
   # Merge files
   echo "Merging $part..."
@@ -54,6 +54,6 @@ for part in $PARTICLE; do
   echo "$OUTPUT_DIR"
   echo "$TEMPLATE_FILE_NAME"
   echo "$OUTPUT_FILE"
-  python $GRID/merge_tables.py --indir="$OUTPUT_DIR" --template_file_name="$TEMPLATE_FILE_NAME" --outfile="$OUTPUT_FILE"
+  $DIRAC/diracos/usr/bin/python $GRID_INTERFACE/merge_tables.py --indir="$OUTPUT_DIR" --template_file_name="$TEMPLATE_FILE_NAME" --outfile="$OUTPUT_FILE"
 
 done

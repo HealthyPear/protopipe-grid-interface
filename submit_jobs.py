@@ -21,13 +21,13 @@ Script.setUsageMessage(
     "\n".join(
         [
             "Usage:",
-            "python $INTERFACE/%s.py [options]" % Script.scriptName,
+            "python $GRID_INTERFACE/%s.py [options]" % Script.scriptName,
             "e.g.:",
-            "python $INTERFACE/%s.py --analysis_name=test --output_type=DL2" % Script.scriptName,
+            "python $GRID_INTERFACE/%s.py --analysis_path=shared_folder/analyses/test --output_type=DL2" % Script.scriptName,
         ]
     )
 )
-Script.registerSwitch("", "analysis_name=", "Name of the analysis")
+Script.registerSwitch("", "analysis_path=", "Full path to the analysis folder")
 Script.registerSwitch("", "output_type=", "Output data type (TRAINING or DL2)")
 Script.registerSwitch(
     "", "max_events=", "Max number of events to be processed (optional, int)"
@@ -51,8 +51,8 @@ from DIRAC.Interfaces.API.Job import Job
 from DIRAC.Interfaces.API.Dirac import Dirac
 
 # Control switches
-if switches.has_key("analysis_name") is False:
-    print("Analysis name argument is missing: --analysis_name")
+if switches.has_key("analysis_path") is False:
+    print("Analysis full path argument is missing: --analysis_path")
     sys.exit()
 
 if switches.has_key("output_type") is False:
@@ -119,12 +119,9 @@ def main():
         sys.exit()
 
     # Read configuration file
-    analysis_path = os.path.expanduser(os.path.join("~/shared_folder/analyses",
-                                                    switches["analysis_name"])
-                                      )
-    if not os.path.isdir(analysis_path):
+    if not os.path.isdir(switches["analysis_path"]):
         raise ValueError("This analysis folder doesn't exist yet - use create_analysis_tree.py")
-    cfg = load_config(os.path.join(analysis_path, "configs/grid.yaml"))
+    cfg = load_config(os.path.join(switches["analysis_path"], "configs/grid.yaml"))
 
     # Analysis
     config_path = cfg["General"]["config_path"]
@@ -280,9 +277,9 @@ def main():
     # if file name starts with `LFN:`, it will be copied from the GRID
     input_sandbox = [
         # Utility to assign one job to one command...
-        os.path.expandvars("$INTERFACE/pilot.sh"),
+        os.path.expandvars("$GRID_INTERFACE/pilot.sh"),
         os.path.expandvars("$PROTOPIPE/protopipe/"),
-        os.path.expandvars("$INTERFACE/merge_tables.py"),
+        os.path.expandvars("$GRID_INTERFACE/merge_tables.py"),
         # python wrapper for the mr_filter wavelet cleaning
         # os.path.expandvars("$PYWI/pywi/"),
         # os.path.expandvars("$PYWICTA/pywicta/"),
