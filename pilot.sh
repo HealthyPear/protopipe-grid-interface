@@ -7,6 +7,6 @@ do
     $CMD
     if [[ ( $? != 0 ) ]]; then
       echo "Error while executing $CMD"
-      exit -1
+      exit $?
     fi
 done
