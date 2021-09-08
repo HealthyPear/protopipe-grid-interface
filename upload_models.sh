@@ -24,13 +24,13 @@ else
 fi
 
 # GRID environment variables
-GRID="$HOME/protopipe-grid-interface"
 HOME_PATH_GRID=""
 ANALYSIS_PATH_GRID=""
 
 # ANALYSIS environment variables
+LOCAL="" # Parent directory containing the 'shared_folder'
 ANALYSIS_NAME=""  # Name of the analysis
-ANALYSES_PATH="$HOME/shared_folder/analyses"
+ANALYSES_PATH="$LOCAL/shared_folder/analyses"
 CONFIG_DIR="$ANALYSES_PATH/$ANALYSIS_NAME/configs"
 INPUT_DIR="$ANALYSES_PATH/$ANALYSIS_NAME/estimators/$MODEL_TYPE_FOLDER"
 # DIRAC file catalog path
@@ -43,8 +43,8 @@ for cam_id in $CAM_IDS; do
     config="${MODEL_NAME}.yaml"
     file="${MODEL_TYPE}_${cam_id}_${MODEL_NAME}.pkl.gz"
 
-    python $GRID/upload_file.py --indir=$CONFIG_DIR --infile=$config --outdir=$OUTPUT_DIR
-    python $GRID/upload_file.py --indir=$INPUT_DIR --infile=$file --outdir=$OUTPUT_DIR
+    $DIRAC/diracos/usr/bin/python $GRID_INTERFACE/upload_file.py --indir=$CONFIG_DIR --infile=$config --outdir=$OUTPUT_DIR
+    $DIRAC/diracos/usr/bin/python $GRID_INTERFACE/upload_file.py --indir=$INPUT_DIR --infile=$file --outdir=$OUTPUT_DIR
 
     # Make replicas
     for SE in $SE_LIST; do
