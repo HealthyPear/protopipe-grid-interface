@@ -97,7 +97,7 @@ def load_config(name):
     try:
         with open(name, "r") as stream:
             cfg = yaml.load(stream)
-    except FileNotFoundError as e:
+    except IOError as e:
         print(e)
         raise
     return cfg
