@@ -43,6 +43,12 @@ Script.registerSwitch(
 Script.registerSwitch(
     "", "debug_script=", "If True save debug information during execution of the script (default: False)"
 )
+Script.registerSwitch(
+    "", "DataReprocessing=", "If True reprocess data from one site to another (default: False)"
+)
+Script.registerSwitch(
+    "", "tag=", "Used only if DataReprocessing is True; only sites tagged with tag will be considered (default: None)"
+)
 Script.parseCommandLine()
 switches = dict(Script.getUnprocessedSwitches())
 
@@ -98,6 +104,11 @@ elif switches["DataReprocessing"] in ["True", "true"]:
     switches["DataReprocessing"] = True
 else:
     switches["DataReprocessing"] = False
+
+if switches.has_key("tag") is False:
+    switches["tag"] = None
+else:
+    switches["tag"] = str(switches["tag"])
 
 def load_config(name):
     try:
@@ -601,10 +612,7 @@ def main():
         # data is located when the source site has been banned
         if switches["DataReprocessing"] is True:
             j.setType("DataReprocessing")
-            
-            # WARNING: at the moment this is true for 
-            # LCG.IN2P3-CC.fr and LCG.GRIF.fr alone!
-            j.setTag("HighMem") 
+            j.setTag(tag)
 
         # this sends the job to the GRID and uploads all the
         # files into the input sandbox in the process
