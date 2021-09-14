@@ -133,7 +133,7 @@ using the protopipe prototype pipeline.
 
     # Define required directories and create them if necessary
 
-    shared_folder_directory = output_path
+    shared_folder_directory = args.output_path
     makedir(shared_folder_directory)
 
     analyses_directory = os.path.join(shared_folder_directory, "analyses")
