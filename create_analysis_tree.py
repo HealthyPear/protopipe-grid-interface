@@ -8,6 +8,7 @@ from argparse import RawTextHelpFormatter
 import shutil
 import logging
 
+logging.basicConfig(level=logging.INFO)
 
 def setup_config(input_file, output_file, old_text, new_text):
     """Fill a configuration file for an analysis starting from the example one.
@@ -102,6 +103,16 @@ using the protopipe prototype pipeline.
     parser.add_argument(
         "--analysis_name", type=str, required=True, help="Name of the analysis"
     )
+    
+    parser.add_argument(
+        "--source_path", type=str, default=os.environ['HOME'],
+        help="Full path to the source codes of protopipe and the GRID interface (default: home directory)"
+    )
+    
+    parser.add_argument(
+        "--output_path", type=str, default=os.environ['HOME'],
+        help="Full path of the 'shared_folder' (default: home directory)"
+    )
 
     parser.add_argument(
         "--GRID-is-DIRAC", action='store_true', help="The grid on which to run the analysis is the DIRAC grid."
@@ -120,12 +131,9 @@ using the protopipe prototype pipeline.
     # read command-line arguments
     analysis_name = args.analysis_name
 
-    # Get home's absolute path
-    home_path = os.environ['HOME']
-
     # Define required directories and create them if necessary
 
-    shared_folder_directory = os.path.join(home_path, "shared_folder")
+    shared_folder_directory = args.output_path
     makedir(shared_folder_directory)
 
     analyses_directory = os.path.join(shared_folder_directory, "analyses")
@@ -166,8 +174,8 @@ using the protopipe prototype pipeline.
         logging.info("Directory structure ready for protopipe analysis.")
 
         # Source code paths
-        interface_path = os.path.join(home_path, "protopipe-grid-interface")
-        protopipe_path = os.path.join(home_path, "protopipe")
+        interface_path = os.path.join(args.source_path, "protopipe-grid-interface")
+        protopipe_path = os.path.join(args.source_path, "protopipe")
         protopipe_configs = os.path.join(
             protopipe_path, "protopipe/aux/example_config_files/"
         )
@@ -176,20 +184,24 @@ using the protopipe prototype pipeline.
         
         setup_config(os.path.join(interface_path, "download_and_merge.sh"),
                      os.path.join(analysis_path, "data/download_and_merge.sh"),
-                     ['ANALYSIS_NAME=""',
+                     ['LOCAL=""',
+                      'ANALYSIS_NAME=""',
                       'HOME_PATH_GRID=""',
                       'ANALYSIS_PATH_GRID=""'],
-                     ['ANALYSIS_NAME="{}"'.format(analysis_name),
+                     ['LOCAL="{}"'.format(args.output_path),
+                      'ANALYSIS_NAME="{}"'.format(analysis_name),
                       'HOME_PATH_GRID="{}"'.format(args.GRID_home),
                       'ANALYSIS_PATH_GRID="{}"'.format(args.GRID_path_from_home)]
                      )
         
         setup_config(os.path.join(interface_path, "upload_models.sh"),
                      os.path.join(analysis_path, "estimators/upload_models.sh"),
-                     ['ANALYSIS_NAME=""',
+                     ['LOCAL=""',
+                      'ANALYSIS_NAME=""',
                       'HOME_PATH_GRID=""',
                       'ANALYSIS_PATH_GRID=""'],
-                     ['ANALYSIS_NAME="{}"'.format(analysis_name),
+                     ['LOCAL="{}"'.format(args.output_path),
+                      'ANALYSIS_NAME="{}"'.format(analysis_name),
                       'HOME_PATH_GRID="{}"'.format(args.GRID_home),
                       'ANALYSIS_PATH_GRID="{}"'.format(args.GRID_path_from_home)]
                      )
@@ -202,12 +214,12 @@ using the protopipe prototype pipeline.
         setup_config(os.path.join(interface_path, "grid.yaml"),
                      os.path.join(analysis_path, "configs/grid.yaml"),
                      ["$ANALYSIS_NAME",
-                      "$HOME",
+                      "$LOCAL",
                       "user_name: ''",
                       "home_grid: ''",
                       "outdir: ''"],
                      [analysis_name,
-                      home_path,
+                      args.output_path,
                       "user_name: '{}'".format(username),
                       "home_grid: '{}'".format(args.GRID_home),
                       "outdir: '{}'".format(args.GRID_path_from_home)
@@ -222,11 +234,16 @@ using the protopipe prototype pipeline.
                      )
 
         # Same with the benchmarks configuration file
-        setup_config(os.path.join(protopipe_configs, "benchmarks.yaml"),
-                     os.path.join(analysis_path, "configs/benchmarks.yaml"),
-                     ["analysis_name: ''"],
-                     ["analysis_name: '{}'".format(analysis_name)]
-                     )
+        try:
+            setup_config(os.path.join(protopipe_configs, "benchmarks.yaml"),
+                         os.path.join(analysis_path, "configs/benchmarks.yaml"),
+                         ["analysis_name: ''"],
+                         ["analysis_name: '{}'".format(analysis_name)]
+                         )
+        except IOError:
+            logging.warning("benchmarks.yaml not found in example configs")
+            logging.warning("You should find it under docs/contribute/benchmarks")
+            pass
 
         # copy all other configuration files
         # these will require to work outside of the container untile CTADIRAC supports Python3
@@ -237,7 +254,7 @@ using the protopipe prototype pipeline.
                 config_file, os.path.join(analysis_path, "configs")
             )
 
-        logging.info("Auxiliary scripts and configuration file are also stored there.")
+        logging.info("Auxiliary scripts and configuration files have been stored and partially filled.")
 
     else:
         logging.info("Required analysis folder already present. For safety no sub-directory will be overwritten.")
