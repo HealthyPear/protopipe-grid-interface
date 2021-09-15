@@ -43,6 +43,12 @@ Script.registerSwitch(
 Script.registerSwitch(
     "", "debug_script=", "If True save debug information during execution of the script (default: False)"
 )
+Script.registerSwitch(
+    "", "DataReprocessing=", "If True reprocess data from one site to another (default: False)"
+)
+Script.registerSwitch(
+    "", "tag=", "Used only if DataReprocessing is True; only sites tagged with tag will be considered (default: None)"
+)
 Script.parseCommandLine()
 switches = dict(Script.getUnprocessedSwitches())
 
@@ -91,7 +97,18 @@ elif switches["debug_script"] in ["True", "true"]:
     switches["debug_script"] = True
 else:
     switches["debug_script"] = False
+    
+if switches.has_key("DataReprocessing") is False:
+    switches["DataReprocessing"] = False
+elif switches["DataReprocessing"] in ["True", "true"]:
+    switches["DataReprocessing"] = True
+else:
+    switches["DataReprocessing"] = False
 
+if switches.has_key("tag") is False:
+    switches["tag"] = None
+else:
+    switches["tag"] = str(switches["tag"])
 
 def load_config(name):
     try:
@@ -590,6 +607,13 @@ def main():
             print("Name of the output file: {}".format(outputs))
             print("Output path from GRID home: {}".format(output_path))
             break
+
+        # This allows to run the jobs sites different from where the input
+        # data is located when the source site has been banned
+        if switches["DataReprocessing"] is True:
+            print("WARNING: DataReprocessing has been activated with {} tag!").format(switches["tag"])
+            j.setType("DataReprocessing")
+            j.setTag(switches["tag"])
 
         # this sends the job to the GRID and uploads all the
         # files into the input sandbox in the process
