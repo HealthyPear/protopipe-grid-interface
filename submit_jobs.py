@@ -612,7 +612,7 @@ def main():
         # data is located when the source site has been banned
         if switches["DataReprocessing"] is True:
             j.setType("DataReprocessing")
-            j.setTag(tag)
+            j.setTag(switches["tag"])
 
         # this sends the job to the GRID and uploads all the
         # files into the input sandbox in the process
