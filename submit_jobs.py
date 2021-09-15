@@ -97,7 +97,7 @@ def load_config(name):
     try:
         with open(name, "r") as stream:
             cfg = yaml.load(stream)
-    except FileNotFoundError as e:
+    except IOError as e:
         print(e)
         raise
     return cfg
@@ -540,12 +540,15 @@ def main():
                     mode=mode,
                 ),
             )
+            
+            # check that the output file is there
+            j.setExecutable("ls -lh {}".format(output_filename_temp))
 
             # remove the current file to clear space
             j.setExecutable("rm", os.path.basename(run_file))
 
         # simple `ls` for good measure
-        j.setExecutable("ls", "-lh")
+        # j.setExecutable("ls", "-lh")
 
         # if there is more than one file per job, merge the output tables
         if len(bunch) > 1:
