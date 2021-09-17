@@ -111,7 +111,7 @@ using the protopipe prototype pipeline.
     
     parser.add_argument(
         "--output_path", type=str, default=os.environ['HOME'],
-        help="Full path of the 'shared_folder' (default: home directory)"
+        help="Full path where the 'shared_folder' should be created (or where it already exists) (default: home directory)"
     )
 
     parser.add_argument(
@@ -133,7 +133,7 @@ using the protopipe prototype pipeline.
 
     # Define required directories and create them if necessary
 
-    shared_folder_directory = args.output_path
+    shared_folder_directory = os.path.join(args.output_path, "shared_folder")
     makedir(shared_folder_directory)
 
     analyses_directory = os.path.join(shared_folder_directory, "analyses")
