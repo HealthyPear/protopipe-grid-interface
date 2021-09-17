@@ -47,6 +47,9 @@ for part in $PARTICLE; do
   echo "Downloading $part..."
   $DIRAC/diracos/usr/bin/python $GRID_INTERFACE/download_files.py --indir="$INPUT_DIR" --outdir="$OUTPUT_DIR"
 
+  # Syncing (for good measure)
+  dirac-dms-directory-sync $INPUT_DIR $OUTPUT_DIR
+
   # Merge files
   echo "Merging $part..."
   OUTPUT_FILE="$OUTPUT_DIR/${DATA_TYPE}_${MODE}_${part}_merged.h5"
