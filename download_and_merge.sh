@@ -13,6 +13,8 @@ DATA_TYPE=""
 
 PARTICLE=""  # This can be list up to "gamma proton electron"
 
+N_JOBS=4 # Number of parallel jobs for directory syncing
+
 # ============================================
 #           DO NOT EDIT THIS PART
 # ============================================
@@ -48,7 +50,7 @@ for part in $PARTICLE; do
   $DIRAC/diracos/usr/bin/python $GRID_INTERFACE/download_files.py --indir="$INPUT_DIR" --outdir="$OUTPUT_DIR"
 
   # Syncing (for good measure)
-  dirac-dms-directory-sync $INPUT_DIR $OUTPUT_DIR
+  dirac-dms-directory-sync -D -j $N_JOBS $INPUT_DIR $OUTPUT_DIR
 
   # Merge files
   echo "Merging $part..."
