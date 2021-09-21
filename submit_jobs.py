@@ -611,7 +611,6 @@ def main():
         # This allows to run the jobs sites different from where the input
         # data is located when the source site has been banned
         if switches["DataReprocessing"] is True:
-            print("WARNING: DataReprocessing has been activated with {} tag!").format(switches["tag"])
             j.setType("DataReprocessing")
             if switches["tag"]:
                 j.setTag(switches["tag"])
