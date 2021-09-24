@@ -42,20 +42,18 @@ case $DATA_TYPE in
   "DL2") TYPE="DL2";;
 esac
 
-# Cycle over particle type
+# Download files
+echo "Downloading files..."
+$DIRAC/diracos/usr/bin/python $GRID_INTERFACE/download_files.py --indir="$INPUT_DIR" --outdir="$OUTPUT_DIR"
+
+# Syncing (for good measure)
+echo "Syncing directory to be sure..."
+dirac-dms-directory-sync -D -j $N_JOBS $INPUT_DIR $OUTPUT_DIR
+
+# Merge tables for each particle type
 for part in $PARTICLE; do
-
-  # Download files
-  echo "Downloading $part..."
-  $DIRAC/diracos/usr/bin/python $GRID_INTERFACE/download_files.py --indir="$INPUT_DIR" --outdir="$OUTPUT_DIR"
-
-  # Syncing (for good measure)
-  dirac-dms-directory-sync -D -j $N_JOBS $INPUT_DIR $OUTPUT_DIR
-
-  # Merge files
   echo "Merging $part..."
   OUTPUT_FILE="$OUTPUT_DIR/${TYPE}_${MODE}_${part}_merged.h5"
   TEMPLATE_FILE_NAME="${TYPE}_${part}_${MODE}"
-  $DIRAC/diracos/usr/bin/python $GRID_INTERFACE/merge_tables.py --indir="$OUTPUT_DIR" --template_file_name="$TEMPLATE_FILE_NAME" --outfile="$OUTPUT_FILE"
-
+  $DIRAC/diracos/usr/bin/python $GRID_INTERFACE/merge_tables.py --indir="$OUTPUT_DIR" --template_file_name="$TEMPLATE_FILE_NAME" --outfile="$OUTPUT_FILE" 
 done
