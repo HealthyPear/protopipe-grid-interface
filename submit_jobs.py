@@ -611,9 +611,13 @@ def main():
         # This allows to run the jobs sites different from where the input
         # data is located when the source site has been banned
         if switches["DataReprocessing"] is True:
-            print("WARNING: DataReprocessing has been activated with {} tag!").format(switches["tag"])
             j.setType("DataReprocessing")
-            j.setTag(switches["tag"])
+            if switches["tag"]:
+                j.setTag(switches["tag"])
+                print("WARNING: DataReprocessing has been activated with {} tag.").format(switches["tag"])
+            else:
+                print("WARNING: DataReprocessing has been activated with no tag.")
+
 
         # this sends the job to the GRID and uploads all the
         # files into the input sandbox in the process
