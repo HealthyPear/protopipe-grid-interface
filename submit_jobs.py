@@ -445,19 +445,14 @@ def main():
 
     for bunch in list_run_to_loop_on:
 
-        # for bunch in bunches_of_run:
-
-        # from IPython import embed
-        # embed()
-
         # this selects the `runxxx` part of the first and last file in the run
         # list and joins them with a dash so that we get a nice identifier in
         # the output file name.
         # if there is only one file in the list, use only that one
-        # run_token = re.split('_', bunch[+0])[3]  # JLK JLK
-        run_token = re.split("_", bunch[0])[3]
+        run_token = re.split("/", bunch[0])[-1].split("_")[3]
         if len(bunch) > 1:
-            run_token = "-".join([run_token, re.split("_", bunch[-1])[3]])
+            last_run = re.split("/", bunch[0])[-1].split("_")[-1]
+            run_token = "-".join([run_token, last_run])
 
         print("-" * 50)
         print("-" * 50)
