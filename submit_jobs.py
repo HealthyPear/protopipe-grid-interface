@@ -517,7 +517,7 @@ def main():
         j.setInputData(bunch)
 
         for run_file in bunch:
-            file_token = re.split("_", run_file)[3]
+            file_token = re.split("/", bunch[0])[-1].split("_")[3]
 
             # wait for a random number of seconds (up to five minutes) before
             # starting to add a bit more entropy in the starting times of the
