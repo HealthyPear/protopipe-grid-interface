@@ -276,16 +276,16 @@ def main():
     output_filename = output_filename_template
     output_path = outdir
     if estimate_energy is False and switches["output_type"] in "TRAINING":
-        output_path += "/{}/".format(training_dir_energy)
+        output_path += "/{}/{}/".format(training_dir_energy, particle)
         step = "energy"
     if estimate_energy is True and switches["output_type"] in "TRAINING":
-        output_path += "/{}/".format(training_dir_classification)
+        output_path += "/{}/{}/".format(training_dir_classification, particle)
         step = "classification"
     if switches["output_type"] in "DL2":
         if force_tailcut_for_extended_cleaning is False:
-            output_path += "/{}/".format(dl2_dir)
+            output_path += "/{}/{}/".format(dl2_dir, particle)
         else:
-            output_path += "/{}_force_tc_extended_cleaning/".format(dl2_dir)
+            output_path += "/{}_force_tc_extended_cleaning/{}/".format(dl2_dir, particle)
         step = ""
     output_filename += "_{}.h5"
 
