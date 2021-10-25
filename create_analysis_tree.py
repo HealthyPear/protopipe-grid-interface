@@ -7,6 +7,7 @@ import argparse
 from argparse import RawTextHelpFormatter
 import shutil
 import logging
+import yaml
 
 logging.basicConfig(level=logging.INFO)
 
@@ -75,14 +76,17 @@ def create_paths(dictionary):
 
     for key, children in dictionary.iteritems():
         if len(children) > 0:
-            for child in children:
-                if isinstance(child, dict):
-                    for grandchild in create_paths(child):
-                        paths.append(os.path.join(key, grandchild))
-                else:
+            if isinstance(children, list):
+                for child in children:
                     paths.append(os.path.join(key, child))
+            elif isinstance(children, dict):
+                for child in test(children):
+                    paths.append(os.path.join(key, child))
+            else:
+                raise ValueError("Analysis workflow must be defined using dictionaries and/or lists of folders.")
         else:
             paths.append(os.path.join(key))
+    
     return paths
 
 
@@ -102,6 +106,10 @@ using the protopipe prototype pipeline.
     )
     parser.add_argument(
         "--analysis_name", type=str, required=True, help="Name of the analysis"
+    )
+    
+    parser.add_argument(
+        "--analysis_directory_tree", type=str, required=True, help="Analysis workflow YAML file (see example in repository)"
     )
     
     parser.add_argument(
@@ -145,19 +153,11 @@ using the protopipe prototype pipeline.
     analysis_path = os.path.join(analyses_directory, analysis_name)
     new_analysis = makedir(analysis_path)
 
-    # Define analysis subdirectories
-    # (it could be read as a dictionary from a JSON file if multiple analysis workflows are introduced)
-    subdirectories = {
-        "configs": [],
-        "data": ["simtel",
-                    {"TRAINING": ["for_energy_estimation",
-                                  "for_particle_classification"]},
-                     "DL2",
-                     "DL3"],
-        "estimators": ["energy_regressor", "gamma_hadron_classifier"],
-    }
+    # Read analysis workflow and convert it to directory paths
+    with open(args.analysis_directory_tree) as f:
+        analysis_directory_tree = yaml.load(f, Loader=yaml.FullLoader)
     # Build relative paths for this directory tree
-    relative_paths = create_paths(subdirectories)
+    relative_paths = create_paths(analysis_directory_tree)
 
     # Create them only if analyses folder was created now
     if new_analysis:
