@@ -80,7 +80,7 @@ def create_paths(dictionary):
                 for child in children:
                     paths.append(os.path.join(key, child))
             elif isinstance(children, dict):
-                for child in test(children):
+                for child in create_paths(children):
                     paths.append(os.path.join(key, child))
             else:
                 raise ValueError("Analysis workflow must be defined using dictionaries and/or lists of folders.")
