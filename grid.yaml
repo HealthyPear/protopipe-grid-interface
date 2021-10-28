@@ -34,6 +34,7 @@ GRID:
  outdir: ''
 
  # The following four directories will live inside 'outdir'
+ # Sub-directories by particle type will be created automatically
 
  # Directory for training data used for energy estimation
  training_dir_energy: 'data/TRAINING/for_energy_estimation'
