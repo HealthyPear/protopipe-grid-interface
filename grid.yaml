@@ -62,23 +62,23 @@ GRID:
  # LCG.GRIF.fr, LCG.DESY-ZEUTHEN.de, LCG.IN2P3-CC.fr
  banned_sites: ['LCG.CPPM.fr']
 
-# Lists of simtel files
+# You can get the list of simtel files using
 # >>> python protopipe-grid-interface/split_dataset.py -h
 
 EnergyRegressor:
  # Events used to train an energy regressor
  # Used when output_type = TRAINING and estimate_energy is False
- gamma_list: '$LOCAL/shared_folder/analyses/$ANALYSIS_NAME/data/simtel/Prod3_LaPalma_Baseline_NSB1x_gamma_South_20deg_DL0_TRAINING_ENERGY.list'
+ gamma_list: '$LOCAL/shared_folder/analyses/$ANALYSIS_NAME/data/simtel/XXX.list'
 
 GammaHadronClassifier:
  # Events used to train a gamma-hadron classifier
  # Used when output_type = TRAINING and estimate_energy is True
- gamma_list: '$LOCAL/shared_folder/analyses/$ANALYSIS_NAME/data/simtel/Prod3_LaPalma_Baseline_NSB1x_gamma_South_20deg_DL0_TRAINING_CLASSIFICATION.list'
- proton_list: '$LOCAL/shared_folder/analyses/$ANALYSIS_NAME/data/simtel/Prod3_LaPalma_Baseline_NSB1x_proton_South_20deg_DL0_TRAINING_CLASSIFICATION.list'
+ gamma_list: '$LOCAL/shared_folder/analyses/$ANALYSIS_NAME/data/simtel/XXX.list'
+ proton_list: '$LOCAL/shared_folder/analyses/$ANALYSIS_NAME/data/simtel/XXX.list'
 
 Performance:
  # Events processed directly up to DL2 for DL3 production
  # Used when output_type = DL2
- gamma_list: '$LOCAL/shared_folder/analyses/$ANALYSIS_NAME/data/simtel/Prod3_LaPalma_Baseline_NSB1x_gamma_South_20deg_DL0_PERFORMANCE.list'
- proton_list: '$LOCAL/shared_folder/analyses/$ANALYSIS_NAME/data/simtel/Prod3_LaPalma_Baseline_NSB1x_proton_South_20deg_DL0_PERFORMANCE.list'
- electron_list: '$LOCAL/shared_folder/analyses/$ANALYSIS_NAME/data/simtel/Prod3_LaPalma_Baseline_NSB1x_electron_South_20deg_DL0_PERFORMANCE.list'
+ gamma_list: '$LOCAL/shared_folder/analyses/$ANALYSIS_NAME/data/simtel/XXX.list'
+ proton_list: '$LOCAL/shared_folder/analyses/$ANALYSIS_NAME/data/simtel/XXX.list'
+ electron_list: '$LOCAL/shared_folder/analyses/$ANALYSIS_NAME/data/simtel/XXX.list'
