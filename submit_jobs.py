@@ -493,7 +493,7 @@ def main():
         file_on_grid = os.path.join(output_path, output_filenames[mode])
         print("DEBUG> check for existing file on GRID...")
         if file_on_grid in grid_filelist:
-            print("\n WARNING> {} already on GRID SE\n".format(job_name))
+            print("\n WARNING> The file associated to the job {} is already stored on a GRID SE\n".format(job_name))
             continue
 
         if n_jobs_max == 0:
@@ -660,6 +660,7 @@ def main():
         print("This is a DRY RUN! -- analysis.yaml has NOT been uploaded.")
 
     print("\nall done -- exiting now")
+    print("DEBUG > {} jobs belong to this batch".format(len(list_run_to_loop_on)))
     exit()
 
 
