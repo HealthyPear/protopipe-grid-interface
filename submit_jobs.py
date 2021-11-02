@@ -516,8 +516,8 @@ def main():
         # Add simtel files as input data
         j.setInputData(bunch)
 
-        for run_file in bunch:
-            file_token = re.split("/", bunch[0])[-1].split("_")[3]
+        for i, run_file in enumerate(bunch):
+            file_token = re.split("/", bunch[i])[-1].split("_")[3]
 
             # wait for a random number of seconds (up to five minutes) before
             # starting to add a bit more entropy in the starting times of the
@@ -544,6 +544,7 @@ def main():
                 output_filename_temp = output_filename.format(
                     "_".join([step, particle, mode, file_token])
                 )
+
             j.setExecutable(
                 "./pilot.sh",
                 pilot_args_write.format(
@@ -558,9 +559,6 @@ def main():
 
             # remove the current file to clear space
             j.setExecutable("rm", os.path.basename(run_file))
-
-        # simple `ls` for good measure
-        # j.setExecutable("ls", "-lh")
 
         # if there is more than one file per job, merge the output tables
         if len(bunch) > 1:
