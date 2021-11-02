@@ -451,7 +451,7 @@ def main():
         # if there is only one file in the list, use only that one
         run_token = re.split("/", bunch[0])[-1].split("_")[3]
         if len(bunch) > 1:
-            last_run = re.split("/", bunch[0])[-1].split("_")[-1]
+            last_run = re.split("/", bunch[-1])[-1].split("_")[3]
             run_token = "-".join([run_token, last_run])
 
         print("-" * 50)
