@@ -97,7 +97,7 @@ elif switches["debug_script"] in ["True", "true"]:
     switches["debug_script"] = True
 else:
     switches["debug_script"] = False
-    
+
 if switches.has_key("DataReprocessing") is False:
     switches["DataReprocessing"] = False
 elif switches["DataReprocessing"] in ["True", "true"]:
@@ -260,9 +260,6 @@ def main():
         prod3b_filelist["proton"] = cfg["Performance"]["proton_list"]
         prod3b_filelist["electron"] = cfg["Performance"]["electron_list"]
 
-    # from IPython import embed
-    # embed()
-
     # Split list of files according to stoprage elements
     with open(prod3b_filelist[particle]) as f:
         filelist = f.readlines()
@@ -276,16 +273,16 @@ def main():
     output_filename = output_filename_template
     output_path = outdir
     if estimate_energy is False and switches["output_type"] in "TRAINING":
-        output_path += "/{}/".format(training_dir_energy)
+        output_path += "/{}/{}/".format(training_dir_energy, particle)
         step = "energy"
     if estimate_energy is True and switches["output_type"] in "TRAINING":
-        output_path += "/{}/".format(training_dir_classification)
+        output_path += "/{}/{}/".format(training_dir_classification, particle)
         step = "classification"
     if switches["output_type"] in "DL2":
         if force_tailcut_for_extended_cleaning is False:
-            output_path += "/{}/".format(dl2_dir)
+            output_path += "/{}/{}/".format(dl2_dir, particle)
         else:
-            output_path += "/{}_force_tc_extended_cleaning/".format(dl2_dir)
+            output_path += "/{}_force_tc_extended_cleaning/{}/".format(dl2_dir, particle)
         step = ""
     output_filename += "_{}.h5"
 
@@ -328,7 +325,7 @@ def main():
         print("The following configs(s) for such models will be uploaded to the GRID:")
         print(config_to_upload)
         configs_to_upload.append(config_to_upload)
-            # input_sandbox.append(model_to_upload)
+
     elif estimate_energy is False and switches["output_type"] in "TRAINING":
         pass
     else:  # Charge also classifer for DL2
@@ -353,7 +350,7 @@ def main():
 
             config_to_upload = config_path_template.format(model_method_list[idx])
             print(config_to_upload)
-            configs_to_upload.append(config_to_upload) # upload only 1 copy
+            configs_to_upload.append(config_to_upload)
 
             print("The following model(s) related to such configuration file will be uploaded to the GRID:")
 
@@ -375,7 +372,6 @@ def main():
                 print(model_to_upload)
 
                 models_to_upload.append(model_to_upload)
-                # input_sandbox.append(model_to_upload)
 
     # summary before submitting
     print("\nDEBUG> running as:")
@@ -388,14 +384,6 @@ def main():
     print(particle)
     print("\nDEBUG> Energy estimation:")
     print(estimate_energy)
-
-    # ########  ##     ## ##    ## ##    ## #### ##    ##  ######
-    # ##     ## ##     ## ###   ## ###   ##  ##  ###   ## ##    ##
-    # ##     ## ##     ## ####  ## ####  ##  ##  ####  ## ##
-    # ########  ##     ## ## ## ## ## ## ##  ##  ## ## ## ##   ####
-    # ##   ##   ##     ## ##  #### ##  ####  ##  ##  #### ##    ##
-    # ##    ##  ##     ## ##   ### ##   ###  ##  ##   ### ##    ##
-    # ##     ##  #######  ##    ## ##    ## #### ##    ##  ######
 
     # list of files on the GRID SE space
     # not submitting jobs where we already have the output
@@ -443,7 +431,10 @@ def main():
         else:
             print("\n... done")
 
-    for bunch in list_run_to_loop_on:
+    for n_job, bunch in enumerate(list_run_to_loop_on):
+
+        print("-" * 50)
+        print("JOB # {}".format(n_job +1))
 
         # this selects the `runxxx` part of the first and last file in the run
         # list and joins them with a dash so that we get a nice identifier in
@@ -451,30 +442,28 @@ def main():
         # if there is only one file in the list, use only that one
         run_token = re.split("/", bunch[0])[-1].split("_")[3]
         if len(bunch) > 1:
-            last_run = re.split("/", bunch[0])[-1].split("_")[-1]
+            last_run = re.split("/", bunch[-1])[-1].split("_")[3]
             run_token = "-".join([run_token, last_run])
-
-        print("-" * 50)
-        print("-" * 50)
 
         # setting output name
         output_filenames = dict()
         if switches["output_type"] in "DL2":
-            job_name = "protopipe_{}_{}_{}_{}_{}".format(config_name,
-                                               switches["output_type"],
-                                               particle,
-                                               run_token,
-                                               mode)
+            job_name = "protopipe_{}_{}_{}_{}".format(config_name,
+                                                      switches["output_type"],
+                                                      particle,
+                                                      run_token
+                                                     )
             output_filenames[mode] = output_filename.format(
                 "_".join([particle, mode, run_token])
             )
         else:
-            job_name = "protopipe_{}_{}_{}_{}_{}_{}".format(config_name,
-                                                  switches["output_type"],
-                                                  step,
-                                                  particle,
-                                                  run_token,
-                                                  mode)
+            job_name = "protopipe_{}_{}_{}_{}_{}".format(config_name,
+                                                         switches["output_type"],
+                                                         step,
+                                                         particle,
+                                                         run_token
+                                                        )
+
             output_filenames[mode] = output_filename.format(
                 "_".join([step, particle, mode, run_token])
             )
@@ -493,7 +482,7 @@ def main():
         file_on_grid = os.path.join(output_path, output_filenames[mode])
         print("DEBUG> check for existing file on GRID...")
         if file_on_grid in grid_filelist:
-            print("\n WARNING> {} already on GRID SE\n".format(job_name))
+            print("\n WARNING> The file associated to the job {} is already stored on a GRID SE\n".format(job_name))
             continue
 
         if n_jobs_max == 0:
@@ -516,23 +505,8 @@ def main():
         # Add simtel files as input data
         j.setInputData(bunch)
 
-        for run_file in bunch:
-            file_token = re.split("/", bunch[0])[-1].split("_")[3]
-
-            # wait for a random number of seconds (up to five minutes) before
-            # starting to add a bit more entropy in the starting times of the
-            # dirac queries.
-            # if too many jobs try in parallel to access the SEs,
-            # the interface crashes
-            # #sleep = random.randint(0, 20)  # seconds
-            # #j.setExecutable('sleep', str(sleep))
-
-            # JLK: Try to stop doing that
-            # consecutively downloads the data files, processes them,
-            # deletes the input
-            # and goes on to the next input file;
-            # afterwards, the output files are merged
-            # j.setExecutable('dirac-dms-get-file', "LFN:" + run_file)
+        for i, run_file in enumerate(bunch):
+            file_token = re.split("/", bunch[i])[-1].split("_")[3]
 
             # source the miniconda ctapipe environment and
             # run the python script with all its arguments
@@ -544,6 +518,7 @@ def main():
                 output_filename_temp = output_filename.format(
                     "_".join([step, particle, mode, file_token])
                 )
+
             j.setExecutable(
                 "./pilot.sh",
                 pilot_args_write.format(
@@ -552,15 +527,12 @@ def main():
                     mode=mode,
                 ),
             )
-            
+
             # check that the output file is there
             j.setExecutable("ls -lh {}".format(output_filename_temp))
 
             # remove the current file to clear space
             j.setExecutable("rm", os.path.basename(run_file))
-
-        # simple `ls` for good measure
-        # j.setExecutable("ls", "-lh")
 
         # if there is more than one file per job, merge the output tables
         if len(bunch) > 1:
@@ -639,7 +611,7 @@ def main():
         pass
 
     # Upload analysis configuration file for provenance
-    
+
     SE_LIST=['CC-IN2P3-USER', 'DESY-ZN-USER', 'CNAF-USER', 'CEA-USER']
     analysis_config_local = os.path.join(config_path, config_file)
     # the configuration file is uploaded to the data directory because
@@ -660,6 +632,7 @@ def main():
         print("This is a DRY RUN! -- analysis.yaml has NOT been uploaded.")
 
     print("\nall done -- exiting now")
+    print("DEBUG > {} jobs belong to this batch".format(len(list_run_to_loop_on)))
     exit()
 
 
