@@ -13,7 +13,7 @@ DATA_TYPE=""
 
 PARTICLE=""  # This can be list up to "gamma proton electron"
 
-N_JOBS=4 # Number of parallel jobs for directory syncing
+N_JOBS=4 # Number of parallel jobs for directory syncing
 
 # ============================================
 #           DO NOT EDIT THIS PART

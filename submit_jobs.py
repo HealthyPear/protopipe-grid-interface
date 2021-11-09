@@ -97,7 +97,7 @@ elif switches["debug_script"] in ["True", "true"]:
     switches["debug_script"] = True
 else:
     switches["debug_script"] = False
-    
+
 if switches.has_key("DataReprocessing") is False:
     switches["DataReprocessing"] = False
 elif switches["DataReprocessing"] in ["True", "true"]:
@@ -260,9 +260,6 @@ def main():
         prod3b_filelist["proton"] = cfg["Performance"]["proton_list"]
         prod3b_filelist["electron"] = cfg["Performance"]["electron_list"]
 
-    # from IPython import embed
-    # embed()
-
     # Split list of files according to stoprage elements
     with open(prod3b_filelist[particle]) as f:
         filelist = f.readlines()
@@ -328,7 +325,7 @@ def main():
         print("The following configs(s) for such models will be uploaded to the GRID:")
         print(config_to_upload)
         configs_to_upload.append(config_to_upload)
-            # input_sandbox.append(model_to_upload)
+
     elif estimate_energy is False and switches["output_type"] in "TRAINING":
         pass
     else:  # Charge also classifer for DL2
@@ -353,7 +350,7 @@ def main():
 
             config_to_upload = config_path_template.format(model_method_list[idx])
             print(config_to_upload)
-            configs_to_upload.append(config_to_upload) # upload only 1 copy
+            configs_to_upload.append(config_to_upload)
 
             print("The following model(s) related to such configuration file will be uploaded to the GRID:")
 
@@ -375,7 +372,6 @@ def main():
                 print(model_to_upload)
 
                 models_to_upload.append(model_to_upload)
-                # input_sandbox.append(model_to_upload)
 
     # summary before submitting
     print("\nDEBUG> running as:")
@@ -388,14 +384,6 @@ def main():
     print(particle)
     print("\nDEBUG> Energy estimation:")
     print(estimate_energy)
-
-    # ########  ##     ## ##    ## ##    ## #### ##    ##  ######
-    # ##     ## ##     ## ###   ## ###   ##  ##  ###   ## ##    ##
-    # ##     ## ##     ## ####  ## ####  ##  ##  ####  ## ##
-    # ########  ##     ## ## ## ## ## ## ##  ##  ## ## ## ##   ####
-    # ##   ##   ##     ## ##  #### ##  ####  ##  ##  #### ##    ##
-    # ##    ##  ##     ## ##   ### ##   ###  ##  ##   ### ##    ##
-    # ##     ##  #######  ##    ## ##    ## #### ##    ##  ######
 
     # list of files on the GRID SE space
     # not submitting jobs where we already have the output
@@ -443,7 +431,10 @@ def main():
         else:
             print("\n... done")
 
-    for bunch in list_run_to_loop_on:
+    for n_job, bunch in enumerate(list_run_to_loop_on):
+
+        print("-" * 50)
+        print("JOB # {}".format(n_job +1))
 
         # this selects the `runxxx` part of the first and last file in the run
         # list and joins them with a dash so that we get a nice identifier in
@@ -454,27 +445,25 @@ def main():
             last_run = re.split("/", bunch[-1])[-1].split("_")[3]
             run_token = "-".join([run_token, last_run])
 
-        print("-" * 50)
-        print("-" * 50)
-
         # setting output name
         output_filenames = dict()
         if switches["output_type"] in "DL2":
-            job_name = "protopipe_{}_{}_{}_{}_{}".format(config_name,
-                                               switches["output_type"],
-                                               particle,
-                                               run_token,
-                                               mode)
+            job_name = "protopipe_{}_{}_{}_{}".format(config_name,
+                                                      switches["output_type"],
+                                                      particle,
+                                                      run_token
+                                                     )
             output_filenames[mode] = output_filename.format(
                 "_".join([particle, mode, run_token])
             )
         else:
-            job_name = "protopipe_{}_{}_{}_{}_{}_{}".format(config_name,
-                                                  switches["output_type"],
-                                                  step,
-                                                  particle,
-                                                  run_token,
-                                                  mode)
+            job_name = "protopipe_{}_{}_{}_{}_{}".format(config_name,
+                                                         switches["output_type"],
+                                                         step,
+                                                         particle,
+                                                         run_token
+                                                        )
+
             output_filenames[mode] = output_filename.format(
                 "_".join([step, particle, mode, run_token])
             )
@@ -519,21 +508,6 @@ def main():
         for i, run_file in enumerate(bunch):
             file_token = re.split("/", bunch[i])[-1].split("_")[3]
 
-            # wait for a random number of seconds (up to five minutes) before
-            # starting to add a bit more entropy in the starting times of the
-            # dirac queries.
-            # if too many jobs try in parallel to access the SEs,
-            # the interface crashes
-            # #sleep = random.randint(0, 20)  # seconds
-            # #j.setExecutable('sleep', str(sleep))
-
-            # JLK: Try to stop doing that
-            # consecutively downloads the data files, processes them,
-            # deletes the input
-            # and goes on to the next input file;
-            # afterwards, the output files are merged
-            # j.setExecutable('dirac-dms-get-file', "LFN:" + run_file)
-
             # source the miniconda ctapipe environment and
             # run the python script with all its arguments
             if switches["output_type"] in "DL2":
@@ -553,7 +527,7 @@ def main():
                     mode=mode,
                 ),
             )
-            
+
             # check that the output file is there
             j.setExecutable("ls -lh {}".format(output_filename_temp))
 
@@ -637,7 +611,7 @@ def main():
         pass
 
     # Upload analysis configuration file for provenance
-    
+
     SE_LIST=['CC-IN2P3-USER', 'DESY-ZN-USER', 'CNAF-USER', 'CEA-USER']
     analysis_config_local = os.path.join(config_path, config_file)
     # the configuration file is uploaded to the data directory because
