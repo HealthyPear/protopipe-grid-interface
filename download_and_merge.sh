@@ -39,11 +39,13 @@ esac
 
 # For each particle type
 for part in $PARTICLE; do
+  
+  echo "Processing $part ..."
 
   # DIRAC file catalog full path
-  INPUT_DIR="$HOME_PATH_GRID/$ANALYSIS_PATH_GRID/$ANALYSIS_NAME/data/$DATA_TYPE/$PARTICLE"
+  INPUT_DIR="$HOME_PATH_GRID/$ANALYSIS_PATH_GRID/$ANALYSIS_NAME/data/$DATA_TYPE/$part"
   # Full path in local virtual environment for the grid interface
-  OUTPUT_DIR="$ANALYSIS_PATH_LOCAL/data/$DATA_TYPE/$PARTICLE"
+  OUTPUT_DIR="$ANALYSIS_PATH_LOCAL/data/$DATA_TYPE/$part"
 
   # Download files
   echo "Downloading files..."
