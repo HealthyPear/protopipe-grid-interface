@@ -126,7 +126,8 @@ Default is [100]",
         flist.close()
 
         if args.debug:
-            print("Input list for {} from {}".format(particle_types[i], prodlist[0]))
+            print("Input list for {} from {}".format(
+                particle_types[i], prodlist[0]))
             print("Contains {} files...".format(len(prodLines)))
 
         numlines = [0]
@@ -144,7 +145,8 @@ Default is [100]",
         # Cycle on analysis stages
         for inum, iprop in enumerate(numlines):
 
-            outname = os.path.basename(prodlist[0]).split(".list")[0] + stages[inum] + ".list"
+            outname = os.path.basename(prodlist[0]).split(".list")[
+                                       0] + stages[inum] + ".list"
 
             if args.debug:
                 print("DEBUG>> outname: {}".format(outname))
@@ -157,12 +159,11 @@ Default is [100]",
             if args.debug:
                 print("DEBUG>> Number of files: {}".format(len(Tlines)))
             if len(Tlines) > 0:
-                fprop = open(os.path.join(outdir, outname), "w")
-                for line in Tlines:
-                    print >> fprop, line.strip()
-                fprop.close()
+                with open(os.path.join(outdir, outname), "w") as f:
+                    f.writelines(Tlines)
 
         del stages[0]
+
 
 if __name__ == "__main__":
     main()
