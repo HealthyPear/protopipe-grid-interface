@@ -57,55 +57,55 @@ from DIRAC.Interfaces.API.Job import Job
 from DIRAC.Interfaces.API.Dirac import Dirac
 
 # Control switches
-if switches.has_key("analysis_path") is False:
+if "analysis_path" not in switches:
     print("Analysis full path argument is missing: --analysis_path")
     sys.exit()
 
-if switches.has_key("output_type") is False:
+if "output_type" not in switches:
     print("Output data level argument is missing: --output_type")
     sys.exit()
 
-if switches.has_key("max_events") is False:
+if "max_events" not in switches:
     switches["max_events"] = 10000000000
 else:
     switches["max_events"] = int(switches["max_events"])
 
-if switches.has_key("dry") is False:
+if "dry" not in switches:
     switches["dry"] = False
 elif switches["dry"] in ["True", "true"]:
     switches["dry"] = True
 else:
     switches["dry"] = False
 
-if switches.has_key("test") is False:
+if "test" not in switches:
     switches["test"] = False
 elif switches["test"] in ["True", "true"]:
     switches["test"] = True
 else:
     switches["test"] = False
 
-if switches.has_key("save_images") is False:
+if "save_images" not in switches:
     switches["save_images"] = False
 elif switches["save_images"] in ["True", "true"]:
     switches["save_images"] = True
 else:
     switches["save_images"] = False
 
-if switches.has_key("debug_script") is False:
+if "debug_script" not in switches:
     switches["debug_script"] = False
 elif switches["debug_script"] in ["True", "true"]:
     switches["debug_script"] = True
 else:
     switches["debug_script"] = False
 
-if switches.has_key("DataReprocessing") is False:
+if "DataReprocessing" not in switches:
     switches["DataReprocessing"] = False
 elif switches["DataReprocessing"] in ["True", "true"]:
     switches["DataReprocessing"] = True
 else:
     switches["DataReprocessing"] = False
 
-if switches.has_key("tag") is False:
+if "tag" not in switches:
     switches["tag"] = None
 else:
     switches["tag"] = str(switches["tag"])
@@ -113,7 +113,7 @@ else:
 def load_config(name):
     try:
         with open(name, "r") as stream:
-            cfg = yaml.load(stream)
+            cfg = yaml.load(stream, Loader=yaml.FullLoader)
     except IOError as e:
         print(e)
         raise
