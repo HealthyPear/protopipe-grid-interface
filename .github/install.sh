@@ -8,9 +8,9 @@ if [[ "$INSTALL_METHOD" == "conda" ]]; then
   # Useful for debugging any issues with conda
   conda info -a
 
-  sed -i -e "s/- python=.*/- python=$PYTHON_VERSION/g" environment.yml
+  sed -i -e "s/- python=.*/- python=$PYTHON_VERSION/g" environment.yaml
   conda install -c conda-forge mamba
-  mamba env create -n protopipe-grid-interface --file environment.yml
+  mamba env create -n protopipe-grid-interface --file environment.yaml
   conda activate protopipe-grid-interface
 else
   echo "Using pip"
