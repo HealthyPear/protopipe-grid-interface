@@ -172,3 +172,24 @@ def upload(indir, infile, outdir, se=DEFAULT_SE):
         log.error(f"STDERR: {e.stderr}")
 
     return None
+
+
+def load_config(name):
+    """Load a YAML configuration file.
+
+    Parameters
+    ----------
+    name: str or pathlib.Path
+
+    Returns
+    -------
+    cfg: object
+        Python object (usually a dictionary).
+    """
+    try:
+        with open(name, "r") as stream:
+            cfg = yaml.load(stream, Loader=yaml.FullLoader)
+    except FileNotFoundError as e:
+        raise e
+
+    return cfg

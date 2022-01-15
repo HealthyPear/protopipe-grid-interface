@@ -1,13 +1,15 @@
 from pathlib import Path
 import subprocess
 from pkg_resources import resource_filename
-
+import pytest
 import yaml
 
-from protopipe.pipeline.io import load_config
+from protopipe_grid_interface.utils import load_config
 
 
 def test_directory_tree(tmpdir):
+
+    pytest.importorskip("protopipe", minversion="0.5.0")
 
     test_analysis_workflow = tmpdir.join("test_analysis_workflow.yaml")
 
@@ -31,7 +33,9 @@ def test_directory_tree(tmpdir):
     subprocess.run(
         [
             "python",
-            resource_filename("protopipe_grid_interface", "scripts/create_analysis_tree.py"),
+            resource_filename(
+                "protopipe_grid_interface", "scripts/create_analysis_tree.py"
+            ),
             "--analysis_name",
             "test_analysis",
             "--analysis_directory_tree",
@@ -41,7 +45,8 @@ def test_directory_tree(tmpdir):
             "home_test",
             "--output_path",
             tmpdir,
-        ], check=True
+        ],
+        check=True,
     )
 
     analysis_path = tmpdir / "shared_folder/analyses/test_analysis"
@@ -57,7 +62,7 @@ def test_directory_tree(tmpdir):
         assert metadata["GRID is DIRAC"] == True
         assert metadata["Home directory on the GRID"] == "home_test"
         assert metadata["analysis directory on the GRID from home"] == ""
-        
+
     # Check that the created directory tree is the expected one
     assert analysis_path.exists()
     assert (analysis_path / "configs").exists()
@@ -71,4 +76,3 @@ def test_directory_tree(tmpdir):
     assert (analysis_path / "data/DL3").exists()
     assert (analysis_path / "estimators/energy_regressor").exists()
     assert (analysis_path / "estimators/gamma_hadron_classifier").exists()
-

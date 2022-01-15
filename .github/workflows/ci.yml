@@ -8,15 +8,16 @@ on: [push, pull_request]
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   tests:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
+        os: [ubuntu-latest, macos-latest]
         python-version: [3.8]
-        install-method: ["conda", "pip"]
+        install-method: ["conda"]
     steps:
       - uses: actions/checkout@v2
         with:
-            fetch-depth: 0
+          fetch-depth: 0
 
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v2
@@ -30,7 +31,7 @@ jobs:
         run: |
           source .github/install.sh
           python --version
-          pip install pytest codecov pytest-cov tables
+          pip install .[all]
           pip freeze
       - name: Tests
         env:
@@ -38,7 +39,7 @@ jobs:
         run: |
           if [[ "$INSTALL_METHOD" == "conda" ]]; then
             source $CONDA/etc/profile.d/conda.sh
-            conda activate protopipe-grid-interface
+            conda activate CI
             conda list
           fi
           pytest --cov=protopipe --cov-report=xml

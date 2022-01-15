@@ -7,6 +7,8 @@ extras_require = {
         "pytest-cov",
         "pytest-dependency",
         "codecov",
+        "pyyaml",
+        "tables",
     ],
 }
 
@@ -31,7 +33,7 @@ setup(
     package_data={
         "protopipe_grid_interface": ["aux/standard_analysis_workflow.yaml", "grid.yaml"]
     },
-    install_requires=["DIRAC", "CTADIRAC", "PyYAML", "tables"],
+    install_requires=["DIRAC", "CTADIRAC", "pyyaml", "tables"],
     zip_safe=False,
     use_scm_version={
         "write_to": os.path.join("protopipe_grid_interface", "_version.py")

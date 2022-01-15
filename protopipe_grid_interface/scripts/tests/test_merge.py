@@ -5,7 +5,6 @@ import subprocess
 from pkg_resources import resource_filename
 
 import tables as tb
-import numpy as np
 
 
 def create_mock_file(tmpdir, filename):

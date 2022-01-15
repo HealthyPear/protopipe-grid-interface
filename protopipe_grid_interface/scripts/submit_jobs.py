@@ -14,7 +14,7 @@ try:
 except ImportError:
     raise ImportError("protopipe is not installed in this environment.")
 
-from protopipe_grid_interface.utils import initialize_logger
+from protopipe_grid_interface.utils import initialize_logger, load_config
 
 try:
     from DIRAC.Core.Base import Script
