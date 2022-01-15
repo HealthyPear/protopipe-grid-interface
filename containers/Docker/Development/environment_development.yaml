@@ -1,0 +1,17 @@
+name: protopipe-CTADIRAC-dev
+channels:
+  - conda-forge
+dependencies:
+  - python=3.8
+  - pip
+  # required by the interface
+  - dirac-grid
+  - voms
+  - pytables
+  - pyyaml
+  # required for ctapipe 0.11.0 based installation
+  # will work anyway if such dependency is upgraded
+  - gammapy=0.18
+  - eventio
+  - pip:
+      - CTADIRAC
