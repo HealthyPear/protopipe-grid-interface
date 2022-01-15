@@ -1,14 +1,38 @@
-#!/usr/bin/env python
-
 import argparse
 import glob
 import logging
 
-# PyTables
 try:
     import tables as tb
 except ImportError:
-    logging.critical("Pytables is not installed in this environment (pip install tables).")
+    logging.critical(
+        "Pytables is not installed in this environment (pip install tables)."
+    )
+
+# logging.basicConfig(level=logging.DEBUG)
+
+
+def merge_call(template_file_name, indir, outfile):
+
+    logging.debug("template_file_name={}".format(template_file_name))
+    logging.debug("indir={}".format(indir))
+    logging.debug("outfile={}".format(outfile))
+
+    input_template = "{}/{}*.h5".format(indir, template_file_name)
+    logging.debug(f"input_template: {input_template}")
+
+    filename_list = glob.glob(input_template)
+    logging.debug(f"filename_list (truncated to 10 files): {filename_list[0:10]}")
+
+    merged_tables, empty_files = merge_list_of_pytables(filename_list, outfile)
+
+    if empty_files > 0:
+        ratio = round(float(empty_files) / float(len(filename_list)), 2) * 100
+        logging.warning(
+            "%d over %f (%f%%) were empty!" % (empty_files, len(filename_list), ratio)
+        )
+
+    return None
 
 
 def merge_list_of_pytables(filename_list, destination):
@@ -18,22 +42,22 @@ def merge_list_of_pytables(filename_list, destination):
     empty_files = 0
 
     for idx, filename in enumerate(sorted(filename_list)):
-        
+
         logging.info("File # %d of %d" % (idx, len(filename_list)))
         logging.info("Filename %s" % filename)
 
         try:
             infile = tb.open_file(filename, mode="r")
-        except tables.exceptions.HDF5ExtError:
-            logging.warning('file %s appears to be corrupt' % filename)
+        except tb.exceptions.HDF5ExtError:
+            logging.warning("file %s appears to be corrupt" % filename)
             continue
-            
+
         table_name_list = [table.name for table in infile.root]  # Name of tables
-        
+
         if len(table_name_list) == 0:
-            logging.warning('file %s appears to be empty' % filename)
+            logging.warning("file %s appears to be empty" % filename)
             empty_file = True
-            empty_files +=1
+            empty_files += 1
         else:
             empty_file = False
 
@@ -67,6 +91,7 @@ def merge_list_of_pytables(filename_list, destination):
                 table_tmp.append_where(dstTable=merged_tables[name])
 
         infile.close()
+    outfile.close()
 
     return merged_tables, empty_files
 
@@ -78,21 +103,7 @@ def main():
     parser.add_argument("--outfile", type=str)
     args = parser.parse_args()
 
-    logging.debug("template_file_name={}".format(args.template_file_name))
-    logging.debug("indir={}".format(args.indir))
-    logging.debug("outfile={}".format(args.outfile))
-
-    input_template = "{}/{}*.h5".format(args.indir, args.template_file_name)
-    logging.info("input_template:", input_template)
-
-    filename_list = glob.glob(input_template)
-    logging.info("filename_list (truncated):", filename_list[0:10])
-
-    merged_tables, empty_files = merge_list_of_pytables(filename_list, args.outfile)
-    
-    if empty_files > 0:
-        ratio = round(float(empty_files)/float(len(filename_list)), 2) * 100
-        logging.warning("%d over %f (%f%%) were empty!" % (empty_files, len(filename_list), ratio))
+    merge_call(args.template_file_name, args.indir, args.outfile)
 
 
 if __name__ == "__main__":

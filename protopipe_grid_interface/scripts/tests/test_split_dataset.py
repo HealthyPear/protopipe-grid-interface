@@ -1,4 +1,5 @@
 import subprocess
+from pkg_resources import resource_filename
 
 def test_simple_split(tmpdir):
         
@@ -8,12 +9,13 @@ def test_simple_split(tmpdir):
         for i in range(10):
             file.write('{}\n'.format(i))
     
-    subprocess.check_call(["python",
-                             "split_dataset.py", 
-                             "--input_gammas", original_list.strpath,
-                             "--split_gammas", "10", "10", "80",
-                             "--output_path", tmpdir.strpath
-                             ])
+    subprocess.run(["python",
+                    resource_filename("protopipe_grid_interface", "scripts/split_dataset.py"), 
+                    "--input_gammas", original_list.strpath,
+                    "--split_gammas", "10", "10", "80",
+                    "--output_path", tmpdir.strpath
+                    ],
+                    check=True)
 
     list1 = tmpdir.join('original_list_TRAINING_ENERGY.list')
     list2 = tmpdir.join('original_list_TRAINING_CLASSIFICATION.list')

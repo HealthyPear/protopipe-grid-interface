@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 import os
 import argparse
 from argparse import RawTextHelpFormatter
@@ -34,7 +32,7 @@ def main():
     Requirement:
     - list files should have *.list extension.
 
-    Current scheme for a protopipe analysis:
+    Default analysis workflow (see protopipe/aux/standard_analysis_workflow.yaml):
     - a training sample for energy made of gammas,
     - a training sample for particle classification made of gammas and protons,
     - a performance sample made of gammas, protons, and electrons.
@@ -45,19 +43,13 @@ def main():
         description=description, formatter_class=RawTextHelpFormatter
     )
 
-    parser.add_argument("--debug",
-                        action="store_true",
-                        help="Print debug information")
+    parser.add_argument("--debug", action="store_true", help="Print debug information")
 
     parser.add_argument(
-        "--input_gammas",
-        type=str,
-        help="Full path of the original list of gammas."
+        "--input_gammas", type=str, help="Full path of the original list of gammas."
     )
     parser.add_argument(
-        "--input_protons",
-        type=str,
-        help="Full path of the original list of protons."
+        "--input_protons", type=str, help="Full path of the original list of protons."
     )
     parser.add_argument(
         "--input_electrons",
@@ -126,14 +118,13 @@ Default is [100]",
         flist.close()
 
         if args.debug:
-            print("Input list for {} from {}".format(
-                particle_types[i], prodlist[0]))
+            print("Input list for {} from {}".format(particle_types[i], prodlist[0]))
             print("Contains {} files...".format(len(prodLines)))
 
         numlines = [0]
 
-        for prop in prodlist[1][: len(prodlist[1])-1]:
-            delta = int(prop / 100.0 * len(prodLines)+0.5)
+        for prop in prodlist[1][: len(prodlist[1]) - 1]:
+            delta = int(prop / 100.0 * len(prodLines) + 0.5)
             numlines.append(numlines[-1] + delta)
 
         if args.debug:
@@ -145,14 +136,15 @@ Default is [100]",
         # Cycle on analysis stages
         for inum, iprop in enumerate(numlines):
 
-            outname = os.path.basename(prodlist[0]).split(".list")[
-                                       0] + stages[inum] + ".list"
+            outname = (
+                os.path.basename(prodlist[0]).split(".list")[0] + stages[inum] + ".list"
+            )
 
             if args.debug:
                 print("DEBUG>> outname: {}".format(outname))
 
             if inum + 1 < len(numlines):
-                Tlines = prodLines[iprop: numlines[inum + 1]]
+                Tlines = prodLines[iprop : numlines[inum + 1]]
             else:
                 Tlines = prodLines[iprop:]
 

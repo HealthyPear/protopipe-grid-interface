@@ -1,53 +1,67 @@
-#!/usr/bin/env python
 import os
 import re
 import datetime
 import subprocess
 import sys
-import logging
+from pathlib import Path
+from pkg_resources import resource_filename
 
-# PyYAML
 try:
-    import yaml
-except ImportError:
-    logging.critical("PyYAML is not installed in this environment (pip install pyyaml).")
+    import protopipe
 
+    protopipe_path = Path(protopipe.__path__[0])
+    from protopipe.pipeline.io import load_config
+except ImportError:
+    raise ImportError("protopipe is not installed in this environment.")
+
+from protopipe_grid_interface.utils import initialize_logger
+
+try:
+    from DIRAC.Core.Base import Script
+except ImportError:
+    error_message = """
+    
+    It seems that the tools necessary to use protopipe on DIRAC are not installed.
+    Please use the environment.yaml file in the repository of this code.
+    
+    """
+    raise ImportError(
+        "You need dirac-grid installed to use this part of the interface"
+    ) from None
 
 # This allows to handle user arguments
-from DIRAC.Core.Base import Script
+# from DIRAC.Core.Base import Script
 
-# Set switches
-Script.setUsageMessage(
-    "\n".join(
-        [
-            "Usage:",
-            "python $GRID_INTERFACE/%s.py [options]" % Script.scriptName,
-            "e.g.:",
-            "python $GRID_INTERFACE/%s.py --analysis_path=shared_folder/analyses/test --output_type=DL2" % Script.scriptName,
-        ]
-    )
-)
 Script.registerSwitch("", "analysis_path=", "Full path to the analysis folder")
 Script.registerSwitch("", "output_type=", "Output data type (TRAINING or DL2)")
 Script.registerSwitch(
     "", "max_events=", "Max number of events to be processed (optional, int)"
 )
 Script.registerSwitch("", "dry=", "If True do not submit job (default: False)")
-Script.registerSwitch(
-    "", "test=", "If True submit only one job (default: False)"
-)
+Script.registerSwitch("", "test=", "If True submit only one job (default: False)")
 Script.registerSwitch(
     "", "save_images=", "If True save images together with parameters (default: False)"
 )
 
 Script.registerSwitch(
-    "", "debug_script=", "If True save debug information during execution of the script (default: False)"
+    "",
+    "debug_script=",
+    "If True save debug information during execution of the script (default: False)",
 )
 Script.registerSwitch(
-    "", "DataReprocessing=", "If True reprocess data from one site to another (default: False)"
+    "",
+    "DataReprocessing=",
+    "If True reprocess data from one site to another (default: False)",
 )
 Script.registerSwitch(
-    "", "tag=", "Used only if DataReprocessing is True; only sites tagged with tag will be considered (default: None)"
+    "",
+    "tag=",
+    "Used only if DataReprocessing is True; only sites tagged with tag will be considered (default: None)",
+)
+Script.registerSwitch(
+    "",
+    "log_file=",
+    "Override log file path (default: analysis.log in analysis folder)",
 )
 Script.parseCommandLine()
 switches = dict(Script.getUnprocessedSwitches())
@@ -58,7 +72,7 @@ from DIRAC.Interfaces.API.Dirac import Dirac
 
 # Control switches
 if "analysis_path" not in switches:
-    print("Analysis full path argument is missing: --analysis_path")
+    print("Analysis path argument is missing: --analysis_path")
     sys.exit()
 
 if "output_type" not in switches:
@@ -110,34 +124,46 @@ if "tag" not in switches:
 else:
     switches["tag"] = str(switches["tag"])
 
-def load_config(name):
-    try:
-        with open(name, "r") as stream:
-            cfg = yaml.load(stream, Loader=yaml.FullLoader)
-    except IOError as e:
-        print(e)
-        raise
-    return cfg
+if "log_file" not in switches:
+    switches["log_file"] = None
+else:
+    switches["log_file"] = str(switches["log_file"])
 
 
 def main():
     """
     Launch job on the GRID
     """
+
     # this thing pilots everything related to the GRID
     dirac = Dirac()
 
-    if switches["output_type"] in "TRAINING":
-        print("Preparing submission for TRAINING data")
-    elif switches["output_type"] in "DL2":
-        print("Preparing submission for DL2 data")
+    # Check that analysis folder exists
+    if not os.path.isdir(switches["analysis_path"]):
+        raise ValueError(
+            "This analysis folder doesn't exist yet - use create_analysis_tree.py"
+        )
+
+    # Initialize logger
+    if switches["log_file"] is None:
+        log_filepath = Path(switches["analysis_path"]) / "analysis.log"
+        append = True
     else:
-        print("You have to choose either TRAINING or DL2 as output type!")
+        log_filepath = switches["log_file"]
+        append = False
+    log = initialize_logger(
+        logger_name=__name__, log_filename=log_filepath, append=append
+    )
+
+    if switches["output_type"] in "TRAINING":
+        log.info("Preparing submission for TRAINING data")
+    elif switches["output_type"] in "DL2":
+        log.info("Preparing submission for DL2 data")
+    else:
+        log.critical("You have to choose either TRAINING or DL2 as output type!")
         sys.exit()
 
-    # Read configuration file
-    if not os.path.isdir(switches["analysis_path"]):
-        raise ValueError("This analysis folder doesn't exist yet - use create_analysis_tree.py")
+    # Initialize grid configuration
     cfg = load_config(os.path.join(switches["analysis_path"], "configs/grid.yaml"))
 
     # Analysis
@@ -184,7 +210,7 @@ def main():
 
     # HACK
     if force_tailcut_for_extended_cleaning is True:
-        print("Force tail cuts for extended cleaning!!!")
+        log.debug("Force tail cuts for extended cleaning!!!")
 
     # Prepare command to launch script
     source_ctapipe = "source /cvmfs/cta.in2p3.fr/software/conda/dev/setupConda.sh"
@@ -231,7 +257,7 @@ def main():
     if switches["debug_script"] is True:
         script_args.append("--debug")
 
-    cmd = [source_ctapipe, "&&", "./" + execute]
+    cmd = [source_ctapipe, "&&", "python " + execute]
     cmd += script_args
 
     pilot_args_write = " ".join(cmd)
@@ -241,7 +267,7 @@ def main():
         [
             source_ctapipe,
             "&&",
-            "./merge_tables.py",
+            "python merge_tables.py",
             "--template_file_name",
             "{in_name}",
             "--outfile",
@@ -282,7 +308,9 @@ def main():
         if force_tailcut_for_extended_cleaning is False:
             output_path += "/{}/{}/".format(dl2_dir, particle)
         else:
-            output_path += "/{}_force_tc_extended_cleaning/{}/".format(dl2_dir, particle)
+            output_path += "/{}_force_tc_extended_cleaning/{}/".format(
+                dl2_dir, particle
+            )
         step = ""
     output_filename += "_{}.h5"
 
@@ -291,14 +319,16 @@ def main():
     # if file name starts with `LFN:`, it will be copied from the GRID
     input_sandbox = [
         # Utility to assign one job to one command...
-        os.path.expandvars("$GRID_INTERFACE/pilot.sh"),
-        os.path.expandvars("$PROTOPIPE/protopipe/"),
-        os.path.expandvars("$GRID_INTERFACE/merge_tables.py"),
+        resource_filename("protopipe_grid_interface", "aux/pilot.sh"),
+        resource_filename("protopipe_grid_interface", "scripts/merge_tables.py"),
+        # os.path.expandvars("$GRID_INTERFACE/pilot.sh"),
+        os.path.expandvars(protopipe_path),
+        # os.path.expandvars("$GRID_INTERFACE/merge_tables.py"),
         # python wrapper for the mr_filter wavelet cleaning
         # os.path.expandvars("$PYWI/pywi/"),
         # os.path.expandvars("$PYWICTA/pywicta/"),
         # script that is being run
-        os.path.expandvars("$PROTOPIPE/protopipe/scripts/" + execute),
+        os.path.expandvars(protopipe_path / f"scripts/{execute}"),
         # Configuration file
         os.path.expandvars(os.path.join(config_path, config_file)),
     ]
@@ -310,21 +340,16 @@ def main():
             home_grid, outdir, model_dir, "{}.yaml"
         )
         config_to_upload = config_path_template.format(regressor_method)
+        configs_to_upload.append(config_to_upload)
         model_path_template = "LFN:" + os.path.join(
             home_grid, outdir, model_dir, "regressor_{}_{}.pkl.gz"
         )
         for cam_id in cam_id_list:
 
-            model_to_upload = model_path_template.format(
-                cam_id, regressor_method
-            )  # TBC
-            print("The following model(s) will be uploaded to the GRID:")
-            print(model_to_upload)
+            model_to_upload = model_path_template.format(cam_id, regressor_method)
             models_to_upload.append(model_to_upload)
-
-        print("The following configs(s) for such models will be uploaded to the GRID:")
-        print(config_to_upload)
-        configs_to_upload.append(config_to_upload)
+        log.debug(f"Model(s) to be uploaded to the GRID: \n{models_to_upload}")
+        log.debug(f"Configuration file to be uploaded to the GRID: {configs_to_upload}")
 
     elif estimate_energy is False and switches["output_type"] in "TRAINING":
         pass
@@ -339,51 +364,41 @@ def main():
         )
         if force_tailcut_for_extended_cleaning is True:
             force_mode = mode.replace("wave", "tail")
-            print("################")
-            print(force_mode)
+            log.debug(f"{force_mode} cleaning mode has been enforced")
         else:
             force_mode = mode
 
         for idx, model_type in enumerate(model_type_list):
 
-            print("The following configuration file will be uploaded to the GRID:")
-
             config_to_upload = config_path_template.format(model_method_list[idx])
-            print(config_to_upload)
             configs_to_upload.append(config_to_upload)
-
-            print("The following model(s) related to such configuration file will be uploaded to the GRID:")
 
             for cam_id in cam_id_list:
 
                 if model_type in "regressor" and use_regressor is False:
-                    print("Do not upload regressor model on GRID!!!")
+                    log.debug("Do not upload regressor model on GRID!!!")
                     continue
 
                 if model_type in "classifier" and use_classifier is False:
-                    print("Do not upload classifier model on GRID!!!")
+                    log.debug("Do not upload classifier model on GRID!!!")
                     continue
 
                 model_to_upload = model_path_template.format(
-                    model_type_list[idx],
-                    cam_id,
-                    model_method_list[idx]
+                    model_type_list[idx], cam_id, model_method_list[idx]
                 )
-                print(model_to_upload)
 
                 models_to_upload.append(model_to_upload)
+        log.debug(
+            f"Configuration files to be uploaded to the GRID: {configs_to_upload}"
+        )
+        log.debug(f"Model(s) to be uploaded to the GRID: \n{models_to_upload}")
 
-    # summary before submitting
-    print("\nDEBUG> running as:")
-    print(pilot_args_write)
-    print("\nDEBUG> with input_sandbox:")
-    print(input_sandbox)
-    print("\nDEBUG> with output file:")
-    print(output_filename.format("{job_name}"))
-    print("\nDEBUG> Particles:")
-    print(particle)
-    print("\nDEBUG> Energy estimation:")
-    print(estimate_energy)
+    # debug summary before submitting
+    log.debug(f"Running command: {pilot_args_write}")
+    log.debug(f"Input sandbox: {input_sandbox}")
+    log.debug(f"Output file: {input_sandbox}")
+    log.debug(f"Particle type: {particle}")
+    log.debug(f"Energy estimation: {estimate_energy}")
 
     # list of files on the GRID SE space
     # not submitting jobs where we already have the output
@@ -418,23 +433,18 @@ def main():
 
     n_jobs = len(running_ids)
     if n_jobs > 0:
-        print(
-            "Scanning {} running/waiting jobs... please wait...".format(
-                n_jobs
-            )
-        )
+        log.debug(f"Scanning {n_jobs} running/waiting jobs... please wait...")
         for i, id in enumerate(running_ids):
             if ((100 * i) / n_jobs) % 5 == 0:
-                print("\r{} %".format(((20 * i) / n_jobs) * 5)),
+                log.debug("\r{} %".format(((20 * i) / n_jobs) * 5)),
             jobname = dirac.getJobAttributes(id)["Value"]["JobName"]
             running_names.append(jobname)
-        else:
-            print("\n... done")
 
+    n_jobs_remaining = n_jobs_max
+    n_jobs_submitted = 0
     for n_job, bunch in enumerate(list_run_to_loop_on):
 
-        print("-" * 50)
-        print("JOB # {}".format(n_job +1))
+        log.info("JOB # {}".format(n_job + 1))
 
         # this selects the `runxxx` part of the first and last file in the run
         # list and joins them with a dash so that we get a nice identifier in
@@ -448,21 +458,16 @@ def main():
         # setting output name
         output_filenames = dict()
         if switches["output_type"] in "DL2":
-            job_name = "protopipe_{}_{}_{}_{}".format(config_name,
-                                                      switches["output_type"],
-                                                      particle,
-                                                      run_token
-                                                     )
+            job_name = "protopipe_{}_{}_{}_{}".format(
+                config_name, switches["output_type"], particle, run_token
+            )
             output_filenames[mode] = output_filename.format(
                 "_".join([particle, mode, run_token])
             )
         else:
-            job_name = "protopipe_{}_{}_{}_{}_{}".format(config_name,
-                                                         switches["output_type"],
-                                                         step,
-                                                         particle,
-                                                         run_token
-                                                        )
+            job_name = "protopipe_{}_{}_{}_{}_{}".format(
+                config_name, switches["output_type"], step, particle, run_token
+            )
 
             output_filenames[mode] = output_filename.format(
                 "_".join([step, particle, mode, run_token])
@@ -470,27 +475,27 @@ def main():
 
         # if job already running / waiting, skip
         if job_name in running_names:
-            print("\n WARNING> {} still running\n".format(job_name))
+            log.warning(f"{job_name} still running")
             continue
 
-        print("Output file name: {}".format(output_filenames[mode]))
+        log.debug(f"Output file name: {output_filenames[mode]}")
 
         # if file already in GRID storage, skip
         # (you cannot overwrite it there, delete it and resubmit)
         # (assumes tail and wave will always be written out together)
-        already_exist = False
         file_on_grid = os.path.join(output_path, output_filenames[mode])
-        print("DEBUG> check for existing file on GRID...")
+        log.debug("Checking for existing file on GRID...")
         if file_on_grid in grid_filelist:
-            print("\n WARNING> The file associated to the job {} is already stored on a GRID SE\n".format(job_name))
+            log.warning(
+                "The file associated to job {job_name} is already stored on a GRID SE"
+            )
             continue
 
-        if n_jobs_max == 0:
-            print("WARNING> maximum number of jobs to submit reached")
-            print("WARNING> breaking loop now")
+        if n_jobs_remaining == 0:
+            log.warning("Maximum number of jobs to submit reached; breaking loop now")
             break
         else:
-            n_jobs_max -= 1
+            n_jobs_remaining -= 1
 
         j = Job()
 
@@ -538,41 +543,39 @@ def main():
         if len(bunch) > 1:
             names = []
 
-            names.append(
-                ("*_{}_".format(particle), output_filenames[mode])
-            )
+            names.append(("*_{}_".format(particle), output_filenames[mode]))
 
             for in_name, out_name in names:
-                print("in_name: {}, out_name: {}".format(in_name, out_name))
+                log.debug(f"in_name: {in_name}, out_name: {out_name}")
                 j.setExecutable(
                     "./pilot.sh",
                     pilot_args_merge.format(in_name=in_name, out_name=out_name),
                 )
 
-                print(
-                    "DEBUG> args append: {}".format(
-                        pilot_args_merge.format(in_name=in_name, out_name=out_name)
-                    )
+                log.debug(
+                    f"args append: {pilot_args_merge.format(in_name=in_name, out_name=out_name)}"
                 )
 
         bunch.extend(models_to_upload)
         bunch.extend(configs_to_upload)
         j.setInputData(bunch)
 
-        print("Input data set to job = {}".format(bunch))
+        log.debug(f"Input data set to job = {bunch}")
 
         outputs = []
         outputs.append(output_filenames[mode])
-        print("Output file path: {}{}".format(output_path, output_filenames[mode]))
+        log.debug(
+            f"Output file path from user's home: {output_path}{output_filenames[mode]}"
+        )
 
         j.setOutputData(outputs, outputSE=None, outputPath=output_path)
 
         # check if we should somehow stop doing what we are doing
         if switches["dry"] is True:
-            print("\nThis is a DRY RUN! -- NO job has been submitted!")
-            print("Name of the job: {}".format(job_name))
-            print("Name of the output file: {}".format(outputs))
-            print("Output path from GRID home: {}".format(output_path))
+            log.info("This is a DRY RUN! -- NO job has been submitted!")
+            log.info("Name of the job: {job_name}")
+            log.info(f"Name of the output file: {outputs}")
+            log.info(f"Output path from GRID home: {output_path}")
             break
 
         # This allows to run the jobs sites different from where the input
@@ -581,23 +584,24 @@ def main():
             j.setType("DataReprocessing")
             if switches["tag"]:
                 j.setTag(switches["tag"])
-                print("WARNING: DataReprocessing has been activated with {} tag.").format(switches["tag"])
+                log.debug(
+                    f"DataReprocessing has been activated with {switches['tag']} tag."
+                )
             else:
-                print("WARNING: DataReprocessing has been activated with no tag.")
-
+                log.debug("DataReprocessing has been activated with no tag.")
 
         # this sends the job to the GRID and uploads all the
         # files into the input sandbox in the process
-        print("\nSUBMITTING job with the following INPUT SANDBOX:")
-        print(input_sandbox)
-        print("Submission RESULT: {}\n".format(dirac.submitJob(j)["Value"]))
+        log.info(f"SUBMITTING job with the following INPUT SANDBOX:\n {input_sandbox}")
+        log.info(f"Submission RESULT: {dirac.submitJob(j)['Value']}")
+        n_jobs_submitted += 1
 
         # break if this is only a test submission
         if switches["test"] is True:
-            print("This is a TEST RUN! -- Only ONE job will be submitted!")
-            print("Name of the job: {}".format(job_name))
-            print("Name of the output file: {}".format(outputs))
-            print("Output path from GRID home: {}".format(output_path))
+            log.info("This is a TEST RUN! -- Only ONE job will be submitted!")
+            log.info("Name of the job: {job_name}")
+            log.info("Name of the output file: {outputs}")
+            log.info("Output path from GRID home: {output_path}")
             break
 
         # since there are two nested loops, need to break again
@@ -612,12 +616,11 @@ def main():
 
     # Upload analysis configuration file for provenance
 
-    SE_LIST=['CC-IN2P3-USER', 'DESY-ZN-USER', 'CNAF-USER', 'CEA-USER']
+    SE_LIST = ["CC-IN2P3-USER", "DESY-ZN-USER", "CNAF-USER", "CEA-USER"]
     analysis_config_local = os.path.join(config_path, config_file)
     # the configuration file is uploaded to the data directory because
     # the training samples (as well as their cleaning settings) are independent
     analysis_config_dirac = os.path.join(home_grid, output_path, config_file)
-    print("Uploading {} to {}...".format(analysis_config_local, analysis_config_dirac))
 
     if switches["dry"] is False:
         # Upload this file to all Dirac Storage Elements in SE_LIST
@@ -626,13 +629,17 @@ def main():
             ana_cfg_upload_cmd = "dirac-dms-add-file -f {} {} {}".format(
                 analysis_config_dirac, analysis_config_local, se
             )
-            ana_cfg_upload_result = subprocess.check_output(ana_cfg_upload_cmd, shell=True)
-            print(ana_cfg_upload_result)
+            log.info(f"Uploading {analysis_config_local} to {analysis_config_dirac}...")
+            ana_cfg_upload_result = subprocess.run(
+                ana_cfg_upload_cmd, shell=True, text=True, check=True
+            )
+            log.debug(ana_cfg_upload_result)
     else:
-        print("This is a DRY RUN! -- analysis.yaml has NOT been uploaded.")
+        log.info("This is a DRY RUN! -- analysis.yaml has NOT been uploaded.")
 
-    print("\nall done -- exiting now")
-    print("DEBUG > {} jobs belong to this batch".format(len(list_run_to_loop_on)))
+    n_jobs_planned = n_jobs_max if (n_jobs_max != -1) else len(list_run_to_loop_on)
+    log.debug(f"{n_jobs_planned} job(s) have been planned")
+    log.info(f"{n_jobs_submitted} job(s) have been submitted")
     exit()
 
 
