@@ -1,9 +1,0 @@
-configs: []
-data:
-  simtel: []
-  TRAINING:
-    for_energy_estimation: ["gamma"]
-    for_particle_classification: ["gamma", "proton"]
-  DL2: ["gamma", "proton", "electron"]
-  DL3: []
-estimators: ["energy_regressor", "gamma_hadron_classifier"]
