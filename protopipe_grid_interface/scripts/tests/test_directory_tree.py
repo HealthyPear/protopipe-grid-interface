@@ -1,15 +1,12 @@
-from pathlib import Path
 import subprocess
 from pkg_resources import resource_filename
 import pytest
 import yaml
 
-from protopipe_grid_interface.utils import load_config
-
 
 def test_directory_tree(tmpdir):
 
-    pytest.importorskip("protopipe", minversion="0.5.0")
+    pytest.importorskip("protopipe", minversion="0.4.0")
 
     test_analysis_workflow = tmpdir.join("test_analysis_workflow.yaml")
 
@@ -27,7 +24,7 @@ def test_directory_tree(tmpdir):
         "estimators": ["energy_regressor", "gamma_hadron_classifier"],
     }
 
-    with open(str(test_analysis_workflow), "w") as file:
+    with open(str(test_analysis_workflow), mode="w", encoding="utf8") as file:
         yaml.dump(tree, file)
 
     subprocess.run(
@@ -55,11 +52,11 @@ def test_directory_tree(tmpdir):
     assert metadata_file_path.exists()
 
     # load metadata and check that we get back what we built
-    with open(metadata_file_path, "r") as f:
-        metadata = yaml.load(f, Loader=yaml.CLoader)
+    with open(metadata_file_path, mode="r", encoding="utf8") as f:
+        metadata = yaml.safe_load(f)
         assert metadata["analysis_name"] == "test_analysis"
         assert metadata["analyses_directory"] == str(tmpdir / "shared_folder/analyses")
-        assert metadata["GRID is DIRAC"] == True
+        assert metadata["GRID is DIRAC"] is True
         assert metadata["Home directory on the GRID"] == "home_test"
         assert metadata["analysis directory on the GRID from home"] == ""
 

@@ -105,28 +105,25 @@ def main():
     args = parser.parse_args()
 
     # Read metadata if set
-    metadata = None
     if args.metadata:
-        with open(args.metadata, "r") as f:
-            metadata = yaml.load(f, Loader=yaml.CLoader)
-
-    if not metadata:
+        with open(args.metadata, mode="r", encoding="utf8") as f:
+            metadata = yaml.safe_load(f)
+        analysis_name = metadata["analysis_name"]
+        analysis_path_local = Path(metadata["analyses_directory"]) / analysis_name
+        grid_home = Path(metadata["Home directory on the GRID"])
+        grid_path_from_home = Path(metadata["analysis directory on the GRID from home"])
+    else:
         local = Path(args.local_path)
         analysis_name = args.analysis_name
         analysis_path_local = local / "shared_folder/analyses" / analysis_name
         grid_home = Path(args.GRID_home)
         grid_path_from_home = Path(args.GRID_path_from_home)
-    else:
-        analysis_name = metadata["analysis_name"]
-        analysis_path_local = Path(metadata["analyses_directory"]) / analysis_name
-        grid_home = Path(metadata["Home directory on the GRID"])
-        grid_path_from_home = Path(metadata["analysis directory on the GRID from home"])
 
     if args.log_file is None:
         log_filepath = analysis_path_local / "analysis.log"
         append = True
     else:
-        log_filepath = args.log_file
+        log_filepath = Path(args.log_file)
         append = False
     log = initialize_logger(
         logger_name=__name__, log_filename=log_filepath, append=append
@@ -146,12 +143,15 @@ def main():
     # Upload configuration file
     configuration_file = f"{args.model_name}.yaml"
     log.info(
-        f"Uploading {configuration_file} from {analysis_configuration_directory} to {output_directory}"
+        "Uploading %s from %s to %s",
+        configuration_file,
+        analysis_configuration_directory,
+        output_directory,
     )
     upload(analysis_configuration_directory, configuration_file, output_directory)
     # Make replicas
     for se in args.list_of_SEs:
-        log.info(f"Producing replicas of {configuration_file} on {se}...")
+        log.info("Producing replicas of %s on %s", configuration_file, se)
         try:
             result = subprocess.run(
                 [
@@ -165,21 +165,26 @@ def main():
             )
             log.debug(result)
         except subprocess.CalledProcessError as e:
-            log.error(f"Exit status: {e.returncode}")
-            log.error(f"Command: {e.cmd}")
-            log.error(f"STDOUT: {e.stdout}")
-            log.error(f"STDERR: {e.stderr}")
+            log.error("Exit status: %s", e.returncode)
+            log.error("Command: %s", e.cmd)
+            log.error("STDOUT: %s", e.stdout)
+            log.error("STDERR: %s", e.stderr)
 
     # Upload model files
     for camera in args.cameras:
 
         model_file = f"{args.model_type}_{camera}_{args.model_name}.pkl.gz"
-        log.info(f"Uploading {model_file} from {input_directory} to {output_directory}")
+        log.info(
+            "Uploading %s from %s to %s...",
+            model_file,
+            input_directory,
+            output_directory,
+        )
         upload(input_directory, model_file, output_directory)
 
         # Make replicas
         for se in args.list_of_SEs:
-            log.info(f"Producing replicas of {model_file} on {se}...")
+            log.info("Producing replicas of %s on %s...", model_file, se)
             try:
                 result = subprocess.run(
                     ["dirac-dms-replicate-lfn", str(output_directory / model_file), se],
@@ -189,10 +194,10 @@ def main():
                 )
                 log.debug(result)
             except subprocess.CalledProcessError as e:
-                log.error(f"Exit status: {e.returncode}")
-                log.error(f"Command: {e.cmd}")
-                log.error(f"STDOUT: {e.stdout}")
-                log.error(f"STDERR: {e.stderr}")
+                log.error("Exit status: %s", e.returncode)
+                log.error("Command: %s", e.cmd)
+                log.error("STDOUT: %s", e.stdout)
+                log.error("STDERR: %s", e.stderr)
 
     log.info("Models and configuration files have been uploaded.")
 

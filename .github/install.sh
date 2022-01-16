@@ -2,8 +2,8 @@
 
 if [[ "$INSTALL_METHOD" == "conda" ]]; then
   echo "Using conda"
-  sudo chown -R $USER $CONDA # Give CONDA permission to its own files
-  source $CONDA/etc/profile.d/conda.sh
+  sudo chown -R "$USER" "$CONDA" # Give CONDA permission to its own files
+  source "$CONDA"/etc/profile.d/conda.sh
   conda config --set always_yes yes --set changeps1 no
   conda update -q conda  # get latest conda version
   # Useful for debugging any issues with conda

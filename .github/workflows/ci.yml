@@ -42,5 +42,6 @@ jobs:
             conda activate CI
             conda list
           fi
+          python .github/test.py
           pytest --cov=protopipe --cov-report=xml
       - uses: codecov/codecov-action@v1

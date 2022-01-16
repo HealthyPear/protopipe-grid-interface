@@ -1,9 +1,12 @@
 """
 Select DIRAC jobs matching the given conditions and set them to failed if they are stuck.
+
 This is a variation over the DIRAC script dirac-wms-select-jobs.
 """
+
 import DIRAC
 from DIRAC import gLogger
+from DIRAC.Interfaces.API.Dirac import Dirac
 from DIRAC.Core.Utilities.DIRACScript import DIRACScript as Script
 from DIRAC.WorkloadManagementSystem.Client.JobReport import JobReport
 
@@ -23,25 +26,25 @@ def main():
 
     # Default values
     status = None
-    minorStatus = None
-    appStatus = None
+    minor_status = None
+    app_status = None
     site = None
     owner = None
-    jobGroups = []
+    job_groups = []
     date = None
 
     if args:
         Script.showHelp()
 
-    exitCode = 0
+    exit_code = 0
 
     for switch in switches:
         if switch[0].lower() == "status":
             status = switch[1]
         elif switch[0].lower() == "minorstatus":
-            minorStatus = switch[1]
+            minor_status = switch[1]
         elif switch[0].lower() == "applicationstatus":
-            appStatus = switch[1]
+            app_status = switch[1]
         elif switch[0].lower() == "site":
             site = switch[1]
         elif switch[0].lower() == "owner":
@@ -49,44 +52,36 @@ def main():
         elif switch[0].lower() == "jobgroup":
             for jg in switch[1].split(","):
                 if jg.isdigit():
-                    jobGroups.append("%08d" % int(jg))
+                    job_groups.append(f"{int(jg)}")
                 else:
-                    jobGroups.append(jg)
+                    job_groups.append(jg)
         elif switch[0].lower() == "date":
             date = switch[1]
-        elif switch[0] == "Maximum":
-            try:
-                maxJobs = int(switch[1])
-            except TypeError:
-                gLogger.fatal("Invalid max number of jobs", switch[1])
-                DIRAC.exit(1)
 
-    selDate = date
+    selected_date = date
     if not date:
-        selDate = "Today"
+        selected_date = "Today"
     conditions = {
         "Status": status,
-        "MinorStatus": minorStatus,
-        "ApplicationStatus": appStatus,
+        "MinorStatus": minor_status,
+        "ApplicationStatus": app_status,
         "Owner": owner,
-        "JobGroup": ",".join(str(jg) for jg in jobGroups),
-        "Date": selDate,
+        "JobGroup": ",".join(str(jg) for jg in job_groups),
+        "Date": selected_date,
     }
-
-    from DIRAC.Interfaces.API.Dirac import Dirac
 
     dirac = Dirac()
     jobs = []
 
-    if jobGroups:
-        for jobGroup in jobGroups:
+    if job_groups:
+        for job_group in job_groups:
             res = dirac.selectJobs(
                 status=status,
-                minorStatus=minorStatus,
-                applicationStatus=appStatus,
+                minorStatus=minor_status,
+                applicationStatus=app_status,
                 site=site,
                 owner=owner,
-                jobGroup=jobGroup,
+                jobGroup=job_group,
                 date=date,
                 printErrors=False,
             )
@@ -97,8 +92,8 @@ def main():
     else:
         res = dirac.selectJobs(
             status=status,
-            minorStatus=minorStatus,
-            applicationStatus=appStatus,
+            minorStatus=minor_status,
+            applicationStatus=app_status,
             site=site,
             owner=owner,
             date=date,
@@ -109,7 +104,7 @@ def main():
         else:
             gLogger.error("Can't select jobs: ", res["Message"])
 
-    conds = ["%s = %s" % (n, v) for n, v in conditions.items() if v]
+    conds = [f"{n} = {v}" for n, v in conditions.items() if v]
     constrained = " "
 
     if jobs:
@@ -121,13 +116,12 @@ def main():
         gLogger.notice("No jobs were selected with conditions:", ", ".join(conds))
 
     for job in jobs:
-        jobReport = JobReport(job)
-        res = jobReport.setJobStatus("Failed")
+        job_report = JobReport(job)
+        res = job_report.setJobStatus("Failed")
         if not res["OK"]:
-            return res
-        print(res)
+            gLogger.error(res)
 
-    DIRAC.exit(exitCode)
+    DIRAC.exit(exit_code)
 
 
 if __name__ == "__main__":

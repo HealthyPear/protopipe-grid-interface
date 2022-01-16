@@ -1,11 +1,10 @@
 import argparse
-import subprocess
-from protopipe_grid_interface.utils import check_VOMS, download
+from protopipe_grid_interface.utils import check_voms, download
 
 
 def main():
 
-    check_VOMS()
+    check_voms()
 
     # Read command line options
     parser = argparse.ArgumentParser(description="Download collection files from Dirac")

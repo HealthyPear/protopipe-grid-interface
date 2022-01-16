@@ -32,12 +32,8 @@ def create_mock_file(tmpdir, filename):
 
     outfile.close()
 
-    return None
-
 
 def test_merge(tmpdir):
-
-    print(tmpdir.strpath)
 
     # create 1st file
     create_mock_file(tmpdir, "run1.h5")
@@ -65,7 +61,7 @@ def test_merge(tmpdir):
     n_images_from_runs = dict.fromkeys(cameras, 0)
     n_tot_images = dict.fromkeys(cameras, 0)
 
-    single_files = glob.glob("{}/*run*.h5".format(tmpdir.strpath))
+    single_files = glob.glob(f"{tmpdir.strpath}/*run*.h5")
 
     # Get total number of table rows cumulatively from each files per table
     for file in single_files:

@@ -1,6 +1,7 @@
 import argparse
 import glob
 import logging
+from pathlib import Path
 
 try:
     import tables as tb
@@ -15,11 +16,11 @@ from protopipe_grid_interface.utils import initialize_logger
 
 def merge_call(template_file_name, indir, outfile, logger=None):
 
-    logger.debug("template_file_name={}".format(template_file_name))
-    logger.debug("indir=%s", indir)
-    logger.debug("outfile=%s", outfile)
+    logger.debug("template_file_name = %s", template_file_name)
+    logger.debug("indir = %s", indir)
+    logger.debug("outfile = %s", outfile)
 
-    input_template = "{}/{}*.h5".format(indir, template_file_name)
+    input_template = f"{indir}/{template_file_name}*.h5"
     logger.debug("input_template: %s", input_template)
 
     filename_list = glob.glob(input_template)
@@ -42,13 +43,13 @@ def merge_list_of_pytables(filename_list, destination, logger=None):
 
     for idx, filename in enumerate(tqdm(sorted(filename_list))):
 
-        logger.debug("File # %d of %d" % (idx + 1, len(filename_list)))
-        logger.debug("Filename %s" % filename)
+        logger.debug("File # %d of %d", idx + 1, len(filename_list))
+        logger.debug("Filename %s", filename)
 
         try:
             infile = tb.open_file(filename, mode="r")
         except tb.exceptions.HDF5ExtError:
-            logger.warning("file %s appears to be corrupt" % filename)
+            logger.warning("File %s appears to be corrupt", filename)
             continue
 
         table_name_list = [table.name for table in infile.root]  # Name of tables
@@ -110,7 +111,7 @@ def main():
     args = parser.parse_args()
 
     if args.log_file is None:
-        log_filepath = args.indir / "merge_tables.log"
+        log_filepath = Path(args.indir) / "merge_tables.log"
     else:
         log_filepath = args.log_file
     log = initialize_logger(

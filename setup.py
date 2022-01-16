@@ -30,9 +30,8 @@ setup(
     author_email="michele.peresano@cea.fr",
     license="CeCILL-B Free Software License Agreement",
     packages=find_packages(),
-    package_data={
-        "protopipe_grid_interface": ["aux/standard_analysis_workflow.yaml", "grid.yaml"]
-    },
+    package_data={"protopipe_grid_interface": ["aux/*"]},
+    include_package_data=True,
     install_requires=["DIRAC", "CTADIRAC", "pyyaml", "tables", "tqdm"],
     zip_safe=False,
     use_scm_version={
@@ -64,7 +63,7 @@ setup(
             "protopipe-UPLOAD_FILE=protopipe_grid_interface.scripts.upload_file:main",
             "protopipe-UPLOAD_MODELS=protopipe_grid_interface.scripts.upload_models:main",
             "protopipe-FORCE_JOB_TO_FAILED=protopipe_grid_interface.scripts.cta_wms_set_failed:main",
-            # "protopipe-FILTER-REPLICAS=protopipe_grid_interface.scripts.filter_lfns_by_replicas:main",
+            "protopipe-FILTER-REPLICAS=protopipe_grid_interface.scripts.filter_lfns_by_replicas:main",
         ],
     },
 )

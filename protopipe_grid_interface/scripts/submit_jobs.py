@@ -10,27 +10,22 @@ try:
     import protopipe
 
     protopipe_path = Path(protopipe.__path__[0])
-    from protopipe.pipeline.io import load_config
 except ImportError:
-    raise ImportError("protopipe is not installed in this environment.")
+    raise ImportError("protopipe is not installed in this environment.") from None
 
 from protopipe_grid_interface.utils import initialize_logger, load_config
 
 try:
-    from DIRAC.Core.Base import Script
+    from DIRAC.Core.Base import Script  # This allows to handle user arguments
 except ImportError:
     error_message = """
-    
     It seems that the tools necessary to use protopipe on DIRAC are not installed.
     Please use the environment.yaml file in the repository of this code.
-    
     """
     raise ImportError(
         "You need dirac-grid installed to use this part of the interface"
     ) from None
 
-# This allows to handle user arguments
-# from DIRAC.Core.Base import Script
 
 Script.registerSwitch("", "analysis_path=", "Full path to the analysis folder")
 Script.registerSwitch("", "output_type=", "Output data type (TRAINING or DL2)")
@@ -131,9 +126,6 @@ else:
 
 
 def main():
-    """
-    Launch job on the GRID
-    """
 
     # this thing pilots everything related to the GRID
     dirac = Dirac()
@@ -219,33 +211,31 @@ def main():
     if switches["output_type"] in "TRAINING":
         execute = "data_training.py"
         script_args = [
-            "--config_file={}".format(config_file),
-            "--estimate_energy={}".format(str(estimate_energy)),
-            "--regressor_config={}.yaml".format(regressor_method),
+            f"--config_file={config_file}",
+            f"--estimate_energy={str(estimate_energy)}",
+            f"--regressor_config={regressor_method}.yaml",
             "--regressor_dir=./",
             "--outfile {outfile}",
             "--indir ./ --infile_list={infile_name}",
-            "--max_events={}".format(switches["max_events"]),
+            f"--max_events={switches['max_events']}",
             "--{mode}",
-            "--cam_ids {}".format(cam_id_list),
+            f"--cam_ids {cam_id_list}",
         ]
         output_filename_template = "TRAINING"
     elif switches["output_type"] in "DL2":
         execute = "write_dl2.py"
         script_args = [
-            "--config_file={}".format(config_file),
-            "--regressor_config={}.yaml".format(regressor_method),
+            f"--config_file={config_file}",
+            f"--regressor_config={regressor_method}.yaml",
             "--regressor_dir=./",
-            "--classifier_config={}.yaml".format(classifier_method),
+            f"--classifier_config={classifier_method}.yaml",
             "--classifier_dir=./",
             "--outfile {outfile}",
             "--indir ./ --infile_list={infile_name}",
-            "--max_events={}".format(switches["max_events"]),
+            f"--max_events={switches['max_events']}",
             "--{mode}",
-            "--force_tailcut_for_extended_cleaning={}".format(
-                force_tailcut_for_extended_cleaning
-            ),
-            "--cam_ids {}".format(cam_id_list),
+            "--force_tailcut_for_extended_cleaning={force_tailcut_for_extended_cleaning}",
+            f"--cam_ids {cam_id_list}",
         ]
         output_filename_template = "DL2"
 
@@ -275,7 +265,7 @@ def main():
         ]
     )
 
-    prod3b_filelist = dict()
+    prod3b_filelist = {}
     if estimate_energy is False and switches["output_type"] in "TRAINING":
         prod3b_filelist["gamma"] = cfg["EnergyRegressor"]["gamma_list"]
     elif estimate_energy is True and switches["output_type"] in "TRAINING":
@@ -287,7 +277,7 @@ def main():
         prod3b_filelist["electron"] = cfg["Performance"]["electron_list"]
 
     # Split list of files according to stoprage elements
-    with open(prod3b_filelist[particle]) as f:
+    with open(prod3b_filelist[particle], mode="r", encoding="utf8") as f:
         filelist = f.readlines()
 
     filelist = ["{}".format(_.replace("\n", "")) for _ in filelist]
@@ -299,18 +289,16 @@ def main():
     output_filename = output_filename_template
     output_path = outdir
     if estimate_energy is False and switches["output_type"] in "TRAINING":
-        output_path += "/{}/{}/".format(training_dir_energy, particle)
+        output_path += f"/{training_dir_energy}/{particle}/"
         step = "energy"
     if estimate_energy is True and switches["output_type"] in "TRAINING":
-        output_path += "/{}/{}/".format(training_dir_classification, particle)
+        output_path += f"/{training_dir_classification}/{particle}/"
         step = "classification"
     if switches["output_type"] in "DL2":
         if force_tailcut_for_extended_cleaning is False:
-            output_path += "/{}/{}/".format(dl2_dir, particle)
+            output_path += "/{dl2_dir}/{particle}/"
         else:
-            output_path += "/{}_force_tc_extended_cleaning/{}/".format(
-                dl2_dir, particle
-            )
+            output_path += f"/{dl2_dir}_force_tc_extended_cleaning/{particle}/"
         step = ""
     output_filename += "_{}.h5"
 
@@ -321,16 +309,13 @@ def main():
         # Utility to assign one job to one command...
         resource_filename("protopipe_grid_interface", "aux/pilot.sh"),
         resource_filename("protopipe_grid_interface", "scripts/merge_tables.py"),
-        # os.path.expandvars("$GRID_INTERFACE/pilot.sh"),
         os.path.expandvars(protopipe_path),
-        # os.path.expandvars("$GRID_INTERFACE/merge_tables.py"),
-        # python wrapper for the mr_filter wavelet cleaning
-        # os.path.expandvars("$PYWI/pywi/"),
-        # os.path.expandvars("$PYWICTA/pywicta/"),
-        # script that is being run
-        os.path.expandvars(protopipe_path / f"scripts/{execute}"),
-        # Configuration file
-        os.path.expandvars(os.path.join(config_path, config_file)),
+        os.path.expandvars(
+            protopipe_path / f"scripts/{execute}"
+        ),  # script that is being run
+        os.path.expandvars(
+            os.path.join(config_path, config_file)
+        ),  # Configuration file
     ]
 
     models_to_upload = []
@@ -348,8 +333,10 @@ def main():
 
             model_to_upload = model_path_template.format(cam_id, regressor_method)
             models_to_upload.append(model_to_upload)
-        log.debug(f"Model(s) to be uploaded to the GRID: \n{models_to_upload}")
-        log.debug(f"Configuration file to be uploaded to the GRID: {configs_to_upload}")
+        log.debug("Model(s) to be uploaded to the GRID: \n%s", models_to_upload)
+        log.debug(
+            "Configuration file to be uploaded to the GRID: %s", configs_to_upload
+        )
 
     elif estimate_energy is False and switches["output_type"] in "TRAINING":
         pass
@@ -364,7 +351,7 @@ def main():
         )
         if force_tailcut_for_extended_cleaning is True:
             force_mode = mode.replace("wave", "tail")
-            log.debug(f"{force_mode} cleaning mode has been enforced")
+            log.debug("%s cleaning mode has been enforced", force_mode)
         else:
             force_mode = mode
 
@@ -389,27 +376,26 @@ def main():
 
                 models_to_upload.append(model_to_upload)
         log.debug(
-            f"Configuration files to be uploaded to the GRID: {configs_to_upload}"
+            "Configuration files to be uploaded to the GRID: %s", configs_to_upload
         )
-        log.debug(f"Model(s) to be uploaded to the GRID: \n{models_to_upload}")
+        log.debug("Model(s) to be uploaded to the GRID: \n%s", models_to_upload)
 
     # debug summary before submitting
-    log.debug(f"Running command: {pilot_args_write}")
-    log.debug(f"Input sandbox: {input_sandbox}")
-    log.debug(f"Output file: {input_sandbox}")
-    log.debug(f"Particle type: {particle}")
-    log.debug(f"Energy estimation: {estimate_energy}")
+    log.debug("Running command: %s", pilot_args_write)
+    log.debug("Input sandbox: %s", input_sandbox)
+    log.debug("Output file: %s", input_sandbox)
+    log.debug("Particle type: %s", particle)
+    log.debug("Energy estimation: %s", estimate_energy)
 
     # list of files on the GRID SE space
     # not submitting jobs where we already have the output
-    batcmd = "dirac-dms-user-lfns --BaseDir {}".format(
-        os.path.join(home_grid, output_path)
-    )
+    batcmd = f"dirac-dms-user-lfns --BaseDir {os.path.join(home_grid, output_path)}"
     result = subprocess.check_output(batcmd, shell=True)
     try:
-        grid_filelist = open(result.split()[-1]).read()
+        with open(result.split()[-1], mode="r", encoding="utf8") as f:
+            grid_filelist = f.readlines()
     except IOError:
-        raise IOError("ERROR> cannot read GRID filelist...")
+        log.critical("Cannot read GRID filelist.", exc_info=True)
 
     # get jobs from today and yesterday...
     days = []
@@ -433,18 +419,18 @@ def main():
 
     n_jobs = len(running_ids)
     if n_jobs > 0:
-        log.debug(f"Scanning {n_jobs} running/waiting jobs... please wait...")
-        for i, id in enumerate(running_ids):
+        log.debug("Scanning %s running/waiting jobs... please wait...", n_jobs)
+        for i, job_id in enumerate(running_ids):
             if ((100 * i) / n_jobs) % 5 == 0:
-                log.debug("\r{} %".format(((20 * i) / n_jobs) * 5)),
-            jobname = dirac.getJobAttributes(id)["Value"]["JobName"]
+                log.debug("\r%i %%", (((20 * i) / n_jobs) * 5))
+            jobname = dirac.getJobAttributes(job_id)["Value"]["JobName"]
             running_names.append(jobname)
 
     n_jobs_remaining = n_jobs_max
     n_jobs_submitted = 0
     for n_job, bunch in enumerate(list_run_to_loop_on):
 
-        log.info("JOB # {}".format(n_job + 1))
+        log.info("JOB # %i", n_job + 1)
 
         # this selects the `runxxx` part of the first and last file in the run
         # list and joins them with a dash so that we get a nice identifier in
@@ -456,18 +442,14 @@ def main():
             run_token = "-".join([run_token, last_run])
 
         # setting output name
-        output_filenames = dict()
+        output_filenames = {}
         if switches["output_type"] in "DL2":
-            job_name = "protopipe_{}_{}_{}_{}".format(
-                config_name, switches["output_type"], particle, run_token
-            )
+            job_name = f"protopipe_{config_name}_{switches['output_type']}_{particle}_{run_token}"
             output_filenames[mode] = output_filename.format(
                 "_".join([particle, mode, run_token])
             )
         else:
-            job_name = "protopipe_{}_{}_{}_{}_{}".format(
-                config_name, switches["output_type"], step, particle, run_token
-            )
+            job_name = f"protopipe_{config_name}_{switches['output_type']}_{step}_{particle}_{run_token}"
 
             output_filenames[mode] = output_filename.format(
                 "_".join([step, particle, mode, run_token])
@@ -475,10 +457,10 @@ def main():
 
         # if job already running / waiting, skip
         if job_name in running_names:
-            log.warning(f"{job_name} still running")
+            log.warning("%s still running", job_name)
             continue
 
-        log.debug(f"Output file name: {output_filenames[mode]}")
+        log.debug("Output file name: %s", output_filenames[mode])
 
         # if file already in GRID storage, skip
         # (you cannot overwrite it there, delete it and resubmit)
@@ -487,15 +469,13 @@ def main():
         log.debug("Checking for existing file on GRID...")
         if file_on_grid in grid_filelist:
             log.warning(
-                "The file associated to job {job_name} is already stored on a GRID SE"
+                "The file associated to job %s is already stored on a GRID SE", job_name
             )
             continue
 
         if n_jobs_remaining == 0:
             log.warning("Maximum number of jobs to submit reached; breaking loop now")
             break
-        else:
-            n_jobs_remaining -= 1
 
         j = Job()
 
@@ -534,7 +514,7 @@ def main():
             )
 
             # check that the output file is there
-            j.setExecutable("ls -lh {}".format(output_filename_temp))
+            j.setExecutable(f"ls -lh {output_filename_temp}")
 
             # remove the current file to clear space
             j.setExecutable("rm", os.path.basename(run_file))
@@ -543,29 +523,32 @@ def main():
         if len(bunch) > 1:
             names = []
 
-            names.append(("*_{}_".format(particle), output_filenames[mode]))
+            names.append(("*_{particle}_", output_filenames[mode]))
 
             for in_name, out_name in names:
-                log.debug(f"in_name: {in_name}, out_name: {out_name}")
+                log.debug("in_name: %s, out_name: %s", in_name, out_name)
                 j.setExecutable(
                     "./pilot.sh",
                     pilot_args_merge.format(in_name=in_name, out_name=out_name),
                 )
 
                 log.debug(
-                    f"args append: {pilot_args_merge.format(in_name=in_name, out_name=out_name)}"
+                    "args append: %s",
+                    pilot_args_merge.format(in_name=in_name, out_name=out_name),
                 )
 
         bunch.extend(models_to_upload)
         bunch.extend(configs_to_upload)
         j.setInputData(bunch)
 
-        log.debug(f"Input data set to job = {bunch}")
+        log.debug("Input data set to job = \n%s", bunch)
 
         outputs = []
         outputs.append(output_filenames[mode])
         log.debug(
-            f"Output file path from user's home: {output_path}{output_filenames[mode]}"
+            "Output file path from user's home: %s%s",
+            output_path,
+            output_filenames[mode],
         )
 
         j.setOutputData(outputs, outputSE=None, outputPath=output_path)
@@ -573,9 +556,9 @@ def main():
         # check if we should somehow stop doing what we are doing
         if switches["dry"] is True:
             log.info("This is a DRY RUN! -- NO job has been submitted!")
-            log.info("Name of the job: {job_name}")
-            log.info(f"Name of the output file: {outputs}")
-            log.info(f"Output path from GRID home: {output_path}")
+            log.info("Name of the job: %s", job_name)
+            log.info("Name of the output file: %s", outputs)
+            log.info("Output path from GRID home: %s", output_path)
             break
 
         # This allows to run the jobs sites different from where the input
@@ -585,38 +568,32 @@ def main():
             if switches["tag"]:
                 j.setTag(switches["tag"])
                 log.debug(
-                    f"DataReprocessing has been activated with {switches['tag']} tag."
+                    "DataReprocessing has been activated with %s tag.", switches["tag"]
                 )
             else:
                 log.debug("DataReprocessing has been activated with no tag.")
 
         # this sends the job to the GRID and uploads all the
         # files into the input sandbox in the process
-        log.info(f"SUBMITTING job with the following INPUT SANDBOX:\n {input_sandbox}")
-        log.info(f"Submission RESULT: {dirac.submitJob(j)['Value']}")
+        log.info("SUBMITTING job with the following INPUT SANDBOX:\n %s", input_sandbox)
+        log.info("Submission RESULT: %s", dirac.submitJob(j)["Value"])
         n_jobs_submitted += 1
 
         # break if this is only a test submission
         if switches["test"] is True:
             log.info("This is a TEST RUN! -- Only ONE job will be submitted!")
-            log.info("Name of the job: {job_name}")
-            log.info("Name of the output file: {outputs}")
-            log.info("Output path from GRID home: {output_path}")
+            log.info("Name of the job: %s", job_name)
+            log.info("Name of the output file: %s", outputs)
+            log.info("Output path from GRID home: %s", output_path)
             break
 
         # since there are two nested loops, need to break again
         if switches["test"] is True:
             break
 
-    try:
-        os.remove("datapipe.tar.gz")
-        os.remove("modules.tar.gz")
-    except:
-        pass
-
     # Upload analysis configuration file for provenance
 
-    SE_LIST = ["CC-IN2P3-USER", "DESY-ZN-USER", "CNAF-USER", "CEA-USER"]
+    se_list = ["CC-IN2P3-USER", "DESY-ZN-USER", "CNAF-USER", "CEA-USER"]
     analysis_config_local = os.path.join(config_path, config_file)
     # the configuration file is uploaded to the data directory because
     # the training samples (as well as their cleaning settings) are independent
@@ -624,12 +601,12 @@ def main():
 
     if switches["dry"] is False:
         # Upload this file to all Dirac Storage Elements in SE_LIST
-        for se in SE_LIST:
+        for se in se_list:
             # the uploaded config file overwrites any old copy
-            ana_cfg_upload_cmd = "dirac-dms-add-file -f {} {} {}".format(
-                analysis_config_dirac, analysis_config_local, se
+            ana_cfg_upload_cmd = f"dirac-dms-add-file -f {analysis_config_dirac} {analysis_config_local} {se}"
+            log.info(
+                "Uploading %s to %s...", analysis_config_local, analysis_config_dirac
             )
-            log.info(f"Uploading {analysis_config_local} to {analysis_config_dirac}...")
             ana_cfg_upload_result = subprocess.run(
                 ana_cfg_upload_cmd, shell=True, text=True, check=True
             )
@@ -638,9 +615,8 @@ def main():
         log.info("This is a DRY RUN! -- analysis.yaml has NOT been uploaded.")
 
     n_jobs_planned = n_jobs_max if (n_jobs_max != -1) else len(list_run_to_loop_on)
-    log.debug(f"{n_jobs_planned} job(s) have been planned")
-    log.info(f"{n_jobs_submitted} job(s) have been submitted")
-    exit()
+    log.debug("%i job(s) have been planned", n_jobs_planned)
+    log.info("%i job(s) have been submitted", n_jobs_submitted)
 
 
 if __name__ == "__main__":

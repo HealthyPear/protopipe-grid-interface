@@ -1,28 +1,10 @@
 import os
 import argparse
 from argparse import RawTextHelpFormatter
+from pathlib import Path
+import yaml
 
-
-def makedir(name):
-    """
-    Create folder if non-existent and output OS error if any.
-
-    Parameters
-    ----------
-    name : str
-        Name of the analysis.
-
-    """
-    if not os.path.exists(name):
-        try:
-            os.mkdir(name)
-        except OSError:
-            print("Creation of the directory {} failed".format(name))
-        else:
-            print("Successfully created the directory {}".format(name))
-    else:
-        print("Using existing folder {}".format(name))
-    return None
+from protopipe_grid_interface.utils import initialize_logger, makedir
 
 
 def main():
@@ -43,7 +25,20 @@ def main():
         description=description, formatter_class=RawTextHelpFormatter
     )
 
-    parser.add_argument("--debug", action="store_true", help="Print debug information")
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument(
+        "--metadata",
+        type=str,
+        default=None,
+        help="""Analysis metadata file produced at creation
+        (recommended).""",
+    )
+    group.add_argument(
+        "--output_path",
+        type=str,
+        default=None,
+        help="Specifiy an output directory",
+    )
 
     parser.add_argument(
         "--input_gammas", type=str, help="Full path of the original list of gammas."
@@ -83,19 +78,36 @@ Default is [100]",
     )
 
     parser.add_argument(
-        "--output_path",
+        "--log_file",
         type=str,
-        required=False,
         default=None,
-        help="It is recommended to use the 'productions' folder created by create_analysis_tree.py)",
+        help="""Override log file path
+                (ignored when using metadata)""",
     )
 
     args = parser.parse_args()
 
-    print("Checking for output directory...")
-    outdir = args.output_path
-    makedir(outdir)
-    print("Splitted lists will be stored under {}".format(outdir))
+    # Read metadata if available
+    if args.metadata:
+        with open(args.metadata, mode="r", encoding="utf8") as f:
+            metadata = yaml.safe_load(f)
+        analysis_name = metadata["analysis_name"]
+        analysis_path_local = Path(metadata["analyses_directory"]) / analysis_name
+        outdir = analysis_path_local / "data/simtel"
+        log_filepath = analysis_path_local / "analysis.log"
+        append = True
+    else:
+        outdir = Path(args.output_path)
+        log_filepath = outdir / "split_datasets.log"
+        append = False
+
+    log = initialize_logger(
+        logger_name=__name__, log_filename=log_filepath, append=append
+    )
+
+    log.debug("Checking for output directory...")
+    makedir(outdir, is_analysis=False, overwrite=True, logger=log)
+    log.info("Splitted lists will be stored under %s", outdir)
 
     prodlists = [
         [args.input_gammas, args.split_gammas],
@@ -110,28 +122,29 @@ Default is [100]",
     for i, prodlist in enumerate(prodlists):
 
         if prodlist[0] is None:
-            print("WARNING: a particle type list seems empty or undefined.")
+            log.warning("A particle type list seems empty or undefined.")
             continue
 
-        flist = open(prodlist[0], "r")
-        prodLines = flist.readlines()
-        flist.close()
+        with open(prodlist[0], "r", encoding="utf8") as f:
+            prod_lines = f.readlines()
 
-        if args.debug:
-            print("Input list for {} from {}".format(particle_types[i], prodlist[0]))
-            print("Contains {} files...".format(len(prodLines)))
+        log.debug(
+            "Input list for %s from %s contains %i files...",
+            particle_types[i],
+            prodlist[0],
+            len(prod_lines),
+        )
 
         numlines = [0]
 
         for prop in prodlist[1][: len(prodlist[1]) - 1]:
-            delta = int(prop / 100.0 * len(prodLines) + 0.5)
+            delta = int(prop / 100.0 * len(prod_lines) + 0.5)
             numlines.append(numlines[-1] + delta)
 
-        if args.debug:
-            if len(numlines) != 1:
-                print("Splitted according to file # : {}".format(numlines))
-            else:
-                print("All files in 1 list.")
+        if len(numlines) != 1:
+            log.debug("Splitted according to file # : %i", numlines)
+        else:
+            log.debug("All files in 1 list.")
 
         # Cycle on analysis stages
         for inum, iprop in enumerate(numlines):
@@ -140,19 +153,19 @@ Default is [100]",
                 os.path.basename(prodlist[0]).split(".list")[0] + stages[inum] + ".list"
             )
 
-            if args.debug:
-                print("DEBUG>> outname: {}".format(outname))
+            log.debug("outname: %s", outname)
 
             if inum + 1 < len(numlines):
-                Tlines = prodLines[iprop : numlines[inum + 1]]
+                tlines = prod_lines[iprop : numlines[inum + 1]]
             else:
-                Tlines = prodLines[iprop:]
+                tlines = prod_lines[iprop:]
 
-            if args.debug:
-                print("DEBUG>> Number of files: {}".format(len(Tlines)))
-            if len(Tlines) > 0:
-                with open(os.path.join(outdir, outname), "w") as f:
-                    f.writelines(Tlines)
+            log.debug("Number of files: %s", len(tlines))
+            if len(tlines) > 0:
+                with open(
+                    os.path.join(outdir, outname), mode="w", encoding="utf8"
+                ) as f:
+                    f.writelines(tlines)
 
         del stages[0]
 

@@ -1,31 +1,25 @@
+"""
+Filter LFNs that have replicas onto certain disk into a new file list.
+
+Example:
+  $ protopipe-FILTER-REPLICAS --input_list my_simtel_files.list --filter_disks [CC-IN2P3-Disk,POLGRID-Disk] --outfile filtered_files.list
+"""
 __RCSID__ = "$Id$"
 
 import sys
-import argparse
-from argparse import RawTextHelpFormatter
 import logging
-from multiprocessing import Pool
+
 from functools import partial
+from tqdm.contrib.concurrent import process_map
 
 from DIRAC.Core.Base import Script
-
-Script.setUsageMessage(
-    "\n".join(
-        [
-            "Filter a list of files by the disk(s) in which they have been replicated.",
-            "python $GRID_INTERFACE/%s.py [options]" % Script.scriptName,
-            "e.g.:",
-            "python $GRID_INTERFACE/%s.py --analysis_path=shared_folder/analyses/test --output_type=DL2"
-            % Script.scriptName,
-        ]
-    )
-)
+from DIRAC.Resources.Catalog.FileCatalog import FileCatalog
 
 Script.registerSwitch("", "input_list=", "File containing a list of LFNs (required)")
 Script.registerSwitch(
     "",
     "filter_disks=",
-    "List of SEs in which to look for replicas (required; example --filter_disks CC-IN2P3-Disk DESY-ZN-Disk)",
+    "List of SEs to scan (required; example --filter_disks [CC-IN2P3-Disk,DESY-ZN-Disk])",
 )
 Script.registerSwitch(
     "", "outfile=", "File where to store the selected LFNs (default: ./outfile.list)"
@@ -33,6 +27,8 @@ Script.registerSwitch(
 Script.registerSwitch(
     "", "max_files=", "Maximum number of LFN from input_list to scan (optional)"
 )
+Script.registerSwitch("", "n_cpu=", "Number of processes to use (default: 1)")
+Script.registerSwitch("", "log_level=", "Logging level (default: INFO)")
 
 Script.parseCommandLine()
 switches = dict(Script.getUnprocessedSwitches())
@@ -44,20 +40,26 @@ if "filter_disks" not in switches:
     print("List of SEs is missing: --filter_disks")
     sys.exit()
 else:
-    switches["filter_disks"] = [disk for disk in switches["filter_disks"].split(" ")]
+    switches["filter_disks"] = list(switches["filter_disks"][1:-1].split(","))
+    if len(switches["filter_disks"]) < 1:
+        raise ValueError("No disks have been provided!")
 if "outfile" not in switches:
     switches["outfile"] = "./outfile.list"
 if "max_files" not in switches:
     switches["max_files"] = None
 else:
     switches["max_files"] = int(switches["max_files"])
-
-from DIRAC.Resources.Catalog.FileCatalog import FileCatalog
+if "n_cpu" not in switches:
+    n_cpu = 1
+else:
+    switches["n_cpu"] = int(switches["n_cpu"])
+if "log_level" not in switches:
+    switches["log_level"] = logging.INFO
 
 fc = FileCatalog()
 
 
-def getReplicas(lfn, disks):
+def get_replicas(lfn, disks, logger=None):
     """Extract and write replicas from an LFN.
 
     Parameters
@@ -68,48 +70,55 @@ def getReplicas(lfn, disks):
         List of SEs.
     outfile: file
         Output file where to save the selected LFNs.
+
     """
+
+    logger.debug("Scanning replicas for LFN: %s", lfn)
 
     res = fc.getReplicas(lfn)
 
     if not res["OK"]:
-        logging.error(f"Error getting replicas for lfn: {lfn}")
-        return res["Message"]
+        logger.error("Error getting replicas for lfn: %s", lfn)
+        logger.error(res["Message"])
+        return None
 
-    if (
-        (len(disks) == 1)
-        and (len(res["Value"]["Successful"][lfn].keys()) == 1)
-        and (disks[0] in res["Value"]["Successful"][lfn].keys())
-    ):
-        return lfn + "\n"
-    elif (len(disks) > 1) and any(
-        disk in res["Value"]["Successful"][lfn].keys() for disk in disks
-    ):
-        return lfn + "\n"
+    successful = res["Value"]["Successful"]
+    replicas = list(successful.values())[0]
+
+    if not any(disk in replicas.keys() for disk in disks):
+        logger.debug("This LFN has no replicas in the disks that have been provided.")
+        return None
+
+    return lfn + "\n"
 
 
 def main():
 
-    outfile = open(switches["outfile"], "w")
+    logging.basicConfig()
+    logger = logging.getLogger(__name__)
+    logger.setLevel(getattr(logging, switches["log_level"].upper()))
 
-    with open(switches["input_list"], "r") as input_file:
+    logger.debug("Selected list of disks = %s", switches["filter_disks"])
+    logger.debug("Opening input file %s...", switches["input_list"])
+    with open(switches["input_list"], mode="r", encoding="utf8") as input_file:
 
         infile_list = []
         for line in input_file:
             infile_list.append(line.rstrip())
 
+        logger.debug("Selecting first %i LFNs...", switches["max_files"])
         infile_list = infile_list[: switches["max_files"]]
 
-        p = Pool(1)
-        g = partial(getReplicas, disks=switches["filter_disks"])
-        list_of_lfns = p.map(g, infile_list)
+        g = partial(get_replicas, disks=switches["filter_disks"], logger=logger)
+        list_of_lfns = process_map(g, infile_list, max_workers=switches["n_cpu"])
 
-    result = [l for ll in list_of_lfns if ll is not None for l in ll]
+    result = [lfn for lfn in list_of_lfns if lfn is not None]
+    logger.debug("Got following list of LFNs:\n%s", result)
 
-    outfile = open(switches["outfile"], "w")
-    for lfn in result:
-        outfile.writelines(lfn)
-    outfile.close()
+    logger.debug("Writing to output file %s...", switches["outfile"])
+    with open(switches["outfile"], mode="w", encoding="utf8") as outfile:
+        for lfn in result:
+            outfile.writelines(lfn)
 
 
 if __name__ == "__main__":

@@ -6,14 +6,11 @@ import glob
 from pathlib import Path
 import argparse
 from argparse import RawTextHelpFormatter
-import shutil
-import logging
 import yaml
 from pkg_resources import resource_filename
+import sys
 
-import protopipe
-
-logging.basicConfig(level=logging.INFO)
+from protopipe_grid_interface.utils import initialize_logger, makedir
 
 
 def setup_config(input_file, output_file, old_text, new_text):
@@ -29,46 +26,15 @@ def setup_config(input_file, output_file, old_text, new_text):
         Text to replace.
     new_text: str
         Text to be used.
+
     """
 
-    with open(input_file, "r") as infile:
-        with open(output_file, "w") as outfile:
+    with open(input_file, mode="r", encoding="utf8") as infile:
+        with open(output_file, mode="w", encoding="utf8") as outfile:
             for line in infile:
                 for old, new in zip(old_text, new_text):
                     line = line.replace(old, new)
                 outfile.write(os.path.expandvars(line))
-
-
-def makedir(name, is_analysis=False, overwrite=False):
-    """
-    Manage the creation of a new folder.
-
-    Parameters
-    ----------
-    name : str
-        Name of the folder to be created.
-    result: int
-        1 for success, 0 otherwise (any reason).
-
-    """
-    if (not name.exists()) or (name.exists() and overwrite):
-        try:
-            Path.mkdir(name, parents=True, exist_ok=True)
-        except OSError as error:
-            logging.critical(f"Creation of the directory {name} failed due to {error}")
-            return 0
-        else:
-            logging.info(f"Successfully created the directory {name}")
-            return 1
-    else:
-        if is_analysis:
-            additional_message = "(you can force it with ----overwrite-analysis)"
-        else:
-            additional_message = ""
-        logging.warning(
-            f"Directory {name} already exists and it won't be overwritten {additional_message}"
-        )
-        return 0
 
 
 def create_paths(dictionary):
@@ -83,6 +49,7 @@ def create_paths(dictionary):
     -------
     paths : list
         List of relative paths
+
     """
     paths = []
 
@@ -127,12 +94,13 @@ using the protopipe prototype pipeline.
         help="Analysis workflow YAML file (default: see protopipe_grid_interface.aux)",
     )
 
-    # parser.add_argument(
-    #     "--source_path",
-    #     type=str,
-    #     default=os.environ["HOME"],
-    #     help="Full path to the source codes of protopipe and the GRID interface (default: home directory)",
-    # )
+    parser.add_argument(
+        "--log_file",
+        type=str,
+        default=None,
+        help="""Override log file path
+                (default: analysis.log in analysis folder)""",
+    )
 
     parser.add_argument(
         "--output_path",
@@ -178,26 +146,35 @@ using the protopipe prototype pipeline.
     output_path = Path(args.output_path).resolve()
 
     shared_folder_directory = output_path / "shared_folder"
-    makedir(shared_folder_directory, overwrite=False)
-
     analyses_directory = Path(shared_folder_directory) / "analyses"
-    makedir(analyses_directory, overwrite=False)
-
     productions_directory = Path(shared_folder_directory) / "productions"
-    makedir(productions_directory, overwrite=False)
-
     analysis_path = Path(analyses_directory) / analysis_name
+
+    if args.log_file is None:
+        log_filepath = (
+            Path.cwd() / f"protopipe_temp_creation_of_analysis_{analysis_name}.log"
+        )
+        Path(log_filepath).touch()
+    else:
+        log_filepath = Path(args.log_file)
+    log = initialize_logger(
+        logger_name=__name__, log_filename=log_filepath, append=False
+    )
+
+    makedir(shared_folder_directory, overwrite=False, logger=log)
+    makedir(analyses_directory, overwrite=False, logger=log)
+    makedir(productions_directory, overwrite=False, logger=log)
 
     # Read analysis workflow and convert it to directory paths
     if args.analysis_directory_tree:
-        with open(args.analysis_directory_tree) as f:
-            analysis_directory_tree = yaml.load(f, Loader=yaml.FullLoader)
+        with open(args.analysis_directory_tree, mode="r", encoding="utf8") as f:
+            analysis_directory_tree = yaml.safe_load(f)
     else:
         analysis_directory_file = resource_filename(
             "protopipe_grid_interface", "aux/standard_analysis_workflow.yaml"
         )
-        with open(analysis_directory_file, "r") as stream:
-            analysis_directory_tree = yaml.load(stream, Loader=yaml.FullLoader)
+        with open(analysis_directory_file, mode="r", encoding="utf8") as stream:
+            analysis_directory_tree = yaml.safe_load(stream)
 
     # Build relative paths for this directory tree
     relative_paths = create_paths(analysis_directory_tree)
@@ -206,13 +183,11 @@ using the protopipe prototype pipeline.
     if (not analysis_path.exists()) or (
         analysis_path.exists() and args.overwrite_analysis
     ):
-
-        new_analysis = makedir(
-            analysis_path, is_analysis=True, overwrite=args.overwrite_analysis
-        )
+        # Create analysis folder
+        makedir(analysis_path, overwrite=True, logger=log)
 
         # Write metadata to YAML file and store it into the analysis folder
-        logging.info("Writing metadata...")
+        log.info("Writing metadata...")
         analysis_metadata = {
             "analyses_directory": str(analyses_directory),
             "analysis_name": analysis_name,
@@ -221,10 +196,12 @@ using the protopipe prototype pipeline.
             "analysis directory on the GRID from home": args.GRID_path_from_home,
         }
         with open(
-            analyses_directory / analysis_name / "analysis_metadata.yaml", "w"
+            analyses_directory / analysis_name / "analysis_metadata.yaml",
+            mode="w",
+            encoding="utf8",
         ) as file:
             yaml.dump(analysis_metadata, file)
-        logging.info(
+        log.info(
             "A YAML file containing metadata for this analysis has been stored in the analysis folder"
         )
 
@@ -233,57 +210,13 @@ using the protopipe prototype pipeline.
             try:
                 full_path.mkdir(parents=True, exist_ok=args.overwrite_analysis)
             except os.error as e:
-                logging.critical(
-                    "Creation of the directory {} failed due to {}".format(full_path, e)
+                log.critical(
+                    "Creation of the directory %s failed due to %s", full_path, e
                 )
-                logging.critical(
-                    "Directory structure NOT ready for protopipe analysis."
-                )
-                exit()
+                log.critical("Directory structure NOT ready for protopipe analysis.")
+                sys.exit()
 
-        logging.info("Directory structure ready for protopipe analysis.")
-
-        # Source code paths
-        # interface_path = os.path.join(args.source_path, "protopipe-grid-interface")
-
-        protopipe_path = Path(protopipe.__path__[0])
-        protopipe_configs = protopipe_path / "aux/example_config_files/"
-
-        # Copy scripts and edit scripts according to this analysis
-
-        # setup_config(
-        #     os.path.join(interface_path, "download_and_merge.sh"),
-        #     os.path.join(analysis_path, "data/download_and_merge.sh"),
-        #     [
-        #         'LOCAL=""',
-        #         'ANALYSIS_NAME=""',
-        #         'HOME_PATH_GRID=""',
-        #         'ANALYSIS_PATH_GRID=""',
-        #     ],
-        #     [
-        #         'LOCAL="{}"'.format(args.output_path),
-        #         'ANALYSIS_NAME="{}"'.format(analysis_name),
-        #         'HOME_PATH_GRID="{}"'.format(args.GRID_home),
-        #         'ANALYSIS_PATH_GRID="{}"'.format(args.GRID_path_from_home),
-        #     ],
-        # )
-
-        # setup_config(
-        #     os.path.join(interface_path, "upload_models.sh"),
-        #     os.path.join(analysis_path, "estimators/upload_models.sh"),
-        #     [
-        #         'LOCAL=""',
-        #         'ANALYSIS_NAME=""',
-        #         'HOME_PATH_GRID=""',
-        #         'ANALYSIS_PATH_GRID=""',
-        #     ],
-        #     [
-        #         'LOCAL="{}"'.format(args.output_path),
-        #         'ANALYSIS_NAME="{}"'.format(analysis_name),
-        #         'HOME_PATH_GRID="{}"'.format(args.GRID_home),
-        #         'ANALYSIS_PATH_GRID="{}"'.format(args.GRID_path_from_home),
-        #     ],
-        # )
+        log.info("Directory structure ready for protopipe analysis.")
 
         # Create a grid configuration file for this analysis starting from the example
 
@@ -338,13 +271,19 @@ using the protopipe prototype pipeline.
                 [str(analyses_directory), analysis_name],
             )
 
-        logging.info(
+        log.info(
             "Auxiliary scripts and configuration files have been stored and partially filled."
         )
+        log.debug("Finalizing analysis log file...")
+        log_filepath.rename(analysis_path / "analysis.log")
+        if not (analysis_path / "analysis.log").exists():
+            log.error("Something went wrong with the analysis log file!")
+        else:
+            log.info("Analysis log file: %s", analysis_path / "analysis.log")
 
     else:
-        logging.info(
-            "Required analysis folder already present. For safety no sub-directory will be overwritten."
+        log.warning(
+            "Required analysis folder exists and no overriding has been requested. Terminating now."
         )
 
 

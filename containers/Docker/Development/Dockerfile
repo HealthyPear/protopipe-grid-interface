@@ -52,8 +52,8 @@ RUN echo ". $CONDA_DIR/etc/profile.d/conda.sh" >> ~/.profile \
 # Get latest environment file and create environment
 # WARNING: in the final Dockerfile the pull must come from either the
 # master branch (development version) or from a tagged release (released version)
-RUN git clone https://github.com/HealthyPear/protopipe-grid-interface.git \
-    && cd protopipe-grid-interface \
+WORKDIR /home/cta/protopipe-grid-interface
+RUN git clone https://github.com/HealthyPear/protopipe-grid-interface.git .\
     && git pull origin pull/50/head \
     && mamba env create -f environment_development.yaml \
     && echo "conda activate protopipe-grid-interface" >> ~/.bashrc \
@@ -63,9 +63,9 @@ RUN git clone https://github.com/HealthyPear/protopipe-grid-interface.git \
 #                                   PROTOPIPE
 # ===============================================================================
 
-# Clone protopipe and install dev version 
-RUN cd $HOME && https://github.com/cta-observatory/protopipe.git \
-    && cd protopipe \
+# Clone protopipe and install dev version
+WORKDIR /home/cta/protopipe
+RUN git clone https://github.com/cta-observatory/protopipe.git .\
     && pip install -e '.[all]'
 
 
