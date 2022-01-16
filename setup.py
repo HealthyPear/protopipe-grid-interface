@@ -33,7 +33,7 @@ setup(
     package_data={
         "protopipe_grid_interface": ["aux/standard_analysis_workflow.yaml", "grid.yaml"]
     },
-    install_requires=["DIRAC", "CTADIRAC", "pyyaml", "tables"],
+    install_requires=["DIRAC", "CTADIRAC", "pyyaml", "tables", "tqdm"],
     zip_safe=False,
     use_scm_version={
         "write_to": os.path.join("protopipe_grid_interface", "_version.py")

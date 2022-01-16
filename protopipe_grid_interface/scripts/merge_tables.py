@@ -8,54 +8,53 @@ except ImportError:
     logging.critical(
         "Pytables is not installed in this environment (pip install tables)."
     )
+from tqdm import tqdm
 
-# logging.basicConfig(level=logging.DEBUG)
+from protopipe_grid_interface.utils import initialize_logger
 
 
-def merge_call(template_file_name, indir, outfile):
+def merge_call(template_file_name, indir, outfile, logger=None):
 
-    logging.debug("template_file_name={}".format(template_file_name))
-    logging.debug("indir={}".format(indir))
-    logging.debug("outfile={}".format(outfile))
+    logger.debug("template_file_name={}".format(template_file_name))
+    logger.debug("indir=%s", indir)
+    logger.debug("outfile=%s", outfile)
 
     input_template = "{}/{}*.h5".format(indir, template_file_name)
-    logging.debug(f"input_template: {input_template}")
+    logger.debug("input_template: %s", input_template)
 
     filename_list = glob.glob(input_template)
-    logging.debug(f"filename_list (truncated to 10 files): {filename_list[0:10]}")
+    logger.debug(f"filename_list (truncated to 10 files): {filename_list[0:10]}")
 
-    merged_tables, empty_files = merge_list_of_pytables(filename_list, outfile)
+    _, empty_files = merge_list_of_pytables(filename_list, outfile, logger=logger)
 
     if empty_files > 0:
         ratio = round(float(empty_files) / float(len(filename_list)), 2) * 100
-        logging.warning(
-            "%d over %f (%f%%) were empty!" % (empty_files, len(filename_list), ratio)
+        logger.warning(
+            "%d over %f (%f%%) were empty!", empty_files, len(filename_list), ratio
         )
 
-    return None
 
-
-def merge_list_of_pytables(filename_list, destination):
+def merge_list_of_pytables(filename_list, destination, logger=None):
     merged_tables = {}
     outfile = tb.open_file(destination, mode="w")
     all_previous_files_were_empty = True
     empty_files = 0
 
-    for idx, filename in enumerate(sorted(filename_list)):
+    for idx, filename in enumerate(tqdm(sorted(filename_list))):
 
-        logging.info("File # %d of %d" % (idx, len(filename_list)))
-        logging.info("Filename %s" % filename)
+        logger.debug("File # %d of %d" % (idx + 1, len(filename_list)))
+        logger.debug("Filename %s" % filename)
 
         try:
             infile = tb.open_file(filename, mode="r")
         except tb.exceptions.HDF5ExtError:
-            logging.warning("file %s appears to be corrupt" % filename)
+            logger.warning("file %s appears to be corrupt" % filename)
             continue
 
         table_name_list = [table.name for table in infile.root]  # Name of tables
 
         if len(table_name_list) == 0:
-            logging.warning("file %s appears to be empty" % filename)
+            logger.warning("file %s appears to be empty", filename)
             empty_file = True
             empty_files += 1
         else:
@@ -63,29 +62,29 @@ def merge_list_of_pytables(filename_list, destination):
 
         # Initialise output file
         if (idx == 0) and not empty_file:
-            logging.info("First file is not empty")
+            logger.debug("First file is not empty")
             for name in table_name_list:
                 merged_tables[name] = infile.copy_node(
                     where="/", name=name, newparent=outfile.root
                 )
             all_previous_files_were_empty = False
         elif all_previous_files_were_empty and (idx != 0) and not empty_file:
-            logging.info("This is not the first file but is the first non-empty")
+            logger.debug("This is not the first file but is the first non-empty")
             for name in table_name_list:
                 merged_tables[name] = infile.copy_node(
                     where="/", name=name, newparent=outfile.root
                 )
             all_previous_files_were_empty = False
         elif all_previous_files_were_empty:
-            logging.warning("Still no file with data...")
+            logger.warning("Still no file with data...")
             infile.close()
             continue
         elif empty_file:
-            logging.warning("Empty file! Closing and going to the next one...")
+            logger.warning("Empty file! Closing and going to the next one...")
             infile.close()
             continue
         else:
-            logging.info("File with data. Merging with the previous non-empty one...")
+            logger.debug("File with data. Merging with the previous non-empty one...")
             for name in table_name_list:
                 table_tmp = infile.get_node("/" + name)
                 table_tmp.append_where(dstTable=merged_tables[name])
@@ -101,9 +100,24 @@ def main():
     parser.add_argument("--indir", type=str, default="./")
     parser.add_argument("--template_file_name", type=str, default="features_event")
     parser.add_argument("--outfile", type=str)
+    parser.add_argument(
+        "--log_file",
+        type=str,
+        default=None,
+        help="""Override log file path
+                (default: input directory)""",
+    )
     args = parser.parse_args()
 
-    merge_call(args.template_file_name, args.indir, args.outfile)
+    if args.log_file is None:
+        log_filepath = args.indir / "merge_tables.log"
+    else:
+        log_filepath = args.log_file
+    log = initialize_logger(
+        logger_name=__name__, log_filename=log_filepath, append=False
+    )
+
+    merge_call(args.template_file_name, args.indir, args.outfile, logger=log)
 
 
 if __name__ == "__main__":
