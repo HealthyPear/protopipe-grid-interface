@@ -40,6 +40,7 @@ def main():
     while "Value" not in result.keys():
         result = dirac.getJobJDL(args.job_id)
         logging.debug(result)
+        break
     else:
         input_data = result["Value"]["InputData"]
         lfns = [i for i in input_data if not re.compile("estimators").search(i)]
