@@ -64,6 +64,7 @@ setup(
             "protopipe-UPLOAD_MODELS=protopipe_grid_interface.scripts.upload_models:main",
             "protopipe-FORCE_JOB_TO_FAILED=protopipe_grid_interface.scripts.cta_wms_set_failed:main",
             "protopipe-FILTER-REPLICAS=protopipe_grid_interface.scripts.filter_lfns_by_replicas:main",
+            "protopipe-GET_INPUT_LFNS=protopipe_grid_interface.scripts.get_input_LFNs:main",
         ],
     },
 )
