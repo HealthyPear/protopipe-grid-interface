@@ -225,6 +225,10 @@ def makedir(name, is_analysis=False, overwrite=False, logger=None):
 
     Parameters
     ----------
+    is_analysis: bool
+        If True the directory is intended to be an analysis.
+    overwrite: bool
+        If True all contents will be removed at creation.
     name : pathlib.Path
         Folder to be created.
     result: int
@@ -238,10 +242,8 @@ def makedir(name, is_analysis=False, overwrite=False, logger=None):
             logger.exception(
                 "Creation of the directory %s failed due to %s", name, error
             )
-            return 0
         else:
             logger.info(f"Successfully created the directory {name}")
-            return 1
     else:
         if is_analysis:
             additional_message = "(you can force it with ----overwrite-analysis)"
@@ -250,4 +252,3 @@ def makedir(name, is_analysis=False, overwrite=False, logger=None):
         logger.warning(
             f"Directory {name} already exists and it won't be overwritten {additional_message}"
         )
-        return 0
