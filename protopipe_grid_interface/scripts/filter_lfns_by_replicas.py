@@ -1,8 +1,8 @@
 """
-Filter LFNs that have replicas onto certain disk into a new file list.
+Filter LFNs that have replicas onto a certain GRID location into a new file list.
 
 Example:
-  $ protopipe-FILTER-REPLICAS --input_list my_simtel_files.list --filter_disks [CC-IN2P3-Disk,POLGRID-Disk] --outfile filtered_files.list
+  $ protopipe-FILTER-REPLICAS --input_list my_simtel_files.list --filter_disk CC-IN2P3-Disk --outfile filtered_files.list
 """
 __RCSID__ = "$Id$"
 
@@ -29,6 +29,9 @@ Script.registerSwitch(
 )
 Script.registerSwitch("", "n_cpu=", "Number of processes to use (default: 1)")
 Script.registerSwitch("", "log_level=", "Logging level (default: INFO)")
+Script.registerSwitch(
+    "", "chunk_size=", "Size of chunks sent to worker processes (default: 1)"
+)
 
 Script.parseCommandLine()
 switches = dict(Script.getUnprocessedSwitches())
@@ -36,13 +39,9 @@ switches = dict(Script.getUnprocessedSwitches())
 if "input_list" not in switches:
     print("Input file list is missing: --input_list")
     sys.exit()
-if "filter_disks" not in switches:
-    print("List of SEs is missing: --filter_disks")
+if "filter_disk" not in switches:
+    print("List of SEs is missing: --filter_disk")
     sys.exit()
-else:
-    switches["filter_disks"] = list(switches["filter_disks"][1:-1].split(","))
-    if len(switches["filter_disks"]) < 1:
-        raise ValueError("No disks have been provided!")
 if "outfile" not in switches:
     switches["outfile"] = "./outfile.list"
 if "max_files" not in switches:
@@ -53,13 +52,17 @@ if "n_cpu" not in switches:
     n_cpu = 1
 else:
     switches["n_cpu"] = int(switches["n_cpu"])
+if "chunk_size" not in switches:
+    chunk_size = 1
+else:
+    switches["chunk_size"] = int(switches["chunk_size"])
 if "log_level" not in switches:
-    switches["log_level"] = logging.INFO
+    switches["log_level"] = "INFO"
 
 fc = FileCatalog()
 
 
-def get_replicas(lfn, disks, logger=None):
+def get_replicas(lfn, disk, logger=None):
     """Extract and write replicas from an LFN.
 
     Parameters
@@ -85,8 +88,8 @@ def get_replicas(lfn, disks, logger=None):
     successful = res["Value"]["Successful"]
     replicas = list(successful.values())[0]
 
-    if not any(disk in replicas.keys() for disk in disks):
-        logger.debug("This LFN has no replicas in the disks that have been provided.")
+    if disk not in replicas.keys():
+        logger.debug("This LFN has no replicas in the disk that has been selected.")
         return None
 
     return lfn + "\n"
@@ -109,8 +112,13 @@ def main():
         logger.debug("Selecting first %i LFNs...", switches["max_files"])
         infile_list = infile_list[: switches["max_files"]]
 
-        g = partial(get_replicas, disks=switches["filter_disks"], logger=logger)
-        list_of_lfns = process_map(g, infile_list, max_workers=switches["n_cpu"])
+        g = partial(get_replicas, disk=switches["filter_disk"], logger=logger)
+        list_of_lfns = process_map(
+            g,
+            infile_list,
+            max_workers=switches["n_cpu"],
+            chunksize=switches["chunk_size"],
+        )
 
     result = [lfn for lfn in list_of_lfns if lfn is not None]
     logger.debug("Got following list of LFNs:\n%s", result)
