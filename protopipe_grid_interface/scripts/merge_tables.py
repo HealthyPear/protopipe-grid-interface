@@ -11,7 +11,12 @@ except ImportError:
     )
 from tqdm import tqdm
 
-from protopipe_grid_interface.utils import initialize_logger
+try:
+    from protopipe_grid_interface.utils import initialize_logger
+
+    initialize_default_logger = False
+except ImportError:
+    initialize_default_logger = True
 
 
 def merge_call(template_file_name, indir, outfile, logger=None):
@@ -114,9 +119,13 @@ def main():
         log_filepath = Path(args.indir) / "merge_tables.log"
     else:
         log_filepath = args.log_file
-    log = initialize_logger(
-        logger_name=__name__, log_filename=log_filepath, append=False
-    )
+    if initialize_default_logger:
+        log = logging.getLogger(__name__)
+        log.setLevel(logging.DEBUG)  # ensures that everything will be logged
+    else:
+        log = initialize_logger(
+            logger_name=__name__, log_filename=log_filepath, append=False
+        )
 
     merge_call(args.template_file_name, args.indir, args.outfile, logger=log)
 
