@@ -121,7 +121,19 @@ def main():
         log_filepath = args.log_file
     if initialize_default_logger:
         log = logging.getLogger(__name__)
-        log.setLevel(logging.DEBUG)  # ensures that everything will be logged
+        log.setLevel(logging.DEBUG)
+        # create console handler and set level to debug
+        ch = logging.StreamHandler()
+        ch.setLevel(logging.DEBUG)
+        # create formatter
+        formatter = logging.Formatter(
+            "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+            datefmt="%Y-%m-%d %H:%M:%S",
+        )
+        # add formatter to ch
+        ch.setFormatter(formatter)
+        # add ch to logger
+        log.addHandler(ch)
     else:
         log = initialize_logger(
             logger_name=__name__, log_filename=log_filepath, append=False
