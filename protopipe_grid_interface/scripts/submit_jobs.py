@@ -5,6 +5,7 @@ import subprocess
 import sys
 from pathlib import Path
 from pkg_resources import resource_filename
+import time
 
 try:
     import protopipe
@@ -27,10 +28,24 @@ except ImportError:
     ) from None
 
 
+def split_input_data(dirac, filelist, n_file_per_job):
+    try:
+        res = dirac.splitInputData(filelist, n_file_per_job)
+        return True, res
+    except AttributeError:
+        return False, None
+
+
 Script.registerSwitch("", "analysis_path=", "Full path to the analysis folder")
 Script.registerSwitch("", "output_type=", "Output data type (TRAINING or DL2)")
 Script.registerSwitch(
     "", "max_events=", "Max number of events to be processed (optional, int)"
+)
+
+Script.registerSwitch(
+    "",
+    "upload_analysis_cfg=",
+    "If True (default), upload analysis configuration file",
 )
 Script.registerSwitch("", "dry=", "If True do not submit job (default: False)")
 Script.registerSwitch("", "test=", "If True submit only one job (default: False)")
@@ -78,6 +93,13 @@ if "max_events" not in switches:
     switches["max_events"] = 10000000000
 else:
     switches["max_events"] = int(switches["max_events"])
+
+if "upload_analysis_cfg" not in switches:
+    switches["upload_analysis_cfg"] = True
+elif switches["upload_analysis_cfg"] in ["False", "false"]:
+    switches["upload_analysis_cfg"] = False
+else:
+    switches["upload_analysis_cfg"] = True
 
 if "dry" not in switches:
     switches["dry"] = False
@@ -281,7 +303,19 @@ def main():
         filelist = f.readlines()
 
     filelist = ["{}".format(_.replace("\n", "")) for _ in filelist]
-    res = dirac.splitInputData(filelist, n_file_per_job)
+
+    i = 1
+    while True:
+        status, res = split_input_data(dirac, filelist, n_file_per_job)
+        if status:
+            break
+        else:
+            i += 1
+            log.warning(
+                f"Failed to get file catalog configuration while splitting input data; Attempt # {i}..."
+            )
+            time.sleep(5)
+            continue
     list_run_to_loop_on = res["Value"]
 
     # define a template name for the file that's going to be written out.
@@ -593,27 +627,31 @@ def main():
             break
 
     # Upload analysis configuration file for provenance
+    if switches["upload_analysis_cfg"]:
+        se_list = ["CC-IN2P3-USER", "DESY-ZN-USER", "CNAF-USER", "CEA-USER"]
+        analysis_config_local = os.path.join(config_path, config_file)
+        # the configuration file is uploaded to the data directory because
+        # the training samples (as well as their cleaning settings) are independent
+        analysis_config_dirac = os.path.join(home_grid, output_path, config_file)
 
-    se_list = ["CC-IN2P3-USER", "DESY-ZN-USER", "CNAF-USER", "CEA-USER"]
-    analysis_config_local = os.path.join(config_path, config_file)
-    # the configuration file is uploaded to the data directory because
-    # the training samples (as well as their cleaning settings) are independent
-    analysis_config_dirac = os.path.join(home_grid, output_path, config_file)
-
-    if switches["dry"] is False:
-        # Upload this file to all Dirac Storage Elements in SE_LIST
-        for se in se_list:
-            # the uploaded config file overwrites any old copy
-            ana_cfg_upload_cmd = f"dirac-dms-add-file -f {analysis_config_dirac} {analysis_config_local} {se}"
-            log.info(
-                "Uploading %s to %s...", analysis_config_local, analysis_config_dirac
-            )
-            ana_cfg_upload_result = subprocess.run(
-                ana_cfg_upload_cmd, shell=True, text=True, check=True
-            )
-            log.debug(ana_cfg_upload_result)
+        if switches["dry"] is False:
+            # Upload this file to all Dirac Storage Elements in SE_LIST
+            for se in se_list:
+                # the uploaded config file overwrites any old copy
+                ana_cfg_upload_cmd = f"dirac-dms-add-file -f {analysis_config_dirac} {analysis_config_local} {se}"
+                log.info(
+                    "Uploading %s to %s...",
+                    analysis_config_local,
+                    analysis_config_dirac,
+                )
+                ana_cfg_upload_result = subprocess.run(
+                    ana_cfg_upload_cmd, shell=True, text=True, check=True
+                )
+                log.debug(ana_cfg_upload_result)
+        else:
+            log.info("This is a DRY RUN! -- analysis.yaml has NOT been uploaded.")
     else:
-        log.info("This is a DRY RUN! -- analysis.yaml has NOT been uploaded.")
+        log.debug("Analysis configuration file won't be uploaded.")
 
     n_jobs_planned = n_jobs_max if (n_jobs_max != -1) else len(list_run_to_loop_on)
     log.debug("%i job(s) have been planned", n_jobs_planned)
