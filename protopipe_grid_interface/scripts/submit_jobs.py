@@ -296,7 +296,7 @@ def main():
         step = "classification"
     if switches["output_type"] in "DL2":
         if force_tailcut_for_extended_cleaning is False:
-            output_path += "/{dl2_dir}/{particle}/"
+            output_path += f"/{dl2_dir}/{particle}/"
         else:
             output_path += f"/{dl2_dir}_force_tc_extended_cleaning/{particle}/"
         step = ""
@@ -523,7 +523,7 @@ def main():
         if len(bunch) > 1:
             names = []
 
-            names.append(("*_{particle}_", output_filenames[mode]))
+            names.append((f"*_{particle}_", output_filenames[mode]))
 
             for in_name, out_name in names:
                 log.debug("in_name: %s, out_name: %s", in_name, out_name)
