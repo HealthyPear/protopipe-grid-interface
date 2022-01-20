@@ -81,7 +81,7 @@ def main():
     parser.add_argument(
         "--n_jobs",
         type=int,
-        default=4,
+        default=1,
         help="Number of parallel jobs for directory syncing (default: 4)",
     )
 
