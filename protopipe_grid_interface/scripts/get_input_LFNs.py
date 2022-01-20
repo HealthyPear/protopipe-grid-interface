@@ -61,6 +61,8 @@ def main():
             for lfn in lfns:
                 file.writelines(lfn + "\n")
 
+        log.info("The LFNs from job %i have been extracted.", args.job_id)
+
 
 if __name__ == "__main__":
     main()
