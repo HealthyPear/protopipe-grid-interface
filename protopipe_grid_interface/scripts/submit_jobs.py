@@ -578,6 +578,7 @@ def main():
         log.info("SUBMITTING job with the following INPUT SANDBOX:\n %s", input_sandbox)
         log.info("Submission RESULT: %s", dirac.submitJob(j)["Value"])
         n_jobs_submitted += 1
+        n_jobs_remaining -= 1
 
         # break if this is only a test submission
         if switches["test"] is True:
