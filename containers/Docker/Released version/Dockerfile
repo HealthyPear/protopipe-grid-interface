@@ -11,7 +11,8 @@ LABEL version="0.1" \
     description="Docker image to create containers for using protopipe on DIRAC"
 
 # Install basic packages
-RUN yum update -y && yum install -y wget git vim tree
+RUN yum update -y && yum install -y wget git vim tree gcc gcc-c++
+# gcc g++ are required to install gammapy and eventio for ctapipe 0.11
 
 # Add non-root user and work from his home directory
 ARG USERNAME=cta
@@ -35,7 +36,6 @@ RUN wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh \
     && bash Miniconda3-latest-Linux-x86_64.sh -b -p $HOME/miniconda \
     && rm Miniconda3-latest-Linux-x86_64.sh
 ENV PATH=$HOME/miniconda/bin:${PATH}
-#ARG PATH=$HOME/miniconda/bin:${PATH}
 
 # make conda activate command available from /bin/bash --login shells 
 # Install mamba and update base environment
@@ -55,8 +55,9 @@ RUN echo ". $CONDA_DIR/etc/profile.d/conda.sh" >> ~/.profile \
 WORKDIR /home/cta/protopipe-grid-interface
 RUN git clone https://github.com/HealthyPear/protopipe-grid-interface.git \
     && git pull origin pull/50/head \
-    && mamba env create -f environment.yaml \
-    && echo "conda activate protopipe-grid-interface" >> ~/.bashrc \
+    && mamba env create -f environment_release.yaml \
+    && echo "conda activate protopipe-CTADIRAC-dev" >> ~/.bashrc \
     && echo "alias ls='ls --color'" >> ~/.bashrc
 
-ENTRYPOINT ["/bin/bash && . ~/protopipe-grid-interface/setup.sh"]
+WORKDIR /home/cta/
+ENTRYPOINT ["bash"]
