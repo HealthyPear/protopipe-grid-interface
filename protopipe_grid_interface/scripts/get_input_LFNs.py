@@ -10,6 +10,18 @@ def main():
 
     log = logging.getLogger(__name__)
     log.setLevel(logging.DEBUG)
+    # create console handler and set level to debug
+    ch = logging.StreamHandler()
+    ch.setLevel(logging.DEBUG)
+    # create formatter
+    formatter = logging.Formatter(
+        "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
+    )
+    # add formatter to ch
+    ch.setFormatter(formatter)
+    # add ch to logger
+    log.addHandler(ch)
 
     description = """Export input LFNs to file for a job."""
 
@@ -39,7 +51,7 @@ def main():
     result = dirac.getJobJDL(args.job_id)
     while "Value" not in result.keys():
         result = dirac.getJobJDL(args.job_id)
-        logging.debug(result)
+        log.debug(result)
         break
     else:
         input_data = result["Value"]["InputData"]
