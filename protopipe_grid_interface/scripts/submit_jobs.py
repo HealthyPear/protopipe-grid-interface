@@ -256,7 +256,7 @@ def main():
             "--indir ./ --infile_list={infile_name}",
             f"--max_events={switches['max_events']}",
             "--{mode}",
-            "--force_tailcut_for_extended_cleaning={force_tailcut_for_extended_cleaning}",
+            f"--force_tailcut_for_extended_cleaning={force_tailcut_for_extended_cleaning}",
             f"--cam_ids {cam_id_list}",
         ]
         output_filename_template = "DL2"
