@@ -415,9 +415,10 @@ def main():
         log.debug("Model(s) to be uploaded to the GRID: \n%s", models_to_upload)
 
     # debug summary before submitting
+    log.debug("protopipe version: %s", protopipe.__version__)
     log.debug("Running command: %s", pilot_args_write)
     log.debug("Input sandbox: %s", input_sandbox)
-    log.debug("Output file: %s", input_sandbox)
+    log.debug("Output type: %s", switches["output_type"])
     log.debug("Particle type: %s", particle)
     log.debug("Energy estimation: %s", estimate_energy)
 
