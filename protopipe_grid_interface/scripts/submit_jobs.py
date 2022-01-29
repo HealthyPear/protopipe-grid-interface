@@ -186,6 +186,7 @@ def main():
     mode = cfg["General"]["mode"]  # One mode naw
     particle = cfg["General"]["particle"]
     estimate_energy = cfg["General"]["estimate_energy"]
+    log.info(f"Estimate energy has been set to {estimate_energy}")
     force_tailcut_for_extended_cleaning = cfg["General"][
         "force_tailcut_for_extended_cleaning"
     ]
