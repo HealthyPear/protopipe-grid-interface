@@ -310,13 +310,12 @@ def main():
         status, res = split_input_data(dirac, filelist, n_file_per_job)
         if status:
             break
-        else:
-            i += 1
-            log.warning(
-                f"Failed to get file catalog configuration while splitting input data; Attempt # {i}..."
-            )
-            time.sleep(5)
-            continue
+        i += 1
+        log.warning(
+            f"Failed to get file catalog configuration while splitting input data; Attempt # {i}..."
+        )
+        time.sleep(5)
+        continue
     list_run_to_loop_on = res["Value"]
 
     # define a template name for the file that's going to be written out.
