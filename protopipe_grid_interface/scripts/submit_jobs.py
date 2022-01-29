@@ -312,7 +312,7 @@ def main():
             break
         i += 1
         log.warning(
-            f"Failed to get file catalog configuration while splitting input data; Attempt # {i}..."
+            "Failed to get file catalog configuration while splitting input data; Attempt # %d...",i
         )
         time.sleep(5)
         continue
