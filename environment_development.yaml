@@ -2,10 +2,11 @@ name: protopipe-CTADIRAC-dev
 channels:
   - conda-forge
 dependencies:
-  - python=3.8
+  - python>=3.8
   - pip
   # required by the interface
   - dirac-grid
+  - diracgrid::fts3
   - voms
   - pytables
   - pyyaml
