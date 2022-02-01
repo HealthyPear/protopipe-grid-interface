@@ -429,9 +429,9 @@ def main():
     result = subprocess.check_output(batcmd, shell=True)
     try:
         with open(result.split()[-1], mode="r", encoding="utf8") as f:
-            grid_filelist = f.readlines()
+            grid_filelist = [line.rstrip("\n") for line in f]
     except IOError:
-        log.critical("Cannot read GRID filelist.", exc_info=True)
+        log.exception("Cannot read GRID filelist.", exc_info=True)
 
     # get jobs from today and yesterday...
     days = []
@@ -501,7 +501,7 @@ def main():
         # if file already in GRID storage, skip
         # (you cannot overwrite it there, delete it and resubmit)
         # (assumes tail and wave will always be written out together)
-        file_on_grid = os.path.join(output_path, output_filenames[mode])
+        file_on_grid = os.path.join(home_grid, output_path, output_filenames[mode])
         log.debug("Checking for existing file on GRID...")
         if file_on_grid in grid_filelist:
             log.warning(
