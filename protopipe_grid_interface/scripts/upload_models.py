@@ -55,10 +55,7 @@ def main():
         help="Type of model to upload",
     )
     parser.add_argument(
-        "--cleaning_mode",
-        type=str,
-        default="tail",
-        help="Deprecated argument",
+        "--cleaning_mode", type=str, default="tail", help="Deprecated argument"
     )
 
     parser.add_argument(

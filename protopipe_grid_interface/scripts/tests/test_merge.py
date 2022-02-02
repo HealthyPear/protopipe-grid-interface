@@ -20,11 +20,7 @@ def create_mock_file(tmpdir, filename):
     out_table = {}
     for cam_id in cameras:
         if cam_id not in outdata:
-            out_table[cam_id] = outfile.create_table(
-                "/",
-                cam_id,
-                output_variables,
-            )
+            out_table[cam_id] = outfile.create_table("/", cam_id, output_variables)
             outdata[cam_id] = out_table[cam_id].row
         for n_image in range(50):
             outdata[cam_id]["n"] = 0

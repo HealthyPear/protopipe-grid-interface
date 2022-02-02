@@ -34,10 +34,7 @@ def main():
         (recommended).""",
     )
     group.add_argument(
-        "--output_path",
-        type=str,
-        default=None,
-        help="Specifiy an output directory",
+        "--output_path", type=str, default=None, help="Specifiy an output directory"
     )
 
     parser.add_argument(

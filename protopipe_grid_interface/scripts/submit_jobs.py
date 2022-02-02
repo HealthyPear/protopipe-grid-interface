@@ -43,9 +43,7 @@ Script.registerSwitch(
 )
 
 Script.registerSwitch(
-    "",
-    "upload_analysis_cfg=",
-    "If True (default), upload analysis configuration file",
+    "", "upload_analysis_cfg=", "If True (default), upload analysis configuration file"
 )
 Script.registerSwitch("", "dry=", "If True do not submit job (default: False)")
 Script.registerSwitch("", "test=", "If True submit only one job (default: False)")
@@ -69,9 +67,7 @@ Script.registerSwitch(
     "Used only if DataReprocessing is True; only sites tagged with tag will be considered (default: None)",
 )
 Script.registerSwitch(
-    "",
-    "log_file=",
-    "Override log file path (default: analysis.log in analysis folder)",
+    "", "log_file=", "Override log file path (default: analysis.log in analysis folder)"
 )
 Script.parseCommandLine()
 switches = dict(Script.getUnprocessedSwitches())

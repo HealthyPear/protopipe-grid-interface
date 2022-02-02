@@ -35,9 +35,7 @@ def main():
     )
 
     parser.add_argument(
-        "--disable_download",
-        action="store_true",
-        help="Do not download files serially",
+        "--disable_download", action="store_true", help="Do not download files serially"
     )
     parser.add_argument(
         "--disable_sync",
@@ -45,9 +43,7 @@ def main():
         help="Do not syncronyze folders after serial download",
     )
     parser.add_argument(
-        "--disable_merge",
-        action="store_true",
-        help="Do not merge files at the end",
+        "--disable_merge", action="store_true", help="Do not merge files at the end"
     )
 
     parser.add_argument(
@@ -86,10 +82,7 @@ def main():
     )
 
     parser.add_argument(
-        "--cleaning_mode",
-        type=str,
-        default="tail",
-        help="Deprecated argument",
+        "--cleaning_mode", type=str, default="tail", help="Deprecated argument"
     )
 
     parser.add_argument(

@@ -27,12 +27,7 @@ def main():
 
     parser = argparse.ArgumentParser(description=description)
 
-    parser.add_argument(
-        "--job_id",
-        type=int,
-        required=True,
-        help="ID of the job",
-    )
+    parser.add_argument("--job_id", type=int, required=True, help="ID of the job")
     parser.add_argument(
         "--output_file",
         type=str,

@@ -234,13 +234,7 @@ using the protopipe prototype pipeline.
         setup_config(
             example_grid_configuration_file,
             analysis_grid_configuration_file,
-            [
-                "ANALYSIS_NAME",
-                "LOCAL",
-                'user_name: ""',
-                'home_grid: ""',
-                'outdir: ""',
-            ],
+            ["ANALYSIS_NAME", "LOCAL", 'user_name: ""', 'home_grid: ""', 'outdir: ""'],
             [
                 analysis_name,
                 str(output_path),
@@ -264,10 +258,7 @@ using the protopipe prototype pipeline.
             setup_config(
                 example_config_file,
                 configuration_file,
-                [
-                    "ANALYSES_DIRECTORY",
-                    "ANALYSIS_NAME",
-                ],
+                ["ANALYSES_DIRECTORY", "ANALYSIS_NAME"],
                 [str(analyses_directory), analysis_name],
             )
 

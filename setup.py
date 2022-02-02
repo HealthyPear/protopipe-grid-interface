@@ -9,7 +9,7 @@ extras_require = {
         "codecov",
         "pyyaml",
         "tables",
-    ],
+    ]
 }
 
 extras_require["all"] = list(set(extras_require["tests"]))
@@ -47,10 +47,7 @@ setup(
         "Programming Language :: Python :: 3.8",
     ],
     python_requires=">=3.7",
-    extras_require={
-        "all": extras_require["tests"],
-        "tests": extras_require["tests"],
-    },
+    extras_require={"all": extras_require["tests"], "tests": extras_require["tests"]},
     entry_points={
         "console_scripts": [
             "protopipe-SPLIT_DATASET=protopipe_grid_interface.scripts.split_dataset:main",
@@ -65,6 +62,6 @@ setup(
             "protopipe-FORCE_JOB_TO_FAILED=protopipe_grid_interface.scripts.cta_wms_set_failed:main",
             "protopipe-FILTER-REPLICAS=protopipe_grid_interface.scripts.filter_lfns_by_replicas:main",
             "protopipe-GET_INPUT_LFNS=protopipe_grid_interface.scripts.get_input_LFNs:main",
-        ],
+        ]
     },
 )
