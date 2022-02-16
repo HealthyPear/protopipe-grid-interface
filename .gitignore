@@ -1,2 +1,86 @@
+# Compiled files
+.pytest_cache
+*.py[co]
 *.pyc
-**/__pycache__
+*.a
+*.o
+*.so
+__pycache__
+
+# Ignore .c files by default to avoid including generated code. If you want to
+# add a non-generated .c extension, use `git add -f filename.c`.
+*.c
+
+# Other generated files
+*/cython_version.py
+htmlcov
+.coverage
+MANIFEST
+
+# ignore version cache file (generated automatically when setup.py is run)
+protopipe_grid_interface/_version_cache.py
+protopipe_grid_interface/_version.py
+
+# Eclipse editor project files
+.project
+.pydevproject
+.settings
+
+# Pycharm editor project files
+.idea
+
+# KDevelop editor project files
+*kdev4
+
+# VSCode
+.vscode
+
+# Packages/installer info
+*.egg
+*.eggs
+*.egg-info
+dist
+build
+eggs
+parts
+bin
+var
+sdist
+develop-eggs
+.installed.cfg
+distribute-*.tar.gz
+
+# Other
+.*.swp
+*~
+\#*
+.\#*
+
+# Mac OSX
+.DS_Store
+
+# Rope refactoring data:
+.ropeproject
+
+# ipython notebook checkpoints
+.ipynb_checkpoints
+.cache*
+.cache
+
+*.out
+
+#sonarlint command-line output
+.sonarlint
+
+# output files (should not be stored in git)
+*.log
+*.h5
+*.hdf5
+*.fits
+irf.fits.gz
+table_best_cutoff.fits
+*.pkl.gz
+
+*.pstats
+target
+.mypy_cache

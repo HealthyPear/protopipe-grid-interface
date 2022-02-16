@@ -1,0 +1,27 @@
+version: 1
+formatters:
+  default:
+    datefmt: "%Y-%m-%d %H:%M:%S"
+    format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  custom:
+    (): protopipe_grid_interface.utils.CustomFormatter
+    datefmt: "%Y-%m-%d %H:%M:%S"
+    format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+handlers:
+  console:
+    class: logging.StreamHandler
+    formatter: custom
+    level: INFO
+    stream: ext://sys.stdout
+  file:
+    class: logging.FileHandler
+    formatter: default
+    filename: "protopipe_grid_interface.log"
+    mode: "w"
+loggers:
+  default_logger:
+    level: DEBUG
+    handlers: [console, file]
+root:
+  level: DEBUG
+  handlers: [console, file]
