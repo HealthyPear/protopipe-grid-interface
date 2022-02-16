@@ -1,0 +1,20 @@
+name: protopipe-CTADIRAC-latest-release
+channels:
+  - conda-forge
+dependencies:
+  - python>=3.8
+  - pip
+  # required by the interface
+  - dirac-grid
+  - diracgrid::fts3
+  - voms
+  - pytables
+  - pyyaml
+  # required for ctapipe 0.11.0 based installation
+  # will work anyway if such dependency is upgraded
+  - eventio
+  - gammapy=0.18
+  - pip:
+      - protopipe
+      - CTADIRAC
+      - git+https://github.com/HealthyPear/protopipe-grid-interface@v0.4.0
