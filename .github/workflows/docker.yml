@@ -27,7 +27,10 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
         with:
-          context: .
+          context: ./containers/Docker/Development
+          file: ./containers/Docker/Latest_release/Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=registry,ref=user/app:buildcache
+          cache-to: type=registry,ref=user/app:buildcache,mode=max
