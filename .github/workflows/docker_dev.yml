@@ -28,7 +28,7 @@ jobs:
           images: ${{ secrets.DOCKER_USERNAME }}/protopipe-ctadirac-dev
 
       - name: Build and push Docker image
-        uses: docker/build-push-action@2.9.0
+        uses: docker/build-push-action@v2.9.0
         with:
           context: ./containers/Docker/Development
           file: ./containers/Docker/Development/Dockerfile
