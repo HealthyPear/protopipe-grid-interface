@@ -3,7 +3,7 @@
 # ===============================================================================
 
 # Define base image
-FROM centos:8
+FROM fedora:latest
 
 # Define labels
 LABEL version="0.1" \
@@ -58,9 +58,9 @@ RUN git clone https://github.com/HealthyPear/protopipe-grid-interface.git \
     && latestTag=$(git describe --tags `git rev-list --tags --max-count=1`) \
     && git checkout $latestTag \
     && mamba env create -f environment_release.yaml \
-    && conda activate protopipe-CTADIRAC-latest-release \
+    && conda activate protopipe-CTADIRAC \
     && pip install '.[all]' \
-    && echo "conda activate protopipe-CTADIRAC-latest-release" >> ~/.bashrc \
+    && echo "conda activate protopipe-CTADIRAC" >> ~/.bashrc \
     && echo "alias ls='ls --color'" >> ~/.bashrc
 
 WORKDIR /home/cta/

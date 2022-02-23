@@ -1,4 +1,4 @@
-name: protopipe-CTADIRAC-latest-release
+name: protopipe-CTADIRAC
 channels:
   - conda-forge
 dependencies:
