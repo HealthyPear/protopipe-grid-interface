@@ -1,4 +1,4 @@
-name: protopipe-CTADIRAC-latest-release
+name: protopipe-CTADIRAC
 channels:
   - conda-forge
 dependencies:
@@ -17,4 +17,3 @@ dependencies:
   - pip:
       - protopipe
       - CTADIRAC
-      - git+https://github.com/HealthyPear/protopipe-grid-interface@v0.4.0

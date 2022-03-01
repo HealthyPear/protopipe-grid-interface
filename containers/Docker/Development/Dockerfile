@@ -3,7 +3,7 @@
 # ===============================================================================
 
 # Define base image
-FROM centos:8
+FROM fedora:latest
 
 # Define labels
 LABEL version="0.1" \
@@ -45,28 +45,7 @@ RUN echo ". $CONDA_DIR/etc/profile.d/conda.sh" >> ~/.profile \
     conda install mamba -n base -c conda-forge \
     && mamba update --all
 
-# ===============================================================================
-#                          PROTOPIPE GRID INTERFACE
-# ===============================================================================
-
-# Get latest environment file and create environment
-# WARNING: in the final Dockerfile the pull must come from either the
-# master branch (development version) or from a tagged release (released version)
-WORKDIR /home/cta/protopipe-grid-interface
-RUN git clone https://github.com/HealthyPear/protopipe-grid-interface.git .\
-    && git pull origin pull/50/head \
-    && mamba env create -f environment_development.yaml \
-    && echo "conda activate protopipe-CTADIRAC-dev" >> ~/.bashrc \
-    && echo "alias ls='ls --color'" >> ~/.bashrc
-
-# ===============================================================================
-#                                   PROTOPIPE
-# ===============================================================================
-
-# Clone protopipe and install dev version
-WORKDIR /home/cta/protopipe
-RUN git clone https://github.com/cta-observatory/protopipe.git .\
-    && pip install -e '.[all]'
-
 WORKDIR /home/cta/
+RUN echo "alias ls='ls --color'" >> ~/.bashrc
+
 ENTRYPOINT ["bash"]
