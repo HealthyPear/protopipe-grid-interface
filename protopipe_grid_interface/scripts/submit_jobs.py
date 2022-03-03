@@ -610,10 +610,12 @@ def main():
 
         job = dirac.submitJob(j)
         if not job["OK"]:
+            log.critical("Job submission failed: %s", job)
             raise RuntimeError(f"Job submission failed: {job}")
 
         log.info("SUBMITTING job with the following INPUT SANDBOX:\n %s", input_sandbox)
-        log.info("Submission RESULT: %s", job)
+        log.debug("Submission RESULT: %s", job)
+        log.info("Job ID: %s", job["Value"])
         n_jobs_submitted += 1
         n_jobs_remaining -= 1
 
