@@ -607,8 +607,13 @@ def main():
 
         # this sends the job to the GRID and uploads all the
         # files into the input sandbox in the process
+
+        job = dirac.submitJob(j)
+        if not job["OK"]:
+            raise RuntimeError(f"Job submission failed: {job}")
+
         log.info("SUBMITTING job with the following INPUT SANDBOX:\n %s", input_sandbox)
-        log.info("Submission RESULT: %s", dirac.submitJob(j)["Value"])
+        log.info("Submission RESULT: %s", job)
         n_jobs_submitted += 1
         n_jobs_remaining -= 1
 
