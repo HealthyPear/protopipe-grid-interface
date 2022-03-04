@@ -20,6 +20,9 @@ Steps to reproduce the behavior:
 **Expected behavior**
 A clear and concise description of what you expected to happen.
 
+**Proposed fix**
+A clear and concise description of what you think will fix the bug.
+
 **Screenshots**
 If applicable, add screenshots to help explain your problem.
 
