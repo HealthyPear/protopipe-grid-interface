@@ -7,6 +7,7 @@ dependencies:
   # required by the interface
   - dirac-grid
   - diracgrid::fts3
+  - gfal2=2.20.2 # needed to avoid ECOMM on macos bug
   - voms
   - pytables
   - pyyaml
