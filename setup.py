@@ -32,7 +32,7 @@ setup(
     packages=find_packages(),
     package_data={"protopipe_grid_interface": ["aux/*"]},
     include_package_data=True,
-    install_requires=["DIRAC", "CTADIRAC", "pyyaml", "tables", "tqdm"],
+    install_requires=["DIRAC", "gfal2==2.20.2", "CTADIRAC", "pyyaml", "tables", "tqdm"],
     zip_safe=False,
     use_scm_version={
         "write_to": os.path.join("protopipe_grid_interface", "_version.py")
