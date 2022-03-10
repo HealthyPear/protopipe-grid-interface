@@ -5,7 +5,6 @@ extras_require = {
     "tests": [
         "pytest",
         "pytest-cov",
-        "pytest-dependency",
         "codecov",
         "pyyaml",
         "tables",
@@ -43,10 +42,9 @@ setup(
         "Topic :: Scientific/Engineering :: Astronomy",
         "Topic :: Scientific/Engineering :: Physics",
         "Programming Language :: Python :: 3 :: Only",
-        "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
     ],
-    python_requires=">=3.7",
+    python_requires=">=3.8,<3.9",
     extras_require={"all": extras_require["tests"], "tests": extras_require["tests"]},
     entry_points={
         "console_scripts": [
