@@ -5,7 +5,6 @@ extras_require = {
     "tests": [
         "pytest",
         "pytest-cov",
-        "pytest-dependency",
         "codecov",
         "pyyaml",
         "tables",

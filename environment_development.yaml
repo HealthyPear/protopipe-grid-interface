@@ -2,18 +2,21 @@ name: protopipe-CTADIRAC-dev
 channels:
   - conda-forge
 dependencies:
+  # Python
   - python=3.8
   - pip
-  # required by the interface
+  # GRID
   - dirac-grid
   - diracgrid::fts3
   - gfal2=2.20.2 # needed to avoid ECOMM on macos bug
   - voms
+  # other required dependencies
+  - tqdm
   - pytables
   - pyyaml
-  # required for ctapipe 0.11.0 based installation
-  # will work anyway if such dependency is upgraded
-  - gammapy=0.18
-  - eventio
+  # Testing
+  - pytest
+  - codecov
+  - pytest-cov
   - pip:
       - CTADIRAC
