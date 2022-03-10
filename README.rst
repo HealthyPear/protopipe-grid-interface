@@ -15,8 +15,6 @@ and the `DIRAC GRID tools <https://dirac.readthedocs.io/en/latest/index.html>`_.
 
 It is required for using *protopipe* to analyse large scale simulation productions on the DIRAC grid.
 
-:warning: Windows is not supported at the moment.
-
 Requirements
 ------------
 
@@ -24,6 +22,8 @@ The are only 2 requirements:
 
 - a python3-based installation of Anaconda (or Miniconda),
 - a GRID certificate.
+
+:note: Windows support should be available via Docker, but it has not been tested - please, refer to the documentation.
 
 DIRAC GRID certificate
 ++++++++++++++++++++++
