@@ -139,7 +139,7 @@ Default is [100]",
             numlines.append(numlines[-1] + delta)
 
         if len(numlines) != 1:
-            log.debug("Splitted according to file # : %i", numlines)
+            log.debug("Split according to file # : %s", numlines)
         else:
             log.debug("All files in 1 list.")
 
