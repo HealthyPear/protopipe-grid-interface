@@ -151,6 +151,8 @@ else:
     append = False
 log = initialize_logger(logger_name=__name__, log_filename=log_filepath, append=append)
 
+if switches["dry"]:
+    log.info("Dry run mode was enabled. No files will be uploaded and no jobs will be submitted.")
 
 def main():
 
@@ -418,29 +420,26 @@ def main():
     log.debug("Energy estimation: %s", estimate_energy)
 
     # Upload analysis configuration file for provenance
-    if switches["upload_analysis_cfg"]:
+    if switches["upload_analysis_cfg"] and not switches["dry"]:
         se_list = ["CC-IN2P3-USER", "DESY-ZN-USER", "CNAF-USER", "CEA-USER"]
         analysis_config_local = os.path.join(config_path, config_file)
         # the configuration file is uploaded to the data directory because
         # the training samples (as well as their cleaning settings) are independent
         analysis_config_dirac = os.path.join(home_grid, output_path, config_file)
 
-        if switches["dry"] is False:
-            # Upload this file to all Dirac Storage Elements in SE_LIST
-            for se in se_list:
-                # the uploaded config file overwrites any old copy
-                ana_cfg_upload_cmd = f"dirac-dms-add-file -f {analysis_config_dirac} {analysis_config_local} {se}"
-                log.info(
-                    "Uploading %s to %s...",
-                    analysis_config_local,
-                    analysis_config_dirac,
-                )
-                ana_cfg_upload_result = subprocess.run(
-                    ana_cfg_upload_cmd, shell=True, text=True, check=True
-                )
-                log.debug(ana_cfg_upload_result)
-        else:
-            log.info("This is a DRY RUN! -- analysis.yaml has NOT been uploaded.")
+        # Upload this file to all Dirac Storage Elements in SE_LIST
+        for se in se_list:
+            # the uploaded config file overwrites any old copy
+            ana_cfg_upload_cmd = f"dirac-dms-add-file -f {analysis_config_dirac} {analysis_config_local} {se}"
+            log.info(
+                "Uploading %s to %s...",
+                analysis_config_local,
+                analysis_config_dirac,
+            )
+            ana_cfg_upload_result = subprocess.run(
+                ana_cfg_upload_cmd, shell=True, text=True, check=True
+            )
+            log.debug(ana_cfg_upload_result)
     else:
         log.debug("Analysis configuration file won't be uploaded.")
 
@@ -613,7 +612,6 @@ def main():
 
         # check if we should somehow stop doing what we are doing
         if switches["dry"] is True:
-            log.info("This is a DRY RUN! -- NO job has been submitted!")
             log.info("Name of the job: %s", job_name)
             log.info("Name of the output file: %s", outputs)
             log.info("Output path from GRID home: %s", output_path)
