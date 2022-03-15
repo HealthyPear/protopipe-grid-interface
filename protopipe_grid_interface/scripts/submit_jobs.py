@@ -216,6 +216,7 @@ def main():
     home_grid = cfg["GRID"]["home_grid"]
     user_name = cfg["GRID"]["user_name"]
     banned_sites = cfg["GRID"]["banned_sites"]
+    upload_sites = cfg["GRID"]["upload_sites"]
 
     # HACK
     if force_tailcut_for_extended_cleaning is True:
@@ -640,7 +641,6 @@ def main():
 
     # Upload analysis configuration file for provenance
     if switches["upload_analysis_cfg"]:
-        se_list = ["CC-IN2P3-USER", "DESY-ZN-USER", "CNAF-USER", "CEA-USER"]
         analysis_config_local = os.path.join(config_path, config_file)
         # the configuration file is uploaded to the data directory because
         # the training samples (as well as their cleaning settings) are independent
@@ -648,7 +648,7 @@ def main():
 
         if switches["dry"] is False:
             # Upload this file to all Dirac Storage Elements in SE_LIST
-            for se in se_list:
+            for se in upload_sites:
                 # the uploaded config file overwrites any old copy
                 ana_cfg_upload_cmd = f"dirac-dms-add-file -f {analysis_config_dirac} {analysis_config_local} {se}"
                 log.info(
