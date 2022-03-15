@@ -54,6 +54,13 @@ GRID:
   # Maximum number of jobs (-1 is no limit)
   n_jobs_max: -1
 
+  # List of upload sites
+  # These will be the sites were data files are uploaded or replicated
+  # They depend on where the simulated data is stored
+  # You can retrieve the sites for your analysis with the following command
+  # `cta-prod-show-dataset YOUR_DATASET_NAME --SEUsage`
+  upload_sites: ["CC-IN2P3-USER", "DESY-ZN-USER", "CNAF-USER", "CEA-USER"]
+
   # List of banned sites
   # you can edit this if
   # - something doesn't work at a certain site (or storage)
