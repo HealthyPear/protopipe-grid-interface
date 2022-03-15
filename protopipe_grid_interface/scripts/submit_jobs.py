@@ -662,3 +662,4 @@ if __name__ == "__main__":
         main()
     except RuntimeError as err:
         log.exception("submit_jobs failed: %s", err)
+        sys.exit(-1)
