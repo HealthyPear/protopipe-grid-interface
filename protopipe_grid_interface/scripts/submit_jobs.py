@@ -142,6 +142,15 @@ if "log_file" not in switches:
 else:
     switches["log_file"] = str(switches["log_file"])
 
+# Initialize logger
+if switches["log_file"] is None:
+    log_filepath = Path(switches["analysis_path"]) / "analysis.log"
+    append = True
+else:
+    log_filepath = switches["log_file"]
+    append = False
+log = initialize_logger(logger_name=__name__, log_filename=log_filepath, append=append)
+
 
 def main():
 
@@ -153,17 +162,6 @@ def main():
         raise ValueError(
             "This analysis folder doesn't exist yet - use create_analysis_tree.py"
         )
-
-    # Initialize logger
-    if switches["log_file"] is None:
-        log_filepath = Path(switches["analysis_path"]) / "analysis.log"
-        append = True
-    else:
-        log_filepath = switches["log_file"]
-        append = False
-    log = initialize_logger(
-        logger_name=__name__, log_filename=log_filepath, append=append
-    )
 
     if switches["output_type"] in "TRAINING":
         log.info("Preparing submission for TRAINING data")
@@ -631,6 +629,15 @@ def main():
         if switches["test"] is True:
             break
 
+    n_jobs_planned = n_jobs_max if (n_jobs_max != -1) else len(list_run_to_loop_on)
+    log.info("%i job(s) have been planned", n_jobs_planned)
+    log.info("%i job(s) have been submitted", n_jobs_submitted)
+
+    if n_jobs_planned > n_jobs_submitted:
+        log.warning(
+            "Planned %d jobs, but only submitted %d", n_jobs_planned, n_jobs_submitted
+        )
+
     # Upload analysis configuration file for provenance
     if switches["upload_analysis_cfg"]:
         se_list = ["CC-IN2P3-USER", "DESY-ZN-USER", "CNAF-USER", "CEA-USER"]
@@ -658,10 +665,10 @@ def main():
     else:
         log.debug("Analysis configuration file won't be uploaded.")
 
-    n_jobs_planned = n_jobs_max if (n_jobs_max != -1) else len(list_run_to_loop_on)
-    log.debug("%i job(s) have been planned", n_jobs_planned)
-    log.info("%i job(s) have been submitted", n_jobs_submitted)
-
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except RuntimeError as err:
+        log.exception("submit_jobs failed: %s", err)
+        sys.exit(-1)
