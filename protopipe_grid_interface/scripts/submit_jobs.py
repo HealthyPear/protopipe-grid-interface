@@ -419,6 +419,34 @@ def main():
     log.debug("Particle type: %s", particle)
     log.debug("Energy estimation: %s", estimate_energy)
 
+    # Upload analysis configuration file for provenance
+    if switches["upload_analysis_cfg"]:
+        se_list = ["CC-IN2P3-USER", "DESY-ZN-USER", "CNAF-USER", "CEA-USER"]
+        analysis_config_local = os.path.join(config_path, config_file)
+        # the configuration file is uploaded to the data directory because
+        # the training samples (as well as their cleaning settings) are independent
+        analysis_config_dirac = os.path.join(home_grid, output_path, config_file)
+
+        if switches["dry"] is False:
+            # Upload this file to all Dirac Storage Elements in SE_LIST
+            for se in se_list:
+                # the uploaded config file overwrites any old copy
+                ana_cfg_upload_cmd = f"dirac-dms-add-file -f {analysis_config_dirac} {analysis_config_local} {se}"
+                log.info(
+                    "Uploading %s to %s...",
+                    analysis_config_local,
+                    analysis_config_dirac,
+                )
+                ana_cfg_upload_result = subprocess.run(
+                    ana_cfg_upload_cmd, shell=True, text=True, check=True
+                )
+                log.debug(ana_cfg_upload_result)
+        else:
+            log.info("This is a DRY RUN! -- analysis.yaml has NOT been uploaded.")
+    else:
+        log.debug("Analysis configuration file won't be uploaded.")
+
+
     # list of files on the GRID SE space
     # not submitting jobs where we already have the output
     batcmd = f"dirac-dms-user-lfns --BaseDir {os.path.join(home_grid, output_path)}"
@@ -630,33 +658,6 @@ def main():
         # since there are two nested loops, need to break again
         if switches["test"] is True:
             break
-
-    # Upload analysis configuration file for provenance
-    if switches["upload_analysis_cfg"]:
-        se_list = ["CC-IN2P3-USER", "DESY-ZN-USER", "CNAF-USER", "CEA-USER"]
-        analysis_config_local = os.path.join(config_path, config_file)
-        # the configuration file is uploaded to the data directory because
-        # the training samples (as well as their cleaning settings) are independent
-        analysis_config_dirac = os.path.join(home_grid, output_path, config_file)
-
-        if switches["dry"] is False:
-            # Upload this file to all Dirac Storage Elements in SE_LIST
-            for se in se_list:
-                # the uploaded config file overwrites any old copy
-                ana_cfg_upload_cmd = f"dirac-dms-add-file -f {analysis_config_dirac} {analysis_config_local} {se}"
-                log.info(
-                    "Uploading %s to %s...",
-                    analysis_config_local,
-                    analysis_config_dirac,
-                )
-                ana_cfg_upload_result = subprocess.run(
-                    ana_cfg_upload_cmd, shell=True, text=True, check=True
-                )
-                log.debug(ana_cfg_upload_result)
-        else:
-            log.info("This is a DRY RUN! -- analysis.yaml has NOT been uploaded.")
-    else:
-        log.debug("Analysis configuration file won't be uploaded.")
 
     n_jobs_planned = n_jobs_max if (n_jobs_max != -1) else len(list_run_to_loop_on)
     log.debug("%i job(s) have been planned", n_jobs_planned)
