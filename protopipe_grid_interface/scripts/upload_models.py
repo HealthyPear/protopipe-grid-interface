@@ -109,7 +109,7 @@ def main():
         analysis_path_local = Path(metadata["analyses_directory"]) / analysis_name
         grid_home = Path(metadata["Home directory on the GRID"])
         grid_path_from_home = Path(metadata["analysis directory on the GRID from home"])
-        grid_cfg = load_config(Path(switches["analysis_path"]) / "configs/grid.yaml")
+        grid_cfg = load_config(analysis_path_local / "configs/grid.yaml")
         upload_sites = grid_cfg["GRID"]["upload_sites"]
     else:
         local = Path(args.local_path)
