@@ -218,6 +218,7 @@ def main():
     home_grid = cfg["GRID"]["home_grid"]
     user_name = cfg["GRID"]["user_name"]
     banned_sites = cfg["GRID"]["banned_sites"]
+    upload_sites = cfg["GRID"]["upload_sites"]
 
     # HACK
     if force_tailcut_for_extended_cleaning is True:
