@@ -6,6 +6,7 @@ import yaml
 
 from protopipe_grid_interface.utils import initialize_logger, upload, load_config
 
+
 def main():
 
     description = """Upload models produced with protopipe to the Dirac grid.
@@ -108,7 +109,7 @@ def main():
         analysis_path_local = Path(metadata["analyses_directory"]) / analysis_name
         grid_home = Path(metadata["Home directory on the GRID"])
         grid_path_from_home = Path(metadata["analysis directory on the GRID from home"])
-        grid_cfg = load_config(Path(switches["analysis_path"]) / "configs/grid.yaml")
+        grid_cfg = load_config(analysis_path_local / "configs/grid.yaml")
         upload_sites = grid_cfg["GRID"]["upload_sites"]
     else:
         local = Path(args.local_path)
@@ -116,7 +117,7 @@ def main():
         analysis_path_local = local / "shared_folder/analyses" / analysis_name
         grid_home = Path(args.GRID_home)
         grid_path_from_home = Path(args.GRID_path_from_home)
-        upload_sites = args.list-of-SEs if args.list-of-SEs is not None else 
+        upload_sites = args.list_of_SEs if args.list_of_SEs is not None else []
 
     if args.log_file is None:
         log_filepath = analysis_path_local / "analysis.log"
@@ -171,7 +172,9 @@ def main():
                 log.error("STDOUT: %s", e.stdout)
                 log.error("STDERR: %s", e.stderr)
     else:
-        log.error("No replicas have been produced as no upload site has been specified.")
+        log.error(
+            "No replicas have been produced as no upload site has been specified."
+        )
 
     # Upload model files
     for camera in args.cameras:
@@ -187,11 +190,15 @@ def main():
 
         # Make replicas
         if upload_sites:
-            for se in args.list_of_SEs:
+            for se in upload_sites:
                 log.info("Producing replicas of %s on %s...", model_file, se)
                 try:
                     result = subprocess.run(
-                        ["dirac-dms-replicate-lfn", str(output_directory / model_file), se],
+                        [
+                            "dirac-dms-replicate-lfn",
+                            str(output_directory / model_file),
+                            se,
+                        ],
                         check=True,
                         text=True,
                         capture_output=True,
@@ -203,9 +210,13 @@ def main():
                     log.error("STDOUT: %s", e.stdout)
                     log.error("STDERR: %s", e.stderr)
         else:
-            log.error("No replicas have been produced as no upload site has been specified.")
+            log.error(
+                "No replicas have been produced as no upload site has been specified."
+            )
 
-    log.info("Models and configuration files have been uploaded (at least on CC-IN2P3-USER).")
+    log.info(
+        "Models and configuration files have been uploaded (at least on CC-IN2P3-USER)."
+    )
 
 
 if __name__ == "__main__":
