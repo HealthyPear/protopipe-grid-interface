@@ -416,9 +416,9 @@ def main():
     log.debug("protopipe version: %s", protopipe.__version__)
     log.debug("Running command: %s", pilot_args_write)
     log.debug("Input sandbox: %s", input_sandbox)
-    log.debug("Output type: %s", switches["output_type"])
-    log.debug("Particle type: %s", particle)
-    log.debug("Energy estimation: %s", estimate_energy)
+    log.info("Output type: %s", switches["output_type"])
+    log.info("Particle type: %s", particle)
+    log.info("Energy estimation: %s", estimate_energy)
 
     # Upload analysis configuration file for provenance
     if switches["upload_analysis_cfg"] and not switches["dry"]:
@@ -485,7 +485,9 @@ def main():
             running_names.append(jobname)
 
     n_jobs_remaining = n_jobs_max
+    n_jobs_planned = n_jobs_max if (n_jobs_max != -1) else len(list_run_to_loop_on)
     n_jobs_submitted = 0
+    failed_jobs = []
     for n_job, bunch in enumerate(list_run_to_loop_on):
 
         log.info("JOB # %i", n_job + 1)
@@ -636,11 +638,14 @@ def main():
         job = dirac.submitJob(j)
         if not job["OK"]:
             log.critical("Job submission failed: %s", job)
-            raise RuntimeError(f"Job submission failed: {job}")
+            failed_jobs.append(run_token)
+        else:
+            log.info(
+                "SUBMITTING job with the following INPUT SANDBOX:\n %s", input_sandbox
+            )
+            log.debug("Submission RESULT: %s", job)
+            log.info("Job ID: %s", job["Value"])
 
-        log.info("SUBMITTING job with the following INPUT SANDBOX:\n %s", input_sandbox)
-        log.debug("Submission RESULT: %s", job)
-        log.info("Job ID: %s", job["Value"])
         n_jobs_submitted += 1
         n_jobs_remaining -= 1
 
@@ -656,9 +661,12 @@ def main():
         if switches["test"] is True:
             break
 
-    n_jobs_planned = n_jobs_max if (n_jobs_max != -1) else len(list_run_to_loop_on)
     log.info("%i job(s) have been planned", n_jobs_planned)
     log.info("%i job(s) have been submitted", n_jobs_submitted)
+    log.info("%d jobs(s) failed", len(failed_jobs))
+
+    if len(failed_jobs) > 0:
+        log.warning("FAILED: %s", failed_jobs)
 
     if n_jobs_planned > n_jobs_submitted:
         log.warning(
