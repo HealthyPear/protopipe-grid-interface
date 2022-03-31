@@ -45,8 +45,8 @@ Script.registerSwitch(
 Script.registerSwitch(
     "", "upload_analysis_cfg=", "If True (default), upload analysis configuration file"
 )
-Script.registerSwitch("", "dry", "If True do not submit job (default: False)")
-Script.registerSwitch("", "test", "If True submit only one job (default: False)")
+Script.registerSwitch("", "dry", "do not submit job")
+Script.registerSwitch("", "test", "submit only one job")
 Script.registerSwitch(
     "", "save_images=", "If True save images together with parameters (default: False)"
 )
@@ -141,8 +141,11 @@ else:
 
 if "particle" in switches:
     if switches["particle"] not in ["gamma", "electron", "proton"]:
-        print("Invalid option for --particle: ", switches["particle"])
-        sys.exit(1)
+        sys.exit(
+            f"Invalid option for --particle: {switches['particle']}"
+            " should be: 'gamma', 'electron', or 'proton'"
+        )
+
 
 if "log_file" not in switches:
     switches["log_file"] = None
@@ -160,7 +163,10 @@ else:
 log = initialize_logger(logger_name=__name__, log_filename=log_filepath, append=append)
 
 if switches["dry"]:
-    log.info("Dry run mode was enabled. No files will be uploaded and no jobs will be submitted.")
+    log.info(
+        "Dry run mode was enabled. No files will be uploaded and no jobs will be submitted."
+    )
+
 
 def main():
 
@@ -219,7 +225,7 @@ def main():
 
     # GRID
     outdir = os.path.join(cfg["GRID"]["outdir"], config_name)
-    n_file_per_job = cfg["GRID"]["n_file_per_job"]
+    n_file_per_job = cfg["GRID"].get("n_file_per_job", 1)
     if "n_file_per_job" in switches:
         n_file_per_job = int(switches["n_file_per_job"])
 
@@ -449,9 +455,7 @@ def main():
             # the uploaded config file overwrites any old copy
             ana_cfg_upload_cmd = f"dirac-dms-add-file -f {analysis_config_dirac} {analysis_config_local} {se}"
             log.info(
-                "Uploading %s to %s...",
-                analysis_config_local,
-                analysis_config_dirac,
+                "Uploading %s to %s...", analysis_config_local, analysis_config_dirac,
             )
             ana_cfg_upload_result = subprocess.run(
                 ana_cfg_upload_cmd, shell=True, text=True, check=True
@@ -459,7 +463,6 @@ def main():
             log.debug(ana_cfg_upload_result)
     else:
         log.debug("Analysis configuration file won't be uploaded.")
-
 
     # list of files on the GRID SE space
     # not submitting jobs where we already have the output
@@ -688,6 +691,7 @@ def main():
         log.warning(
             "Planned %d jobs, but only submitted %d", n_jobs_planned, n_jobs_submitted
         )
+
 
 if __name__ == "__main__":
     try:
