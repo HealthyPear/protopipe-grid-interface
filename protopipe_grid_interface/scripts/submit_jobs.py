@@ -69,7 +69,11 @@ Script.registerSwitch(
 Script.registerSwitch(
     "", "log_file=", "Override log file path (default: analysis.log in analysis folder)"
 )
-Script.registerSwitch("p", "particle=", "Particle type (gamma, electron, proton)")
+Script.registerSwitch(
+    "p",
+    "particle=",
+    "Particle type (gamma, electron, proton) - Recommended: use grid.yaml",
+)
 Script.registerSwitch("n", "n_file_per_job=", "number of files per job")
 Script.parseCommandLine()
 switches = dict(Script.getUnprocessedSwitches())
@@ -145,6 +149,8 @@ if "particle" in switches:
             f"Invalid option for --particle: {switches['particle']}"
             " should be: 'gamma', 'electron', or 'proton'"
         )
+else:
+    particle = None
 
 
 if "log_file" not in switches:
@@ -194,9 +200,16 @@ def main():
     config_path = cfg["General"]["config_path"]
     config_file = cfg["General"]["config_file"]
     mode = cfg["General"]["mode"]  # One mode naw
-    particle = cfg["General"]["particle"]
+    try:
+        particle = cfg["General"]["particle"]
+    except KeyError:
+        particle = None
     if "particle" in switches:
         particle = switches["particle"]
+    elif not particle:
+        log.critical(
+            "The particle type doesn't happen to be defined neither from grid.yaml, nor from the CLI."
+        )
     estimate_energy = cfg["General"]["estimate_energy"]
     log.info("Estimate energy has been set to %s", estimate_energy)
     force_tailcut_for_extended_cleaning = cfg["General"][
@@ -455,7 +468,9 @@ def main():
             # the uploaded config file overwrites any old copy
             ana_cfg_upload_cmd = f"dirac-dms-add-file -f {analysis_config_dirac} {analysis_config_local} {se}"
             log.info(
-                "Uploading %s to %s...", analysis_config_local, analysis_config_dirac,
+                "Uploading %s to %s...",
+                analysis_config_local,
+                analysis_config_dirac,
             )
             ana_cfg_upload_result = subprocess.run(
                 ana_cfg_upload_cmd, shell=True, text=True, check=True
