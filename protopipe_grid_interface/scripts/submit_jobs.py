@@ -43,7 +43,9 @@ Script.registerSwitch(
 )
 
 Script.registerSwitch(
-    "", "upload_analysis_cfg=", "If True (default), upload analysis configuration file"
+    "",
+    "upload_config_files=",
+    "If True (default), upload analysis and grid configuration files",
 )
 Script.registerSwitch("", "dry=", "If True do not submit job (default: False)")
 Script.registerSwitch("", "test=", "If True submit only one job (default: False)")
@@ -90,12 +92,12 @@ if "max_events" not in switches:
 else:
     switches["max_events"] = int(switches["max_events"])
 
-if "upload_analysis_cfg" not in switches:
-    switches["upload_analysis_cfg"] = True
-elif switches["upload_analysis_cfg"] in ["False", "false"]:
-    switches["upload_analysis_cfg"] = False
+if "upload_config_files" not in switches:
+    switches["upload_config_files"] = True
+elif switches["upload_config_files"] in ["False", "false"]:
+    switches["upload_config_files"] = False
 else:
-    switches["upload_analysis_cfg"] = True
+    switches["upload_config_files"] = True
 
 if "dry" not in switches:
     switches["dry"] = False
@@ -152,7 +154,10 @@ else:
 log = initialize_logger(logger_name=__name__, log_filename=log_filepath, append=append)
 
 if switches["dry"]:
-    log.info("Dry run mode was enabled. No files will be uploaded and no jobs will be submitted.")
+    log.info(
+        "Dry run mode was enabled. No files will be uploaded and no jobs will be submitted."
+    )
+
 
 def main():
 
@@ -174,7 +179,10 @@ def main():
         sys.exit()
 
     # Initialize grid configuration
-    cfg = load_config(os.path.join(switches["analysis_path"], "configs/grid.yaml"))
+    grid_config_local_path = os.path.join(
+        switches["analysis_path"], "configs/grid.yaml"
+    )
+    cfg = load_config(grid_config_local_path)
 
     # Analysis
     config_path = cfg["General"]["config_path"]
@@ -421,14 +429,15 @@ def main():
     log.info("Energy estimation: %s", estimate_energy)
 
     # Upload analysis configuration file for provenance
-    if switches["upload_analysis_cfg"] and not switches["dry"]:
+    if switches["upload_config_files"] and not switches["dry"]:
         se_list = ["CC-IN2P3-USER", "DESY-ZN-USER", "CNAF-USER", "CEA-USER"]
         analysis_config_local = os.path.join(config_path, config_file)
         # the configuration file is uploaded to the data directory because
         # the training samples (as well as their cleaning settings) are independent
         analysis_config_dirac = os.path.join(home_grid, output_path, config_file)
+        grid_config_dirac = os.path.join(home_grid, output_path, "grid.yaml")
 
-        # Upload this file to all Dirac Storage Elements in SE_LIST
+        # Upload these 2 files to all Dirac Storage Elements in SE_LIST
         for se in se_list:
             # the uploaded config file overwrites any old copy
             ana_cfg_upload_cmd = f"dirac-dms-add-file -f {analysis_config_dirac} {analysis_config_local} {se}"
@@ -441,9 +450,19 @@ def main():
                 ana_cfg_upload_cmd, shell=True, text=True, check=True
             )
             log.debug(ana_cfg_upload_result)
-    else:
-        log.debug("Analysis configuration file won't be uploaded.")
 
+            grid_cfg_upload_cmd = f"dirac-dms-add-file -f {grid_config_dirac} {grid_config_local_path} {se}"
+            log.info(
+                "Uploading %s to %s...",
+                grid_config_local_path,
+                grid_config_dirac,
+            )
+            grid_cfg_upload_result = subprocess.run(
+                grid_cfg_upload_cmd, shell=True, text=True, check=True
+            )
+            log.debug(grid_cfg_upload_result)
+    else:
+        log.debug("Configuration files won't be uploaded.")
 
     # list of files on the GRID SE space
     # not submitting jobs where we already have the output
@@ -672,6 +691,7 @@ def main():
         log.warning(
             "Planned %d jobs, but only submitted %d", n_jobs_planned, n_jobs_submitted
         )
+
 
 if __name__ == "__main__":
     try:
