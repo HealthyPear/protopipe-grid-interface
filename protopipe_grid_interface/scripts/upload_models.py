@@ -128,6 +128,7 @@ def main():
     log = initialize_logger(
         logger_name=__name__, log_filename=log_filepath, append=append
     )
+    log.info("UPLOAD SITES: %s", upload_sites)
 
     model_type_folder = {
         "regressor": "energy_regressor",

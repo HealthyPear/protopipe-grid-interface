@@ -45,8 +45,8 @@ Script.registerSwitch(
 Script.registerSwitch(
     "", "upload_analysis_cfg=", "If True (default), upload analysis configuration file"
 )
-Script.registerSwitch("", "dry=", "If True do not submit job (default: False)")
-Script.registerSwitch("", "test=", "If True submit only one job (default: False)")
+Script.registerSwitch("", "dry", "do not submit job")
+Script.registerSwitch("", "test", "submit only one job")
 Script.registerSwitch(
     "", "save_images=", "If True save images together with parameters (default: False)"
 )
@@ -69,6 +69,12 @@ Script.registerSwitch(
 Script.registerSwitch(
     "", "log_file=", "Override log file path (default: analysis.log in analysis folder)"
 )
+Script.registerSwitch(
+    "p",
+    "particle=",
+    "Particle type (gamma, electron, proton) - Recommended: use grid.yaml",
+)
+Script.registerSwitch("n", "n_file_per_job=", "number of files per job")
 Script.parseCommandLine()
 switches = dict(Script.getUnprocessedSwitches())
 
@@ -137,6 +143,16 @@ if "tag" not in switches:
 else:
     switches["tag"] = str(switches["tag"])
 
+if "particle" in switches:
+    if switches["particle"] not in ["gamma", "electron", "proton"]:
+        sys.exit(
+            f"Invalid option for --particle: {switches['particle']}"
+            " should be: 'gamma', 'electron', or 'proton'"
+        )
+else:
+    particle = None
+
+
 if "log_file" not in switches:
     switches["log_file"] = None
 else:
@@ -149,10 +165,14 @@ if switches["log_file"] is None:
 else:
     log_filepath = switches["log_file"]
     append = False
+
 log = initialize_logger(logger_name=__name__, log_filename=log_filepath, append=append)
 
 if switches["dry"]:
-    log.info("Dry run mode was enabled. No files will be uploaded and no jobs will be submitted.")
+    log.info(
+        "Dry run mode was enabled. No files will be uploaded and no jobs will be submitted."
+    )
+
 
 def main():
 
@@ -180,7 +200,16 @@ def main():
     config_path = cfg["General"]["config_path"]
     config_file = cfg["General"]["config_file"]
     mode = cfg["General"]["mode"]  # One mode naw
-    particle = cfg["General"]["particle"]
+    try:
+        particle = cfg["General"]["particle"]
+    except KeyError:
+        particle = None
+    if "particle" in switches:
+        particle = switches["particle"]
+    elif not particle:
+        log.critical(
+            "The particle type doesn't happen to be defined neither from grid.yaml, nor from the CLI."
+        )
     estimate_energy = cfg["General"]["estimate_energy"]
     log.info("Estimate energy has been set to %s", estimate_energy)
     force_tailcut_for_extended_cleaning = cfg["General"][
@@ -209,7 +238,10 @@ def main():
 
     # GRID
     outdir = os.path.join(cfg["GRID"]["outdir"], config_name)
-    n_file_per_job = cfg["GRID"]["n_file_per_job"]
+    n_file_per_job = cfg["GRID"].get("n_file_per_job", 1)
+    if "n_file_per_job" in switches:
+        n_file_per_job = int(switches["n_file_per_job"])
+
     n_jobs_max = cfg["GRID"]["n_jobs_max"]
     model_dir = cfg["GRID"]["model_dir"]
     training_dir_energy = cfg["GRID"]["training_dir_energy"]
@@ -219,6 +251,9 @@ def main():
     user_name = cfg["GRID"]["user_name"]
     banned_sites = cfg["GRID"]["banned_sites"]
     upload_sites = cfg["GRID"]["upload_sites"]
+
+    log.info("PARTICLE: %s", particle)
+    log.info("FILES/JOB: %s", n_file_per_job)
 
     # HACK
     if force_tailcut_for_extended_cleaning is True:
@@ -443,7 +478,6 @@ def main():
             log.debug(ana_cfg_upload_result)
     else:
         log.debug("Analysis configuration file won't be uploaded.")
-
 
     # list of files on the GRID SE space
     # not submitting jobs where we already have the output
@@ -672,6 +706,7 @@ def main():
         log.warning(
             "Planned %d jobs, but only submitted %d", n_jobs_planned, n_jobs_submitted
         )
+
 
 if __name__ == "__main__":
     try:
