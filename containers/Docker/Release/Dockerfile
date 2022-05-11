@@ -53,7 +53,7 @@ RUN echo ". $CONDA_DIR/etc/profile.d/conda.sh" >> ~/.profile \
 # WARNING: in the final Dockerfile the pull must come from either the
 # master branch (development version) or from a tagged release (released version)
 WORKDIR /home/cta/protopipe-grid-interface
-RUN git clone https://github.com/HealthyPear/protopipe-grid-interface.git \
+RUN git clone https://github.com/HealthyPear/protopipe-grid-interface.git .\
     && git fetch --tags \
     && latestTag=$(git describe --tags `git rev-list --tags --max-count=1`) \
     && git checkout $latestTag \
