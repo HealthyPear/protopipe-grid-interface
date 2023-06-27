@@ -2,6 +2,8 @@
 Protopipe DIRAC GRID interface |CI| |codacy| |coverage|
 =======================================================
 
+> :warning: **This project has been discontinued and it is now read-only. Any further development has been moved to the new Dirac ProductionSystem and related workflows.**
+
 .. |CI| image:: https://github.com/HealthyPear/protopipe-grid-interface/actions/workflows/ci.yml/badge.svg
   :target: https://github.com/HealthyPear/protopipe-grid-interface/actions/workflows/ci.yml
 .. |codacy| image:: https://app.codacy.com/project/badge/Grade/fecd056c3826433e91d4a7e0b0557434
